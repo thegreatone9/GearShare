@@ -14,7 +14,7 @@ export default function LenderDashboard({authenticatedUser, appData, setAppData}
 
     const listings = appData.listings.filter(listing => listing.ownerId === authenticatedUser.id);
     const requests = appData.requests.filter(pendingReq => pendingReq.lenderId === authenticatedUser.id);
-    const activeRentals = appData.activeRentals.filter(activeRental => activeRental.lenderId === authenticatedUser.id);
+    const activeRentals = appData.rentals.filter(rental => rental.lenderId === authenticatedUser.id && rental.status === RENTAL_STATUS.ACTIVE);
     const pendingRentalListings = listings.filter(item => !activeRentals.map(aR => aR.listingId).includes(item.id));
 
     const editItem = function (itemId, itemStatus) {

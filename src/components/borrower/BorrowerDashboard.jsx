@@ -1,8 +1,9 @@
 import {ChevronRight, Package, Zap} from 'lucide-react';
+import {RENTAL_STATUS} from "../util/Util.js";
 
-export default function BorrowerDashboard ({ authenticatedUser, listings, activeRentals, pastRentals }) {
-    activeRentals = activeRentals.filter(activeRental => activeRental.borrowerId === authenticatedUser.id);
-    pastRentals = pastRentals.filter(pastRental => pastRental.borrowerId === authenticatedUser.id);
+export default function BorrowerDashboard ({ authenticatedUser, listings, rentals }) {
+    const activeRentals = rentals.filter(rental => rental.borrowerId === authenticatedUser.id && rental.status === RENTAL_STATUS.ACTIVE);
+    const pastRentals = rentals.filter(rental => rental.borrowerId === authenticatedUser.id && rental.status === RENTAL_STATUS.COMPLETED);
 
     return (
         <div className="py-8">
@@ -57,18 +58,18 @@ export default function BorrowerDashboard ({ authenticatedUser, listings, active
                                      className="flex justify-between items-center p-3 border-b border-gray-100 last:border-b-0">
                                     <div>
                                         <p className="font-medium text-gray-900">{item.title}</p>
-                                        <p className="text-sm text-gray-500">Returned: {rental.returnedDate}</p>
+                                        <p className="text-sm text-gray-500">Returned: {rental.returnDate}</p>
                                     </div>
-                                    {
-                                        rental.needsReview ? (
-                                        <button
-                                            className="text-sm text-white bg-blue-500 px-3 py-1 rounded-lg hover:bg-blue-600 transition">
-                                            Leave Review
-                                        </button>
-                                        ) : (
-                                        <span className="text-sm text-green-600 flex items-center">Reviewed<ChevronRight className="w-4 h-4 ml-1"/></span>
-                                        )
-                                    }
+                                    {/*{*/}
+                                    {/*    rental.needsReview ? (*/}
+                                    {/*    <button*/}
+                                    {/*        className="text-sm text-white bg-blue-500 px-3 py-1 rounded-lg hover:bg-blue-600 transition">*/}
+                                    {/*        Leave Review*/}
+                                    {/*    </button>*/}
+                                    {/*    ) : (*/}
+                                    {/*    <span className="text-sm text-green-600 flex items-center">Reviewed<ChevronRight className="w-4 h-4 ml-1"/></span>*/}
+                                    {/*    )*/}
+                                    {/*}*/}
                                 </div>
                             )
                         })}

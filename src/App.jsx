@@ -43,7 +43,7 @@ export default function App() {
                             path="/borrower"
                             element={<ProtectedRoute authenticatedUser={authenticatedUser}>
                                 <BorrowerDashboard authenticatedUser={authenticatedUser}
-                                                   activeRentals={appData.activeRentals}
+                                                   rentals={appData.rentals}
                                                    pastRentals={appData.pastRentals}
                                                    listings={appData.listings}/>
                             </ProtectedRoute>}
