@@ -54,6 +54,26 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
         // In a real app, this would upload the file and update itemState.imageUrl
     };
 
+    const handleDelete = function (event) {
+        event.preventDefault();
+
+        setAppData(prevData => {
+            const updatedListings = prevData.listings.filter(item =>
+                item.id !== itemIdNum
+            );
+
+            const updatedRequests = prevData.requests.filter(request =>
+                request.listingId !== itemIdNum
+            );
+
+            return { ...prevData, listings: updatedListings, requests: updatedRequests };
+        });
+
+        setTimeout(() => {
+            navigate('/lender');
+        }, 100);
+    }
+
     // 4. Submission Logic
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -88,8 +108,7 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
                     // --- NEW ITEM LOGIC ---
                     const newItem = {
                         id: Date.now(),
-                        // Note: You must add the ownerId here from the authenticated user context!
-                        ownerId: authenticatedUser.id, // MOCK: Hardcoding ownerId for now
+                        ownerId: authenticatedUser.id,
                         title: itemState.title || "Untitled Gear",
                         description: itemState.description,
                         price: priceNum,
@@ -229,8 +248,9 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
                     {
                         [RENTAL_STATUS.PENDING_BORROW, RENTAL_STATUS.PENDING_LEND].includes(status) &&
                         <button
-                            type="submit"
+                            type="button"
                             value="delete"
+                            onClick={(event) => handleDelete(event)}
                             className="flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-lg text-lg font-bold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150"
                         >
                             {"Delete Item"}
