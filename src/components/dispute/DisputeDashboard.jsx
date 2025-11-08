@@ -1,6 +1,8 @@
 import {MessageSquareWarning, Shield} from 'lucide-react';
 
-export default function DisputeDashboard({ authenticatedUser, disputes }) {
+export default function DisputeDashboard({ authenticatedUser, appData }) {
+    const disputes = [];
+
     return (
         <div className="py-8">
             <h3 className="text-2xl font-bold text-gray-800 mb-6 flex justify-between items-center">

@@ -12,8 +12,9 @@ export default function LenderDashboard({authenticatedUser, appData, setAppData}
     const [selectedRequest, setSelectedRequest] = useState(null);
 
     const listings = appData.listings.filter(listing => listing.ownerId === authenticatedUser.id);
-    const requests = appData.requests.filter(pendingReq => pendingReq.lenderId === authenticatedUser.id);
-    const activeRentals = appData.rentals.filter(rental => rental.lenderId === authenticatedUser.id && rental.status === RENTAL_STATUS.ACTIVE);
+    const requests = appData.requests.filter(req => req.lenderId === authenticatedUser.id);
+    const lenderRentals = appData.rentals.filter(rental => (requests.map(req => req.id)).includes(rental.requestId));
+    const activeRentals = lenderRentals.filter(rental => rental.status === RENTAL_STATUS.ACTIVE);
     const pendingRentalListings = listings.filter(item => !activeRentals.map(aR => aR.listingId).includes(item.id));
 
     const editItem = function (itemId, itemStatus) {
@@ -40,7 +41,7 @@ export default function LenderDashboard({authenticatedUser, appData, setAppData}
                 listingId,
                 borrowerId,
                 lenderId,
-                dueDate: "Nov 3 (New)",
+                returnDate: null,
                 status: RENTAL_STATUS.ACTIVE
             };
 
@@ -113,10 +114,11 @@ export default function LenderDashboard({authenticatedUser, appData, setAppData}
                     </h4>
                     <div className="space-y-4">
                         {activeRentals.map(rental => {
-                            const item = listings.find(listing => listing.id === rental.listingId);
+                            const correspondingRequest = requests.find(request => request.id === rental.requestId);
+                            const item = listings.find(listing => listing.id === correspondingRequest.listingId);
 
                             return (
-                                <div key={rental.rentalId}
+                                <div key={rental.id}
                                      className="p-4 border border-indigo-200 rounded-xl flex justify-between items-center bg-indigo-50">
                                     <div className="flex items-center space-x-3">
                                         <img src={item.imageUrl} alt={item.title}
@@ -124,7 +126,7 @@ export default function LenderDashboard({authenticatedUser, appData, setAppData}
                                         <div>
                                             <p className="font-medium text-gray-900">{item.title}</p>
                                             <p className="text-sm text-gray-600">Due: <span
-                                                className="font-bold">{rental.dueDate}</span></p>
+                                                className="font-bold">{rental.returnDate}</span></p>
                                         </div>
                                     </div>
                                     <div className="text-right">

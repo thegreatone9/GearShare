@@ -42,10 +42,7 @@ export default function App() {
                         <Route
                             path="/borrower"
                             element={<ProtectedRoute authenticatedUser={authenticatedUser}>
-                                <BorrowerDashboard authenticatedUser={authenticatedUser}
-                                                   rentals={appData.rentals}
-                                                   pastRentals={appData.pastRentals}
-                                                   listings={appData.listings}/>
+                                <BorrowerDashboard authenticatedUser={authenticatedUser} appData={appData}/>
                             </ProtectedRoute>}
                         />
                         <Route
@@ -66,7 +63,7 @@ export default function App() {
                         <Route
                             path="/disputes"
                             element={<ProtectedRoute authenticatedUser={authenticatedUser}>
-                                <DisputeDashboard authenticatedUser={authenticatedUser} disputes={appData.disputes}/>
+                                <DisputeDashboard authenticatedUser={authenticatedUser} appData={appData}/>
                             </ProtectedRoute>}
                         />
 
