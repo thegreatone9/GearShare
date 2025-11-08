@@ -44,32 +44,27 @@ export const MOCK_DATA = {
     ],
 
     requests: [
-        { id: 501, listingId: 4, borrowerId: 2, lenderId: 1, date: "", rentStartDate: "", rentEndDate: "", status: REQUEST_STATUS.COMPLETED, deposit: "500" },
-        { id: 502, listingId: 4, borrowerId: 2, lenderId: 1, date: "", rentStartDate: "", rentEndDate: "", status: REQUEST_STATUS.COMPLETED, deposit: null },
-        { id: 503, listingId: 4, borrowerId: 2, lenderId: 1, date: "", rentStartDate: "", rentEndDate: "", status: REQUEST_STATUS.COMPLETED, deposit: "500" },
-        { id: 504, listingId: 4, borrowerId: 2, lenderId: 1, date: "", rentStartDate: "", rentEndDate: "", status: REQUEST_STATUS.COMPLETED, deposit: null },
-        { id: 505, listingId: 4, borrowerId: 2, lenderId: 1, date: "", rentStartDate: "", rentEndDate: "", status: REQUEST_STATUS.ACTIVE, deposit: null },
+        { id: 501, listingId: 4, borrowerId: 2, lenderId: 1, date: "09/09/25", rentStartDate: "10/09/25", rentEndDate: "15/12/25", status: REQUEST_STATUS.COMPLETED, deposit: "500" },
+        { id: 502, listingId: 4, borrowerId: 1, lenderId: 2, date: "09/09/25", rentStartDate: "10/09/25", rentEndDate: "15/12/25", status: REQUEST_STATUS.COMPLETED, deposit: null },
+        { id: 503, listingId: 4, borrowerId: 2, lenderId: 1, date: "09/09/25", rentStartDate: "10/09/25", rentEndDate: "15/10/25", status: REQUEST_STATUS.COMPLETED, deposit: "500" },
+        { id: 504, listingId: 4, borrowerId: 1, lenderId: 2, date: "09/09/25", rentStartDate: "10/09/25", rentEndDate: "15/10/25", status: REQUEST_STATUS.COMPLETED, deposit: null },
+        { id: 505, listingId: 4, borrowerId: 2, lenderId: 1, date: "09/11/25", rentStartDate: null, rentEndDate: null, status: REQUEST_STATUS.ACTIVE, deposit: null },
     ],
 
     disputes: [
-        { id: 901, rentalId: 203, startDate: "", endDate: "", status: DISPUTE_STATUS.ACTIVE },
-        { id: 902, rentalId: 204, startDate: "", endDate: "", status: DISPUTE_STATUS.COMPLETED },
+        { id: 901, rentalId: 203, startDate: "15/10/25", endDate: null, status: DISPUTE_STATUS.ACTIVE },
+        { id: 902, rentalId: 204, startDate: "15/10/25", endDate: "17/10/25", status: DISPUTE_STATUS.COMPLETED },
     ],
 
     rentals: [
-        { id: 201, listingId: 2, requestId: 501, borrowerId: 2, lenderId: 1, status: RENTAL_STATUS.ACTIVE,
-            rentDate: "10/09/25", dueDate: "15/10/25", returnDate: null, disputeId: null, paidDate: null },
+        { id: 201, requestId: 501, status: RENTAL_STATUS.ACTIVE, returnDate: null, disputeId: null, paidDate: null },
 
-        { id: 202, listingId: 2, requestId: 501, borrowerId: 2, lenderId: 1, status: RENTAL_STATUS.ACTIVE,
-            rentDate: "10/09/25", dueDate: "15/10/25", returnDate: null, disputeId: null, paidDate: null },
+        { id: 202, requestId: 502, status: RENTAL_STATUS.ACTIVE, returnDate: null, disputeId: null, paidDate: null },
 
-        { id: 203, listingId: 2, requestId: 503, borrowerId: 2, lenderId: 1, status: RENTAL_STATUS.DISPUTED,
-            rentDate: "10/09/25", dueDate: "15/10/25", returnDate: "17/10/25", disputeId: 901, paidDate: null },
+        { id: 203, requestId: 503, status: RENTAL_STATUS.DISPUTED, returnDate: "17/10/25", disputeId: 901, paidDate: null },
 
-        { id: 204, listingId: 2, requestId: 504, borrowerId: 2, lenderId: 1, status: RENTAL_STATUS.COMPLETED,
-            rentDate: "10/09/25", dueDate: "15/10/25", returnDate: "16/10/25", disputeId: 902, paidDate: "18/10/25" },
+        { id: 204, requestId: 504, status: RENTAL_STATUS.COMPLETED, returnDate: "16/10/25", disputeId: 902, paidDate: "18/10/25" },
 
-        { id: 205, listingId: 2, requestId: 504, borrowerId: 2, lenderId: 1, status: RENTAL_STATUS.COMPLETED,
-            rentDate: "10/09/25", dueDate: "15/10/25", returnDate: "14/10/25", disputeId: null, paidDate: "14/10/25" }
+        { id: 205, requestId: 504, status: RENTAL_STATUS.COMPLETED, returnDate: "14/10/25", disputeId: null, paidDate: "14/10/25" }
     ]
 };
