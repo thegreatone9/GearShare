@@ -1,11 +1,14 @@
 import React, {useState} from 'react';
-import {useNavigate, useParams} from 'react-router-dom';
+import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
 import {Package, Shield} from 'lucide-react';
 import {RENTAL_STATUS} from "../util/Util.js";
 
-export default function ItemForm ({ listings, setAppData, authenticatedUser }) {
+export default function ItemForm({listings, setAppData, authenticatedUser}) {
     const navigate = useNavigate();
     const { id } = useParams(); // Renamed from 'id' to 'itemId' for clarity, based on the route definition
+
+    const [searchParams] = useSearchParams();
+    const status = searchParams.get('status');
 
     // Convert itemId to a number for safe comparison with mock data
     const itemIdNum = parseInt(id);
@@ -15,10 +18,6 @@ export default function ItemForm ({ listings, setAppData, authenticatedUser }) {
     const currentItem = isEditMode
         ? listings.find(item => item.id === itemIdNum)
         : null;
-
-    const itemStatus = currentItem && currentItem.listingStatus;
-
-    console.log("Item Status:", itemStatus);
 
     // Define the initial state based on the mode
     const initialItemState = isEditMode && currentItem ? {
@@ -228,7 +227,7 @@ export default function ItemForm ({ listings, setAppData, authenticatedUser }) {
                 <div className="flex gap-4 justify-center">
                     {/* Submit */}
                     {
-                        [RENTAL_STATUS.PENDING_BORROW, RENTAL_STATUS.PENDING_LEND].includes(itemStatus) &&
+                        [RENTAL_STATUS.PENDING_BORROW, RENTAL_STATUS.PENDING_LEND].includes(status) &&
                         <button
                             type="submit"
                             value="delete"

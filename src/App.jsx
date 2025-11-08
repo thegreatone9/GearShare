@@ -57,7 +57,9 @@ export default function App() {
                         <Route
                             path="/lender/item/:id?"
                             element={<ProtectedRoute authenticatedUser={authenticatedUser}>
-                                <ItemForm listings={appData.listings} setAppData={setAppData} authenticatedUser={authenticatedUser} />
+                                <ItemForm listings={appData.listings}
+                                          setAppData={setAppData}
+                                          authenticatedUser={authenticatedUser} />
                             </ProtectedRoute>}
                         />
                         <Route

@@ -1,5 +1,6 @@
 export const RENTAL_STATUS = {
-    PENDING_LEND: 'pendingLenderAcceptance',
+    PENDING_BORROW: 'pendingBorrow',
+    PENDING_LEND: 'pendingLend',
     ACTIVE: 'active',
     DISPUTED: 'disputed',
     COMPLETED: 'completed'
@@ -44,11 +45,11 @@ export const MOCK_DATA = {
     ],
 
     requests: [
-        { id: 501, listingId: 4, borrowerId: 2, lenderId: 1, date: "09/09/25", rentStartDate: "10/09/25", rentEndDate: "15/12/25", status: REQUEST_STATUS.COMPLETED, deposit: "500" },
-        { id: 502, listingId: 4, borrowerId: 1, lenderId: 2, date: "09/09/25", rentStartDate: "10/09/25", rentEndDate: "15/12/25", status: REQUEST_STATUS.COMPLETED, deposit: null },
-        { id: 503, listingId: 4, borrowerId: 2, lenderId: 1, date: "09/09/25", rentStartDate: "10/09/25", rentEndDate: "15/10/25", status: REQUEST_STATUS.COMPLETED, deposit: "500" },
-        { id: 504, listingId: 4, borrowerId: 1, lenderId: 2, date: "09/09/25", rentStartDate: "10/09/25", rentEndDate: "15/10/25", status: REQUEST_STATUS.COMPLETED, deposit: null },
-        { id: 505, listingId: 4, borrowerId: 2, lenderId: 1, date: "09/11/25", rentStartDate: null, rentEndDate: null, status: REQUEST_STATUS.ACTIVE, deposit: null },
+        { id: 501, listingId: 1, borrowerId: 1, lenderId: 2, date: "09/09/25", rentStartDate: "10/09/25", rentEndDate: "15/12/25", status: REQUEST_STATUS.COMPLETED, deposit: "500" },
+        { id: 502, listingId: 2, borrowerId: 2, lenderId: 1, date: "09/09/25", rentStartDate: "10/09/25", rentEndDate: "15/12/25", status: REQUEST_STATUS.COMPLETED, deposit: null },
+        { id: 503, listingId: 3, borrowerId: 1, lenderId: 2, date: "09/09/25", rentStartDate: "10/09/25", rentEndDate: "15/10/25", status: REQUEST_STATUS.COMPLETED, deposit: "500" },
+        { id: 504, listingId: 4, borrowerId: 2, lenderId: 1, date: "09/09/25", rentStartDate: "10/09/25", rentEndDate: "15/10/25", status: REQUEST_STATUS.COMPLETED, deposit: null },
+        { id: 505, listingId: 5, borrowerId: 1, lenderId: 2, date: "09/11/25", rentStartDate: null, rentEndDate: null, status: REQUEST_STATUS.ACTIVE, deposit: null },
     ],
 
     disputes: [

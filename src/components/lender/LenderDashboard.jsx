@@ -197,7 +197,7 @@ export default function LenderDashboard({authenticatedUser, appData, setAppData}
                                 const item = listings.filter(listing => listing.id === req.listingId)[0];
 
                                 return (
-                                    <div key={req.reqId}
+                                    <div key={req.id}
                                          className="p-4 border border-yellow-200 bg-yellow-50 rounded-xl shadow-inner">
                                         <p className="text-sm font-medium text-gray-700 mb-1">
                                             <span className="font-bold text-gray-900">{authenticatedUser.name}</span> wants
