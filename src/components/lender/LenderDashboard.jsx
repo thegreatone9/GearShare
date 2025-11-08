@@ -135,8 +135,6 @@ export default function LenderDashboard({authenticatedUser, appData, setAppData}
                                         }`}>
                                           {item.status}
                                         </span>
-                                        {item.nextReturn &&
-                                            <p className="text-xs text-gray-500 mt-1">Returns: {item.nextReturn}</p>}
                                         <button className="text-xs text-indigo-600 mt-1 hover:underline"
                                                 onClick={() => editItem(item.id, RENTAL_STATUS.ACTIVE)}>Manage
                                         </button>

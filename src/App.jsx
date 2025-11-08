@@ -42,7 +42,9 @@ export default function App() {
                         <Route
                             path="/borrower"
                             element={<ProtectedRoute authenticatedUser={authenticatedUser}>
-                                <BorrowerDashboard authenticatedUser={authenticatedUser} appData={appData}/>
+                                <BorrowerDashboard authenticatedUser={authenticatedUser}
+                                                   appData={appData}
+                                                   setAppData={setAppData}/>
                             </ProtectedRoute>}
                         />
                         <Route

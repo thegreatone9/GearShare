@@ -2,7 +2,6 @@ export const RENTAL_STATUS = {
     PENDING_BORROW: 'pendingBorrow',
     PENDING_LEND: 'pendingLend',
     ACTIVE: 'active',
-    DISPUTED: 'disputed',
     COMPLETED: 'completed'
 }
 
@@ -13,6 +12,7 @@ export const REQUEST_STATUS = {
 
 export const DISPUTE_STATUS = {
     ACTIVE: 'active',
+    PENDING_DEPOSIT_RETURN: 'pendingDepositReturn',
     COMPLETED: 'completed'
 }
 
@@ -54,18 +54,19 @@ export const MOCK_DATA = {
 
     disputes: [
         { id: 901, rentalId: 203, startDate: "15/10/25", endDate: null, status: DISPUTE_STATUS.ACTIVE },
-        { id: 902, rentalId: 204, startDate: "15/10/25", endDate: "17/10/25", status: DISPUTE_STATUS.COMPLETED },
+        { id: 902, rentalId: 204, startDate: "15/10/25", endDate: "17/10/25", status: DISPUTE_STATUS.PENDING_DEPOSIT_RETURN },
+        { id: 903, rentalId: 205, startDate: "14/10/25", endDate: "15/10/25", status: DISPUTE_STATUS.COMPLETED }
     ],
 
     rentals: [
-        { id: 201, requestId: 501, status: RENTAL_STATUS.ACTIVE, returnDate: null, disputeId: null, paidDate: null },
+        { id: 201, requestId: 501, status: RENTAL_STATUS.ACTIVE, returnDate: null, disputeId: null },
 
-        { id: 202, requestId: 502, status: RENTAL_STATUS.ACTIVE, returnDate: null, disputeId: null, paidDate: null },
+        { id: 202, requestId: 502, status: RENTAL_STATUS.ACTIVE, returnDate: null, disputeId: null },
 
-        { id: 203, requestId: 503, status: RENTAL_STATUS.DISPUTED, returnDate: "17/10/25", disputeId: 901, paidDate: null },
+        { id: 203, requestId: 503, status: RENTAL_STATUS.COMPLETED, returnDate: "17/10/25", disputeId: 901 },
 
-        { id: 204, requestId: 504, status: RENTAL_STATUS.COMPLETED, returnDate: "16/10/25", disputeId: 902, paidDate: "18/10/25" },
+        { id: 204, requestId: 504, status: RENTAL_STATUS.COMPLETED, returnDate: "16/10/25", disputeId: 902 },
 
-        { id: 205, requestId: 504, status: RENTAL_STATUS.COMPLETED, returnDate: "14/10/25", disputeId: null, paidDate: "14/10/25" }
+        { id: 205, requestId: 504, status: RENTAL_STATUS.COMPLETED, returnDate: "14/10/25", disputeId: 903 }
     ]
 };
