@@ -54,7 +54,7 @@ export const MOCK_DATA = {
 
     disputes: [
         { id: 901, rentalId: 203, startDate: "15/10/25", endDate: null, status: DISPUTE_STATUS.ACTIVE },
-        { id: 902, rentalId: 204, startDate: "15/10/25", endDate: "17/10/25", status: DISPUTE_STATUS.PENDING_DEPOSIT_RETURN },
+        { id: 902, rentalId: 204, startDate: "15/10/25", endDate: null, status: DISPUTE_STATUS.PENDING_DEPOSIT_RETURN },
         { id: 903, rentalId: 205, startDate: "14/10/25", endDate: "15/10/25", status: DISPUTE_STATUS.COMPLETED }
     ],
 
