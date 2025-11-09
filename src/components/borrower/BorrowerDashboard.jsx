@@ -22,7 +22,7 @@ const getDisputeDisplay = (dispute) => {
 };
 
 export default function BorrowerDashboard({ authenticatedUser, appData, setAppData }) {
-    const navigate = useNavigate(); // Initialize useNavigate hook
+    const navigate = useNavigate();
 
     const listings = appData.listings;
     const allDisputes = appData.disputes;
@@ -97,13 +97,12 @@ export default function BorrowerDashboard({ authenticatedUser, appData, setAppDa
 
     // Handler to navigate to the disputes tab/page
     const handleViewDispute = function (rentalId) {
-        // You can pass the rental ID or dispute ID if needed to pre-select the case
-        navigate(`/disputes?rentalId=${rentalId}`);
+        navigate(`/disputes`);
     }
 
     // --- Render Logic ---
     return (
-        <div className="py-8 max-w-5xl mx-auto">
+        <div className="py-8 max-w-7xl mx-auto">
             <h3 className="text-3xl font-bold text-gray-800 mb-8">Borrower History: Your Rentals</h3>
 
             <div className="space-y-10">
@@ -122,7 +121,6 @@ export default function BorrowerDashboard({ authenticatedUser, appData, setAppDa
 
                             return (
                                 <div key={rental.id}
-                                    // Main card container
                                      className="p-4 border border-indigo-200 rounded-xl flex flex-col justify-between bg-indigo-50 hover:bg-indigo-100 transition w-full space-y-3">
 
                                     {/* Item Details (Full Width on Top) */}
@@ -167,9 +165,9 @@ export default function BorrowerDashboard({ authenticatedUser, appData, setAppDa
                     {/* SINGLE SECTION-WIDE BUTTON */}
                     {disputedRentals.length > 0 && (
                         <button
-                            onClick={handleViewDispute} // Use the function to navigate to the disputes dashboard
+                            onClick={handleViewDispute}
                             className="text-sm text-white bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700 transition font-medium mb-4 w-full flex items-center justify-center">
-                            <Landmark className='w-4 h-4 mr-2'/> {/* Using Landmark icon for consistency with Lender dashboard */}
+                            <Landmark className='w-4 h-4 mr-2'/>
                             Go to Disputes Dashboard
                         </button>
                     )}
@@ -184,7 +182,6 @@ export default function BorrowerDashboard({ authenticatedUser, appData, setAppDa
 
                             return (
                                 <div key={rental.id}
-                                    // Consistent border and background styling
                                      className="p-4 border border-red-300 bg-red-50 rounded-xl flex justify-between items-center hover:bg-red-100 transition w-full">
 
                                     {/* Item Details (Left Side) */}
@@ -203,7 +200,6 @@ export default function BorrowerDashboard({ authenticatedUser, appData, setAppDa
                         {display.label}
                     </span>
 
-                                    {/* NO INDIVIDUAL BUTTON HERE */}
                                 </div>
                             )
                         })}
@@ -247,6 +243,9 @@ export default function BorrowerDashboard({ authenticatedUser, appData, setAppDa
                                 </div>
                             )
                         })}
+                        {pastRentals.length === 0 && (
+                            <p className="text-center text-sm text-gray-500 py-4 border rounded-lg">No settled rentals yet.</p>
+                        )}
                     </div>
                 </div>
             </div>
