@@ -67,7 +67,7 @@ export default function App() {
                         <Route
                             path="/disputes"
                             element={<ProtectedRoute authenticatedUser={authenticatedUser}>
-                                <DisputeDashboard authenticatedUser={authenticatedUser} appData={appData}/>
+                                <DisputeDashboard authenticatedUser={authenticatedUser} appData={appData} setAppData={setAppData}/>
                             </ProtectedRoute>}
                         />
 

@@ -16,6 +16,19 @@ export const DISPUTE_STATUS = {
     COMPLETED: 'completed'
 }
 
+export const LENDER_DISPUTE_ACTIONS = {
+    FILE_CLAIM: 'fileClaim',
+    SETTLE: 'settle',
+    VIEW_CLAIM_DETAILS: 'viewClaimDetails',
+    VIEW_REPORT: 'viewReport'
+}
+
+export const BORROWER_DISPUTE_ACTIONS = {
+    SUBMIT_EVIDENCE: 'submitEvidence',
+    VIEW_REPORT: 'viewReport',
+    PAY_DAMAGES: 'payDamages'
+}
+
 export const TIME_UNIT = {
     HOUR: 'hour',
     DAY: 'day',
