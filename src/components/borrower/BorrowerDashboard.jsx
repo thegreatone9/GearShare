@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Zap, Package, ShieldAlert } from 'lucide-react';
+import { Zap, Package, ShieldAlert, Landmark } from 'lucide-react';
 import { DISPUTE_STATUS, RENTAL_STATUS } from "../util/Util.js";
 
 // --- Helper Functions for Data Display ---
@@ -113,31 +113,44 @@ export default function BorrowerDashboard({ authenticatedUser, appData, setAppDa
                         <Zap className="w-7 h-7 mr-2 text-indigo-500"/>
                         Active Rentals ({activeRentals.length})
                     </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <div className="space-y-4">
                         {activeRentals.map(rental => {
                             const correspondingRequest = requests.find(request => request.id === rental.requestId);
                             const item = listings.find(listing => listing.id === correspondingRequest.listingId);
+                            const returnDate = correspondingRequest?.rentEndDate || 'N/A';
 
                             return (
                                 <div key={rental.id}
-                                     className={`p-4 border border-indigo-200 bg-indigo-50 rounded-xl flex flex-col justify-between space-y-3`}>
-                                    <div className="flex items-center space-x-3">
-                                        <img src={item.imageUrl} alt={item.title}
-                                             className="w-12 h-12 rounded-lg object-cover border"/>
-                                        <div>
-                                            <p className="font-medium text-gray-900">{item.title}</p>
-                                            <p className="text-sm text-gray-600">Due: <span
-                                                className="font-bold">{correspondingRequest.rentEndDate}</span></p>
+                                    // Main card container
+                                     className="p-4 border border-indigo-200 rounded-xl flex flex-col justify-between bg-indigo-50 hover:bg-indigo-100 transition w-full space-y-3">
+
+                                    {/* Item Details (Full Width on Top) */}
+                                    <div className="flex justify-between items-start w-full">
+                                        <div className="flex items-center space-x-4">
+                                            <img src={item.imageUrl} alt={item.title}
+                                                 className="w-14 h-14 rounded-lg object-cover border border-indigo-300"/>
+                                            <div>
+                                                <p className="font-medium text-lg text-gray-900">{item.title}</p>
+                                                <p className="text-sm text-gray-600">Due: <span
+                                                    className="font-bold text-indigo-700">{returnDate}</span></p>
+                                            </div>
                                         </div>
                                     </div>
+
+                                    {/* Action Button (Full Width on Bottom) */}
                                     <button
                                         onClick={(event) => handleReturn(rental, event)}
-                                        className="text-sm text-white bg-red-600 px-3 py-2 rounded-lg hover:bg-red-700 transition font-medium w-full">
+                                        className="text-sm text-white bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700 transition font-medium w-full mt-2">
                                         Pay & Return Item Now
                                     </button>
                                 </div>
                             )
                         })}
+
+                        {activeRentals.length === 0 && (
+                            <p className="text-center text-sm text-gray-500 py-4 border rounded-lg">No items are currently out on rent.</p>
+                        )}
                     </div>
                 </div>
 
@@ -150,7 +163,19 @@ export default function BorrowerDashboard({ authenticatedUser, appData, setAppDa
                         Disputed Rentals ({disputedRentals.length})
                     </h4>
                     <p className="text-sm text-gray-500 mb-4">Immediate action may be required on the Disputes tab.</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    {/* SINGLE SECTION-WIDE BUTTON */}
+                    {disputedRentals.length > 0 && (
+                        <button
+                            onClick={handleViewDispute} // Use the function to navigate to the disputes dashboard
+                            className="text-sm text-white bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700 transition font-medium mb-4 w-full flex items-center justify-center">
+                            <Landmark className='w-4 h-4 mr-2'/> {/* Using Landmark icon for consistency with Lender dashboard */}
+                            Go to Disputes Dashboard
+                        </button>
+                    )}
+
+                    {/* Items are now stacked vertically (space-y-4) */}
+                    <div className="space-y-4">
                         {disputedRentals.map(rental => {
                             const correspondingRequest = requests.find(request => request.id === rental.requestId);
                             const item = listings.find(listing => listing.id === correspondingRequest.listingId);
@@ -159,29 +184,33 @@ export default function BorrowerDashboard({ authenticatedUser, appData, setAppDa
 
                             return (
                                 <div key={rental.id}
-                                     className={`p-4 border border-red-300 bg-red-50 rounded-xl flex flex-col justify-between space-y-3`}>
-                                    <div className="flex justify-between items-center">
-                                        <div className="flex items-center space-x-3">
-                                            <img src={item.imageUrl} alt={item.title}
-                                                 className="w-12 h-12 rounded-lg object-cover border"/>
-                                            <div>
-                                                <p className="font-medium text-gray-900">{item.title}</p>
-                                                <p className="text-sm text-gray-600">Returned: <span
-                                                    className="font-bold">{new Date(rental.returnDate).toLocaleDateString()}</span></p>
-                                            </div>
+                                    // Consistent border and background styling
+                                     className="p-4 border border-red-300 bg-red-50 rounded-xl flex justify-between items-center hover:bg-red-100 transition w-full">
+
+                                    {/* Item Details (Left Side) */}
+                                    <div className="flex items-center space-x-4">
+                                        <img src={item.imageUrl} alt={item.title}
+                                             className="w-12 h-12 rounded-lg object-cover border"/>
+                                        <div>
+                                            <p className="font-medium text-gray-900">{item.title}</p>
+                                            <p className="text-sm text-gray-600">Returned: <span
+                                                className="font-bold">{new Date(rental.returnDate).toLocaleDateString()}</span></p>
                                         </div>
-                                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${display.color}`}>
-                                            {display.label}
-                                        </span>
                                     </div>
-                                    <button
-                                        onClick={() => handleViewDispute(rental.id)}
-                                        className="text-sm text-white bg-red-600 px-3 py-2 rounded-lg hover:bg-red-700 transition font-medium w-full">
-                                        Go to Disputes Tab
-                                    </button>
+
+                                    {/* Dispute Status (Right Side) */}
+                                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${display.color}`}>
+                        {display.label}
+                    </span>
+
+                                    {/* NO INDIVIDUAL BUTTON HERE */}
                                 </div>
                             )
                         })}
+                        {/* Display message if no disputes */}
+                        {disputedRentals.length === 0 && (
+                            <p className="text-center text-sm text-gray-500 py-4 border rounded-lg">No pending deposit issues.</p>
+                        )}
                     </div>
                 </div>
 
