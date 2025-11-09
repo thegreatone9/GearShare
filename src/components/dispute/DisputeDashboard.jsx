@@ -1,4 +1,4 @@
-import { MessageSquareWarning, Shield, Eye, Gavel, CheckCheck } from 'lucide-react';
+import { MessageSquareWarning, Shield, Eye, Gavel, CheckCheck, Landmark, Handshake } from 'lucide-react';
 import React, { useMemo } from 'react';
 
 // Helper function to map raw status, considering the user's role, to minimal UI details
@@ -11,7 +11,7 @@ const getStatusDetails = (status, userRole) => {
             return {
                 label: 'Awaiting Your Review',
                 color: 'bg-red-100 text-red-700', // Red to highlight the critical action needed from the lender
-                action: 'Release Deposit / File Claim',
+                action: 'Review / File Claim',
                 actionIcon: Shield,
                 showAction: true,
                 buttonClass: 'bg-red-600 hover:bg-red-700'
@@ -21,7 +21,7 @@ const getStatusDetails = (status, userRole) => {
         return {
             label: 'Awaiting Lender Review',
             color: 'bg-yellow-100 text-yellow-700',
-            action: 'View Rental Details',
+            action: 'View Status',
             actionIcon: Eye,
             showAction: true,
             buttonClass: 'bg-indigo-600 hover:bg-indigo-700'
@@ -34,7 +34,7 @@ const getStatusDetails = (status, userRole) => {
             return {
                 label: 'Lender Claim Filed: Action Required',
                 color: 'bg-red-100 text-red-700', // Critical, requires borrower response
-                action: 'Submit Counter-Evidence',
+                action: 'Submit Evidence',
                 actionIcon: MessageSquareWarning,
                 showAction: true,
                 buttonClass: 'bg-red-600 hover:bg-red-700'
@@ -66,12 +66,14 @@ const getStatusDetails = (status, userRole) => {
     return { label: status, color: 'bg-gray-100 text-gray-700', action: 'View Details', actionIcon: Eye, showAction: true, buttonClass: 'bg-gray-600 hover:bg-gray-700' };
 };
 
+// --- Component Definition ---
+
 export default function DisputeDashboard({ authenticatedUser, appData }) {
     const { disputes, rentals, requests, listings } = appData;
     const userId = authenticatedUser.id;
 
-    const userDisputes = useMemo(() => {
-        return disputes
+    const { disputedLentItems, disputedBorrowedItems } = useMemo(() => {
+        const allRelevantDisputes = disputes
             .map(dispute => {
                 const rental = rentals.find(r => r.disputeId === dispute.id);
                 if (!rental) return null;
@@ -95,12 +97,51 @@ export default function DisputeDashboard({ authenticatedUser, appData }) {
                     id: dispute.id,
                     itemTitle: itemTitle,
                     userRole: userRole,
-                    // Spread all details from the helper function
+                    isLent: isLender, // NEW FIELD for filtering
                     ...statusDetails,
                 };
             })
             .filter(d => d !== null); // Filter out irrelevant disputes
+
+        // Separate the results into two arrays
+        const disputedLentItems = allRelevantDisputes.filter(d => d.isLent);
+        const disputedBorrowedItems = allRelevantDisputes.filter(d => !d.isLent);
+
+        return { disputedLentItems, disputedBorrowedItems };
+
     }, [disputes, rentals, requests, listings, userId]);
+
+
+    // --- Dispute Card Renderer Helper ---
+    const DisputeCard = ({ dispute }) => {
+        const ActionIcon = dispute.actionIcon;
+        return (
+            <div key={dispute.id}
+                 className="p-4 border border-gray-200 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white hover:bg-gray-50 transition duration-150">
+                <div className="flex-grow">
+                    <p className="font-semibold text-lg text-gray-900">Case #{dispute.id} - {dispute.itemTitle}</p>
+                    <p className="text-sm text-gray-600 mt-1">Your Role: <span
+                        className="font-bold text-indigo-700">{dispute.userRole}</span></p>
+                </div>
+
+                <div className="mt-3 sm:mt-0 text-left sm:text-right flex items-center space-x-3">
+                    <span className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${dispute.color} shadow-sm`}>
+                        {dispute.label}
+                    </span>
+
+                    {dispute.showAction && (
+                        <button
+                            // Placeholder action to simulate navigating to the dispute details page
+                            onClick={() => console.log(`Action: ${dispute.action} for Dispute ${dispute.id}`)}
+                            className={`text-sm text-white px-4 py-2 rounded-lg transition flex items-center font-medium shadow-md ${dispute.buttonClass}`}>
+                            <ActionIcon className="w-4 h-4 mr-2"/>
+                            {dispute.action}
+                        </button>
+                    )}
+                </div>
+            </div>
+        );
+    };
 
     // --- Render Logic ---
     return (
@@ -113,51 +154,46 @@ export default function DisputeDashboard({ authenticatedUser, appData }) {
                 </span>
             </h3>
 
-            <div className="bg-white p-6 md:p-8 rounded-2xl shadow-2xl">
-                <h4 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-3">
-                    Your Open & Recent Cases ({userDisputes.length})
-                </h4>
+            <div className="bg-white p-6 md:p-8 rounded-2xl shadow-2xl space-y-8">
 
-                {userDisputes.length === 0 ? (
-                    <div className="text-center py-10 text-gray-500">
-                        <CheckCheck className="w-8 h-8 mx-auto mb-3 text-green-500"/>
-                        <p className="font-medium">No active or recent disputes found.</p>
-                        <p className="text-sm mt-1">Peaceful gear sharing, keep it up!</p>
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {userDisputes.map(dispute => {
-                            const ActionIcon = dispute.actionIcon;
+                {/* 1. Disputed Lent Items (Lender Role) */}
+                <section>
+                    <h4 className="text-2xl font-semibold text-gray-800 mb-4 border-b pb-3 flex items-center">
+                        <Landmark className="w-6 h-6 mr-2 text-indigo-500"/>
+                        Disputes on Your Lent Items ({disputedLentItems.length})
+                    </h4>
+                    {disputedLentItems.length === 0 ? (
+                        <div className="text-center py-6 text-gray-500 border rounded-xl bg-gray-50">
+                            <CheckCheck className="w-8 h-8 mx-auto mb-3 text-green-500"/>
+                            <p className="font-medium">No disputes currently active for your listings.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {disputedLentItems.map(dispute => <DisputeCard key={dispute.id} dispute={dispute} />)}
+                        </div>
+                    )}
+                </section>
 
-                            return (
-                                <div key={dispute.id}
-                                     className="p-4 border border-gray-200 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white hover:bg-indigo-50 transition duration-150">
-                                    <div className="flex-grow">
-                                        <p className="font-semibold text-lg text-gray-900">Case #{dispute.id} - {dispute.itemTitle}</p>
-                                        <p className="text-sm text-gray-600 mt-1">Your Role: <span
-                                            className="font-bold text-indigo-700">{dispute.userRole}</span></p>
-                                    </div>
+                <hr className="border-t border-gray-200"/>
 
-                                    <div className="mt-3 sm:mt-0 text-left sm:text-right flex items-center space-x-3">
-                                        <span className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${dispute.color} shadow-sm`}>
-                                            {dispute.label}
-                                        </span>
+                {/* 2. Disputed Borrowed Items (Borrower Role) */}
+                <section>
+                    <h4 className="text-2xl font-semibold text-gray-800 mb-4 border-b pb-3 flex items-center">
+                        <Handshake className="w-6 h-6 mr-2 text-red-500"/>
+                        Disputes on Your Borrowed Items ({disputedBorrowedItems.length})
+                    </h4>
+                    {disputedBorrowedItems.length === 0 ? (
+                        <div className="text-center py-6 text-gray-500 border rounded-xl bg-gray-50">
+                            <CheckCheck className="w-8 h-8 mx-auto mb-3 text-green-500"/>
+                            <p className="font-medium">No deposit claims currently filed against you.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {disputedBorrowedItems.map(dispute => <DisputeCard key={dispute.id} dispute={dispute} />)}
+                        </div>
+                    )}
+                </section>
 
-                                        {dispute.showAction && (
-                                            <button
-                                                // Placeholder action to simulate navigating to the dispute details page
-                                                onClick={() => console.log(`Action: ${dispute.action} for Dispute ${dispute.id}`)}
-                                                className={`text-sm text-white px-4 py-2 rounded-lg transition flex items-center font-medium shadow-md ${dispute.buttonClass}`}>
-                                                <ActionIcon className="w-4 h-4 mr-2"/>
-                                                {dispute.action}
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
             </div>
         </div>
     );
