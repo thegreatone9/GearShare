@@ -1,6 +1,6 @@
 import React from 'react';
 import {DollarSign} from 'lucide-react';
-import {DISPUTE_STATUS} from "../util/Util.js";
+import {DISPUTE_STATUS} from "../../util/Util.js";
 
 export default function SettleContent({ dispute, onClose }) {
     const handleSettle = (disputeId) => {

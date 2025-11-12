@@ -1,12 +1,12 @@
 import React from 'react';
 import {BORROWER_DISPUTE_ACTIONS, LENDER_DISPUTE_ACTIONS} from "../util/Util.js";
-import PayDamagesContent from "./PayDamagesContent.jsx";
-import ViewClaimDetailsContent from "./ViewClaimContent.jsx";
-import SubmitEvidenceContent from "./SubmitEvidenceContent.jsx";
-import ViewReportContent from "./ViewReportContent.jsx";
+import PayDamagesContent from "./modalContent/PayDamagesContent.jsx";
+import ViewClaimDetailsContent from "./modalContent/ViewClaimContent.jsx";
+import SubmitEvidenceContent from "./modalContent/SubmitEvidenceContent.jsx";
+import ViewReportContent from "./modalContent/ViewReportContent.jsx";
 import Modal from "../common/Modal.jsx";
-import SettleContent from "./SettleContent.jsx";
-import FileClaimContent from "./FileClaimContent.jsx";
+import SettleContent from "./modalContent/SettleContent.jsx";
+import FileClaimContent from "./modalContent/FileClaimContent.jsx";
 
 /**
  * Manages rendering the correct modal content and connects the UI buttons

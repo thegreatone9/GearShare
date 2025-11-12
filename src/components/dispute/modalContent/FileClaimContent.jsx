@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {DISPUTE_STATUS} from "../util/Util.js";
+import {DISPUTE_STATUS} from "../../util/Util.js";
 
 export default function FileClaimContent({ dispute, onClose, setAppData }) {
     const [damageDescription, setDamageDescription] = useState('');
