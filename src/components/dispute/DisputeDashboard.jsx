@@ -1,13 +1,10 @@
 import {CheckCheck, Handshake, Landmark, Shield,} from 'lucide-react';
 import React, {useMemo, useState} from 'react';
 import DisputeActionModal from "./DisputeActionModal.jsx";
-import {getStatusDetails} from "./DisputeUtils.jsx";
+import {processUserDisputes} from "./DisputeUtils.jsx";
 import DisputeCard from "./DisputeCard.jsx";
 
 export default function DisputeDashboard({ authenticatedUser, appData, setAppData }) {
-    const { disputes, rentals, requests, listings } = appData;
-    const userId = authenticatedUser.id;
-
     const [modalState, setModalState] = useState({
         isOpen: false,
         action: null,
@@ -23,41 +20,9 @@ export default function DisputeDashboard({ authenticatedUser, appData, setAppDat
     };
 
     const { disputedLentItems, disputedBorrowedItems } = useMemo(() => {
-        const allRelevantDisputes = disputes
-            .map(dispute => {
-                const rental = rentals.find(r => r.disputeId === dispute.id);
-                if (!rental) return null;
+        return processUserDisputes(appData, authenticatedUser.id);
 
-                const request = requests.find(r => r.id === rental.requestId);
-                if (!request) return null;
-
-                const isLender = request.lenderId === userId;
-                const isBorrower = request.borrowerId === userId;
-
-                if (!isLender && !isBorrower) return null;
-
-                const listing = listings.find(l => l.id === request.listingId);
-                const itemTitle = listing ? listing.title : 'Unknown Item';
-                const userRole = isLender ? 'Lender' : 'Borrower';
-
-                const statusDetails = getStatusDetails(dispute.status, userRole);
-
-                return {
-                    id: dispute.id,
-                    itemTitle: itemTitle,
-                    userRole: userRole,
-                    isLent: isLender,
-                    ...statusDetails,
-                };
-            })
-            .filter(d => d !== null);
-
-        const disputedLentItems = allRelevantDisputes.filter(d => d.isLent);
-        const disputedBorrowedItems = allRelevantDisputes.filter(d => !d.isLent);
-
-        return { disputedLentItems, disputedBorrowedItems };
-
-    }, [disputes, rentals, requests, listings, userId]);
+    }, [appData.disputes, appData.rentals, appData.requests, appData.listings, authenticatedUser.id]);
 
     return (
         <div className="py-8 max-w-5xl mx-auto">

@@ -1,7 +1,62 @@
 import {DollarSign, Eye, FileText, MessageSquareWarning, XCircle} from 'lucide-react';
 import {BORROWER_DISPUTE_ACTIONS, DISPUTE_STATUS, LENDER_DISPUTE_ACTIONS} from "../util/Util.js";
 
-export const getStatusDetails = (status, userRole) => {
+export const processUserDisputes = (appData, userId) => {
+    const { disputes, rentals, requests, listings } = appData;
+
+    const allRelevantDisputes = disputes
+        .map(dispute => {
+            // 1. Link Dispute to Rental
+            const rental = rentals.find(r => r.disputeId === dispute.id);
+            if (!rental) return null;
+
+            // 2. Link Rental to Request
+            const request = requests.find(r => r.id === rental.requestId);
+            if (!request) return null;
+
+            // 3. Determine User Role
+            const isLender = request.lenderId === userId;
+            const isBorrower = request.borrowerId === userId;
+
+            // Filter out disputes the user isn't involved in
+            if (!isLender && !isBorrower) return null;
+
+            // 4. Get Listing Details
+            const listing = listings.find(l => l.id === request.listingId);
+            const itemTitle = listing ? listing.title : 'Unknown Item';
+            const userRole = isLender ? 'Lender' : 'Borrower';
+
+            // 5. Get Status Details using the external helper function
+            const statusDetails = getStatusDetails(dispute.status, userRole);
+
+            return {
+                id: dispute.id,
+                itemTitle: itemTitle,
+                userRole: userRole,
+                isLent: isLender, // Used for final categorization
+                ...statusDetails,
+            };
+        })
+        .filter(d => d !== null); // Remove disputes not involving the user
+
+    // Categorize into Lent (Lender Role) and Borrowed (Borrower Role)
+    const disputedLentItems = allRelevantDisputes.filter(d => d.isLent);
+    const disputedBorrowedItems = allRelevantDisputes.filter(d => !d.isLent);
+
+    return { disputedLentItems, disputedBorrowedItems };
+};
+
+export const ACTION_ICONS = {
+    [LENDER_DISPUTE_ACTIONS.SETTLE]: DollarSign,
+    [LENDER_DISPUTE_ACTIONS.FILE_CLAIM]: XCircle,
+    [LENDER_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS]: Eye,
+    [LENDER_DISPUTE_ACTIONS.VIEW_REPORT]: FileText,
+    [BORROWER_DISPUTE_ACTIONS.SUBMIT_EVIDENCE]: MessageSquareWarning, // Used MessageSquareWarning for evidence submission
+    [BORROWER_DISPUTE_ACTIONS.VIEW_REPORT]: FileText,
+    [BORROWER_DISPUTE_ACTIONS.PAY_DAMAGES]: DollarSign
+};
+
+const getStatusDetails = (status, userRole) => {
     if (status === DISPUTE_STATUS.PENDING_DEPOSIT_RETURN) {
         if (userRole === 'Lender') {
             return {
@@ -56,14 +111,4 @@ export const getStatusDetails = (status, userRole) => {
         actions: [LENDER_DISPUTE_ACTIONS.VIEW_REPORT],
         showAction: true
     };
-};
-
-export const ACTION_ICONS = {
-    [LENDER_DISPUTE_ACTIONS.SETTLE]: DollarSign,
-    [LENDER_DISPUTE_ACTIONS.FILE_CLAIM]: XCircle,
-    [LENDER_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS]: Eye,
-    [LENDER_DISPUTE_ACTIONS.VIEW_REPORT]: FileText,
-    [BORROWER_DISPUTE_ACTIONS.SUBMIT_EVIDENCE]: MessageSquareWarning, // Used MessageSquareWarning for evidence submission
-    [BORROWER_DISPUTE_ACTIONS.VIEW_REPORT]: FileText,
-    [BORROWER_DISPUTE_ACTIONS.PAY_DAMAGES]: DollarSign
 };
