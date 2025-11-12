@@ -1,11 +1,10 @@
-import { Clock, Package, Wrench, Zap, ShieldAlert, CheckCheck, Landmark } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { RENTAL_STATUS, DISPUTE_STATUS } from "../util/Util.js";
+import {CheckCheck, Clock, Landmark, Package, ShieldAlert, Wrench, Zap} from 'lucide-react';
+import {Link, useNavigate} from 'react-router-dom';
+import {DISPUTE_STATUS, RENTAL_STATUS} from "../util/Util.js";
 import Modal from "../common/Modal.jsx";
 import AcceptRentalRequest from "./AcceptRentalRequest.jsx";
-import { useState } from "react";
-
-// --- Helper Functions for Data Display ---
+import {useEffect, useState} from "react";
+import {supabase} from "../../server/supabaseClient.js";
 
 const getDisputeDisplay = (dispute) => {
     if (!dispute || dispute.status === DISPUTE_STATUS.COMPLETED) {
@@ -22,43 +21,38 @@ const getDisputeDisplay = (dispute) => {
     }
 };
 
-// --- Component Definition ---
-
-export default function LenderDashboard({ authenticatedUser, appData, setAppData }) {
+export default function LenderDashboard({ authenticatedUser }) {
     const navigate = useNavigate();
 
+    const userId = authenticatedUser.id;
+
+    const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState(null);
 
-    const { disputes } = appData;
+    const [listings, setListings] = useState([]);
+    const [requests, setRequests] = useState([]);
+    const [lenderRentals, setLenderRentals] = useState([]);
+    const [disputes, setDisputes] = useState([]);
 
-    const listings = appData.listings.filter(listing => listing.ownerId === authenticatedUser.id);
-    const requests = appData.requests.filter(req => req.lenderId === authenticatedUser.id);
-    const lenderRentals = appData.rentals.filter(rental => (requests.map(req => req.id)).includes(rental.requestId));
+    const [modalItem, setModalItem] = useState(null);
+    const [modalBorrower, setModalBorrower] = useState(null);
+    const [modalLoading, setModalLoading] = useState(false);
 
-    // Rentals that are physically OUT
     const activeRentals = lenderRentals.filter(rental => rental.status === RENTAL_STATUS.ACTIVE);
-
-    // Listings not currently rented
-    const pendingRentalListings = listings.filter(item => !activeRentals.map(aR => aR.listingId).includes(item.id));
-
-    // IV. Disputed Rentals (Returned but UNSETTLED)
+    const pendingRentalListings = listings.filter(item => !activeRentals.map(aR => aR.listing_id).includes(item.id));
     const disputedRentals = lenderRentals.filter(rental => {
         if (rental.status !== RENTAL_STATUS.COMPLETED) return false;
 
-        const dispute = disputes.find(d => d.rentalId === rental.id);
+        const dispute = disputes.find(d => d.rental_id === rental.id);
         return dispute && dispute.status !== DISPUTE_STATUS.COMPLETED;
     });
-
-    // V. Past Rentals (Settled)
     const pastRentals = lenderRentals.filter(rental => {
         if (rental.status !== RENTAL_STATUS.COMPLETED) return false;
 
-        const dispute = disputes.find(d => d.rentalId === rental.id);
+        const dispute = disputes.find(d => d.rental_id === rental.id);
         return !dispute || dispute.status === DISPUTE_STATUS.COMPLETED;
     });
-
-    // --- Handlers ---
 
     const editItem = function (itemId, itemStatus) {
         navigate(`/lender/item/${itemId}?status=${itemStatus}`);
@@ -73,53 +67,168 @@ export default function LenderDashboard({ authenticatedUser, appData, setAppData
         setIsModalOpen(true);
     };
 
-    const confirmAcceptance = () => {
-        if (!selectedRequest) return;
+    const confirmAcceptance = async () => {
+        if (!selectedRequest) {
+            return;
+        }
 
-        const { reqId, listingId, borrowerId, lenderId } = selectedRequest;
+        const { id, listing_id, borrower_id, lender_id } = selectedRequest;
 
-        setAppData(prevData => {
-            const updatedRequests = prevData.requests.filter(req => req.id !== reqId);
+        const newRental = {
+            id: Date.now(),
+            request_id: id,
+            listing_id: listing_id,
+            borrower_id: borrower_id,
+            lender_id: lender_id,
+            return_date: null,
+            status: RENTAL_STATUS.ACTIVE
+        };
 
-            const newRental = {
-                id: Date.now(),
-                requestId: reqId,
-                listingId,
-                borrowerId,
-                lenderId,
-                returnDate: null,
-                status: RENTAL_STATUS.ACTIVE
-            };
+        const { data: rentalResult, error: rentalError } = await supabase
+            .from('rentals')
+            .insert([newRental])
+            .single();
 
-            const updatedListings = prevData.listings.map(item =>
-                item.id === listingId
-                    ? { ...item, listingStatus: RENTAL_STATUS.ACTIVE }
-                    : item
-            );
+        if (rentalError) {
+            return console.error("Error inserting new rental:", rentalError);
+        }
 
-            return {
-                ...prevData,
-                requests: updatedRequests,
-                rentals: [...prevData.rentals, newRental],
-                listings: updatedListings,
-            };
-        });
+        const { error: listingError } = await supabase
+            .from('listings')
+            .update({ listing_status: RENTAL_STATUS.ACTIVE })
+            .eq('id', listing_id);
+
+        if (listingError) {
+            return console.error("Error updating listing status:", listingError);
+        }
+
+        const { error: requestError } = await supabase
+            .from('requests')
+            .delete()
+            .eq('id', id);
+
+        if (requestError) {
+            return console.error("Error deleting request:", requestError);
+        }
+
+        setRequests(prevRequests => prevRequests.filter(req => req.id !== id));
+        setLenderRentals(prevRentals => [...prevRentals, rentalResult]);
 
         setIsModalOpen(false);
         setSelectedRequest(null);
     };
 
-    const declineRequest = (request) => {
-        setAppData(prevData => {
-            const updatedRequests = prevData.requests.filter(req => req.id !== request.id);
-            return { ...prevData, requests: updatedRequests };
-        })
+    const declineRequest = async (request) => {
+        const { error } = await supabase
+            .from('requests')
+            .delete()
+            .eq('id', request.id);
+
+        if (error) {
+            console.error(`Error declining request ${request.id}:`, error);
+            return;
+        }
+
+        setRequests(prevRequests =>
+            prevRequests.filter(req => req.id !== request.id)
+        );
+    };
+
+    useEffect(() => {
+        const fetchLenderData = async () => {
+            setLoading(true);
+
+            // Function to fetch a single table based on the lender's ID, filtered by the authenticated user's ID
+            const fetchTable = async (table, fkColumn, setState) => {
+                const { data, error } = await supabase
+                    .from(table)
+                    .select('*')
+                    .eq(fkColumn, userId);
+
+                if (error) console.error(`Error fetching ${table}:`, error);
+                if (data) setState(data);
+
+                return data;
+            };
+
+            // --- 1. Fetch Core Lender Data (Listings and Requests) ---
+            const [fetchedListings, fetchedRequests] = await Promise.all([
+                fetchTable('listings', 'owner_id', setListings),
+                fetchTable('requests', 'lender_id', setRequests),
+            ]);
+
+            const requestIds = fetchedRequests ? fetchedRequests.map(req => req.id) : [];
+
+            const { data: rentalData, error: rentalError } = await supabase
+                .from('rentals')
+                .select('*, request_id(*)')
+                .in('request_id', requestIds);
+
+            if (rentalError) console.error("Error fetching rentals:", rentalError);
+
+            const lenderRentals = rentalData || [];
+            setLenderRentals(lenderRentals);
+
+            const rentalIds = lenderRentals.map(rental => rental.id);
+
+            const { data: disputeData, error: disputeError } = await supabase
+                .from('disputes')
+                .select('*')
+                .in('rental_id', rentalIds);
+
+            if (disputeError) console.error("Error fetching disputes:", disputeError);
+
+            setDisputes(disputeData || []);
+
+            setLoading(false);
+        };
+
+        fetchLenderData();
+
+    }, [userId]);
+
+    useEffect(() => {
+        if (!selectedRequest) {
+            setModalItem(null);
+            setModalBorrower(null);
+            return;
+        }
+
+        const fetchModalData = async () => {
+            setModalLoading(true);
+            const listingId = selectedRequest.listingId;
+            const borrowerId = selectedRequest.borrowerId;
+
+            // --- Fetch Modal Item (Listing) ---
+            const { data: itemData, error: itemError } = await supabase
+                .from('listings')
+                .select('*')
+                .eq('id', listingId)
+                .single();
+
+            if (itemError) console.error("Error fetching modal item:", itemError);
+            setModalItem(itemData);
+
+            // --- Fetch Modal Borrower (Account) ---
+            const { data: borrowerData, error: borrowerError } = await supabase
+                .from('accounts')
+                .select('name, email') // Only fetch necessary borrower details
+                .eq('id', borrowerId)
+                .single();
+
+            if (borrowerError) console.error("Error fetching modal borrower:", borrowerError);
+            setModalBorrower(borrowerData);
+
+            setModalLoading(false);
+        };
+
+        fetchModalData();
+
+    }, [selectedRequest]);
+
+    if (loading) {
+        return <div className="p-8 text-center text-indigo-600">Loading Lender Dashboard...</div>;
     }
-
-    const modalItem = selectedRequest ? listings.find(listing => listing.id === selectedRequest.listingId) : null;
-    const modalBorrower = selectedRequest ? appData.accounts.find(acc => acc.id === selectedRequest.borrowerId) : null;
-
-    // --- Render Logic ---
 
     return (
         <div className="py-8 max-w-5xl mx-auto">
@@ -129,13 +238,17 @@ export default function LenderDashboard({ authenticatedUser, appData, setAppData
                 title="Review Rental Confirmation"
                 maxWidth="max-w-lg"
             >
-                <AcceptRentalRequest
-                    request={selectedRequest}
-                    item={modalItem}
-                    borrower={modalBorrower}
-                    onClose={() => setIsModalOpen(false)}
-                    onConfirm={confirmAcceptance}
-                />
+                {modalLoading ? (
+                    <div className="p-4 text-center">Loading Borrower Details...</div>
+                ) : (
+                    <AcceptRentalRequest
+                        request={selectedRequest}
+                        item={modalItem}
+                        borrower={modalBorrower}
+                        onClose={() => setIsModalOpen(false)}
+                        onConfirm={confirmAcceptance}
+                    />
+                )}
             </Modal>
 
             <div className="flex justify-between items-center mb-6">
@@ -157,23 +270,19 @@ export default function LenderDashboard({ authenticatedUser, appData, setAppData
                         Active Rentals ({activeRentals.length})
                     </h4>
 
-                    {/* *** FIX: Changed grid layout below to a simple vertical stack (space-y-3) *** */}
                     <div className="space-y-4">
                         {activeRentals.map(rental => {
-                            const correspondingRequest = requests.find(request => request.id === rental.requestId);
-                            const item = listings.find(listing => listing.id === correspondingRequest.listingId);
+                            const correspondingRequest = requests.find(request => request.id === rental.request_id);
+                            const item = listings.find(listing => listing.id === correspondingRequest.listing_id);
 
-                            // Formatting the date for a cleaner look
-                            const returnDate = correspondingRequest?.rentEndDate
-                                ? correspondingRequest.rentEndDate // Use original mock format if needed
+                            const returnDate = correspondingRequest?.rent_end_date
+                                ? correspondingRequest.rent_end_date
                                 : 'N/A';
 
                             return (
                                 <div key={rental.id}
-                                    // IMPROVEMENT: Ensure item card takes full width and uses flex for internal alignment
                                      className="p-4 border border-indigo-200 rounded-xl flex justify-between items-center bg-indigo-50 hover:bg-indigo-100 transition w-full">
 
-                                    {/* Item Details (Left Side) */}
                                     <div className="flex items-center space-x-4">
                                         <img src={item.imageUrl} alt={item.title}
                                              className="w-14 h-14 rounded-lg object-cover border border-indigo-300"/>
@@ -184,7 +293,6 @@ export default function LenderDashboard({ authenticatedUser, appData, setAppData
                                         </div>
                                     </div>
 
-                                    {/* Status and Action (Right Side) */}
                                     <div className="text-right flex flex-col items-end">
                                         <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700 shadow-sm`}>
                                           **Rented**
@@ -211,7 +319,7 @@ export default function LenderDashboard({ authenticatedUser, appData, setAppData
                     </h4>
                     <div className="space-y-4">
                         {requests.map(req => {
-                                const item = listings.find(listing => listing.id === req.listingId);
+                                const item = listings.find(listing => listing.id === req.listing_id);
 
                                 return (
                                     <div key={req.id}
@@ -272,8 +380,6 @@ export default function LenderDashboard({ authenticatedUser, appData, setAppData
                                         }`}>
                                           {item.status}
                                         </span>
-                                        {item.nextReturn &&
-                                            <p className="text-xs text-gray-500 mt-1">Returns: {item.nextReturn}</p>}
                                         <button className="text-xs text-indigo-600 mt-1 hover:underline"
                                                 onClick={() => editItem(item.id, RENTAL_STATUS.PENDING_BORROW)}>Manage
                                         </button>
@@ -301,8 +407,8 @@ export default function LenderDashboard({ authenticatedUser, appData, setAppData
                     )}
                     <div className="space-y-4">
                         {disputedRentals.map(rental => {
-                            const correspondingRequest = requests.find(request => request.id === rental.requestId);
-                            const item = listings.find(listing => listing.id === correspondingRequest.listingId);
+                            const correspondingRequest = requests.find(request => request.id === rental.request_id);
+                            const item = listings.find(listing => listing.id === correspondingRequest.listing_id);
                             const dispute = disputes.find(d => d.rentalId === rental.id);
                             const display = getDisputeDisplay(dispute);
 
@@ -337,9 +443,9 @@ export default function LenderDashboard({ authenticatedUser, appData, setAppData
                     <p className="text-sm text-gray-500 mb-4">Items that have been returned and the deposit has been released or claimed.</p>
                     <div className="space-y-4">
                         {pastRentals.map(rental => {
-                            const correspondingRequest = requests.find(request => request.id === rental.requestId);
-                            const item = listings.find(listing => listing.id === correspondingRequest.listingId);
-                            const dispute = disputes.find(d => d.rentalId === rental.id);
+                            const correspondingRequest = requests.find(request => request.id === rental.request_id);
+                            const item = listings.find(listing => listing.id === correspondingRequest.listing_id);
+                            const dispute = disputes.find(d => d.rental_id === rental.id);
                             const display = getDisputeDisplay(dispute);
 
                             return (
@@ -349,7 +455,7 @@ export default function LenderDashboard({ authenticatedUser, appData, setAppData
                                         <img src={item.imageUrl} alt={item.title} className="w-10 h-10 rounded-lg object-cover"/>
                                         <div>
                                             <p className="font-medium text-gray-900">{item.title}</p>
-                                            <p className="text-sm text-gray-500">Returned: {new Date(rental.returnDate).toLocaleDateString()}</p>
+                                            <p className="text-sm text-gray-500">Returned: {new Date(rental.return_date).toLocaleDateString()}</p>
                                         </div>
                                     </div>
                                     <div className='text-right'>

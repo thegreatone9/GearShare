@@ -1,7 +1,8 @@
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
+import {supabase} from "../../server/supabaseClient.js";
 
-export default function AuthPage({ accounts, setAppData, setAuthenticatedUser }) {
+export default function AuthPage({ setAuthenticatedUser }) {
     const navigate = useNavigate();
     const [isSigningUp, setIsSigningUp] = useState(true);
     const [email, setEmail] = useState('');
@@ -14,48 +15,93 @@ export default function AuthPage({ accounts, setAppData, setAuthenticatedUser })
         setAuthenticatedUser(user);
     };
 
-    const addAccount = (newUser) => {
-        setAppData(prevData => ({
-            ...prevData,
-            accounts: [...prevData.accounts, newUser]
-        }));
+    const addAccount = async  (newUser) => {
+        const { email, password, name } = newUser;
+
+        const {
+            data: authData,
+            error: authError
+        } = await supabase.auth.signUp({ email, password });
+
+        if (authError) {
+            console.error("Supabase Auth Error:", authError);
+            return { error: authError.message };
+        }
+
+        const user = authData.user;
+
+        const { error: accountError } = await supabase
+            .from('accounts')
+            .insert([
+                {
+                    id: user.id,
+                    email: user.email,
+                    name: name,
+                    password: password
+                }
+            ]);
+
+        if (accountError) {
+            console.error("Account Insert Error:", accountError);
+            return { error: accountError.message };
+        }
+
+        return user;
     };
 
-    const authenticateUser = (email, password) => {
-        return accounts.find(
-            account => account.email === email && account.password === password
-        );
+    const authenticateUser = async (email, password) => {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            console.error("Sign-In Error:", error.message);
+            return null;
+        }
+
+        console.log("User successfully signed in:", data.user.id);
+        return data.user;
     };
 
-    const handleSubmit = (e) => {
+    const isUserExists = async (email, password) => {
+        const { error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        return !error;
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
 
         if (isSigningUp) {
-            // 1. SIGN UP LOGIC
-            if (authenticateUser(email, password)) {
+            const userIsValid = await isUserExists(email, password);
+            if (userIsValid) {
                 setError('An account with this email already exists.');
                 return;
             }
 
             const newUserId = Date.now();
             const newUser = { newUserId, email, password, name };
-            addAccount(newUser);
+            await addAccount(newUser);
 
             console.log(`Sign Up successful for ${email}. New account added.`);
             handleAuth(newUser);
             navigate('/borrower');
 
         } else {
-            // 2. SIGN IN LOGIC
-            const user = authenticateUser(email, password);
+            const user = await authenticateUser(email, password); // If authenticateUser is also async
 
             if (user) {
                 console.log(`Sign In successful for ${email}.`);
                 handleAuth(user);
                 navigate('/borrower');
+
             } else {
-                setError('Invalid email or password.'); // Show error on mismatch
+                setError('Invalid email or password.');
             }
         }
     };

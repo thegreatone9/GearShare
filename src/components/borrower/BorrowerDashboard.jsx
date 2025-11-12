@@ -1,106 +1,161 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Zap, Package, ShieldAlert, Landmark } from 'lucide-react';
-import { DISPUTE_STATUS, RENTAL_STATUS } from "../util/Util.js";
+import React, {useEffect, useMemo, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {Landmark, Package, ShieldAlert, Zap} from 'lucide-react';
+import {DISPUTE_STATUS, RENTAL_STATUS} from "../util/Util.js";
+import {supabase} from "../../server/supabaseClient.js";
 
-// --- Helper Functions for Data Display ---
-
-const getDisputeDisplay = (dispute) => {
-    if (!dispute || dispute.status === DISPUTE_STATUS.COMPLETED) {
-        return { label: 'Settled', color: 'bg-green-100 text-green-700' };
-    }
-
-    // Statuses that require attention or are unsettled
-    switch (dispute.status) {
-        case DISPUTE_STATUS.PENDING_DEPOSIT_RETURN:
-            return { label: 'Awaiting Lender Review', color: 'bg-yellow-100 text-yellow-700' };
-        case DISPUTE_STATUS.ACTIVE:
-            return { label: 'Lender Claim Filed', color: 'bg-red-100 text-red-700' };
-        default:
-            return { label: dispute.status, color: 'bg-gray-100 text-gray-700' };
-    }
-};
-
-export default function BorrowerDashboard({ authenticatedUser, appData, setAppData }) {
+export default function BorrowerDashboard({ authenticatedUser }) {
     const navigate = useNavigate();
+    const userId = authenticatedUser.id;
 
-    const listings = appData.listings;
-    const allDisputes = appData.disputes;
+    const [loading, setLoading] = useState(true);
 
-    // 1. Filter relevant data
-    const requests = appData.requests.filter(req => req.borrowerId === authenticatedUser.id);
-    const borrowerRentals = appData.rentals.filter(rental => (requests.map(req => req.id)).includes(rental.requestId));
+    const [listings, setListings] = useState([]);
+    const [disputes, setDisputes] = useState([]);
+    const [requests, setRequests] = useState([]);
+    const [borrowerRentals, setBorrowerRentals] = useState([]);
 
-    // --- Core Filtering Logic for 3 Sections ---
+    useEffect(() => {
+        const fetchBorrowerData = async () => {
+            setLoading(true);
 
-    // Rentals still physically out
-    const activeRentals = borrowerRentals.filter(rental => rental.status === RENTAL_STATUS.ACTIVE);
+            const { data: requestData, error: reqError } = await supabase
+                .from('requests')
+                .select('*')
+                .eq('borrower_id', userId);
 
-    // Rentals returned (COMPLETED) but with an UNSETTLED dispute (status is NOT COMPLETED)
-    const disputedRentals = borrowerRentals.filter(rental => {
-        if (rental.status !== RENTAL_STATUS.COMPLETED) return false;
+            if (reqError) console.error("Error fetching requests:", reqError);
+            const fetchedRequests = requestData || [];
+            setRequests(fetchedRequests);
 
-        const dispute = allDisputes.find(d => d.rentalId === rental.id);
-        return dispute && dispute.status !== DISPUTE_STATUS.COMPLETED;
-    });
+            const requestIds = fetchedRequests.map(req => req.id);
+            const listingIds = fetchedRequests.map(req => req.listing_id);
 
-    // Rentals where the rental status is COMPLETED AND the dispute status is COMPLETED (or no dispute exists)
-    const pastRentals = borrowerRentals.filter(rental => {
-        if (rental.status !== RENTAL_STATUS.COMPLETED) return false;
+            // 2. Fetch Rentals associated with those Requests
+            const { data: rentalData, error: rentalError } = await supabase
+                .from('rentals')
+                .select('*, request_id(*)')
+                .in('request_id', requestIds);
 
-        const dispute = allDisputes.find(d => d.rentalId === rental.id);
-        return !dispute || dispute.status === DISPUTE_STATUS.COMPLETED;
-    });
+            if (rentalError) console.error("Error fetching rentals:", rentalError);
+            const fetchedRentals = rentalData || [];
+            setBorrowerRentals(fetchedRentals);
 
-    // --- Handlers ---
+            // 3. Fetch Listings needed for display titles
+            const { data: listingData, error: listingError } = await supabase
+                .from('listings')
+                .select('*')
+                .in('id', listingIds);
 
-    // Corrected handler for item return
-    const handleReturn = function (rental, event) {
-        event.preventDefault();
+            if (listingError) console.error("Error fetching listings:", listingError);
+            setListings(listingData || []);
 
-        const returnDate = Date.now();
-        const newDisputeId = Date.now();
+            // 4. Fetch Disputes linked to the retrieved Rentals
+            const rentalIds = fetchedRentals.map(rental => rental.id);
 
-        // 1. Prepare updated Rental object
-        const updatedRental = {
-            ...rental,
-            returnDate: returnDate,
-            status: RENTAL_STATUS.COMPLETED,
-            disputeId: newDisputeId
+            const { data: disputeData, error: disputeError } = await supabase
+                .from('disputes')
+                .select('*')
+                .in('rental_id', rentalIds);
+
+            if (disputeError) console.error("Error fetching disputes:", disputeError);
+            setDisputes(disputeData || []);
+
+            setLoading(false);
         };
 
-        // 2. Prepare new Dispute object (starts immediately upon return for review)
-        const newDispute = {
-            id: newDisputeId,
-            rentalId: rental.id,
-            startDate: returnDate,
-            endDate: null,
-            // Start the process at PENDING_DEPOSIT_RETURN for lender review
-            status: DISPUTE_STATUS.PENDING_DEPOSIT_RETURN
-        }
+        fetchBorrowerData();
 
-        setAppData(prevData => {
-            // Immutable update for Rental: Replace the old object
-            const updatedRentals = prevData.rentals.map(r =>
-                r.id === rental.id ? updatedRental : r
-            );
+    }, [userId]);
 
-            // Immutable update for Disputes: Add the new dispute object
-            const updatedDisputes = [...prevData.disputes, newDispute];
+    // --- 2. Derived State (useMemo) ---
+    const { activeRentals, disputedRentals, pastRentals } = useMemo(() => {
 
-            return { ...prevData, rentals: updatedRentals, disputes: updatedDisputes };
+        const findDispute = (rental) => disputes.find(d => d.rental_id === rental.id);
+
+        const active = [];
+        const disputed = [];
+        const past = [];
+
+        borrowerRentals.forEach(rental => {
+            const dispute = findDispute(rental);
+
+            if (rental.status === RENTAL_STATUS.ACTIVE) {
+                active.push(rental);
+
+            } else if (rental.status === RENTAL_STATUS.COMPLETED) {
+                if (dispute && dispute.status !== DISPUTE_STATUS.COMPLETED) {
+                    disputed.push(rental);
+
+                } else {
+                    past.push(rental);
+                }
+            }
         });
 
-        // 3. Navigate to the Dispute Dashboard so the borrower can see the new status
+        return { activeRentals: active, disputedRentals: disputed, pastRentals: past };
+
+    }, [borrowerRentals, disputes]);
+
+    // --- Handlers ---
+    const handleReturn = async function (rental, event) {
+        event.preventDefault();
+
+        const returnDate = new Date().toISOString();
+
+        const newDisputeData = {
+            rental_id: rental.id,
+            start_date: returnDate,
+            status: DISPUTE_STATUS.PENDING_DEPOSIT_RETURN
+        };
+
+        // --- Database Transactions ---
+        // A. INSERT the new dispute record first
+        const {data: disputeResult, error: disputeError} = await supabase
+            .from('disputes')
+            .insert([newDisputeData])
+            .select()
+            .single();
+
+        if (disputeError) {
+            console.error("Error creating dispute record:", disputeError);
+            return;
+        }
+
+        const updatedRentalData = {
+            return_date: returnDate,
+            status: RENTAL_STATUS.COMPLETED,
+            dispute_id: disputeResult.id
+        };
+
+        const {data: rentalResult, error: rentalError} = await supabase
+            .from('rentals')
+            .update(updatedRentalData)
+            .eq('id', rental.id)
+            .select()
+            .single();
+
+        if (rentalError) {
+            console.error("Error updating rental status:", rentalError);
+            return;
+        }
+
+        setBorrowerRentals(prevRentals =>
+            prevRentals.map(r => r.id === rental.id ? rentalResult : r)
+        );
+        setDisputes(prevDisputes => [...prevDisputes, disputeResult]);
+
         navigate('/disputes');
     }
 
-    // Handler to navigate to the disputes tab/page
-    const handleViewDispute = function (rentalId) {
+    const handleViewDispute = function () {
         navigate(`/disputes`);
     }
 
-    // --- Render Logic ---
+    if (loading) {
+        return <div className="p-8 text-center text-indigo-600">Loading Borrower Dashboard...</div>;
+    }
+
     return (
         <div className="py-8 max-w-7xl mx-auto">
             <h3 className="text-3xl font-bold text-gray-800 mb-8">Borrower History: Your Rentals</h3>
@@ -115,8 +170,8 @@ export default function BorrowerDashboard({ authenticatedUser, appData, setAppDa
 
                     <div className="space-y-4">
                         {activeRentals.map(rental => {
-                            const correspondingRequest = requests.find(request => request.id === rental.requestId);
-                            const item = listings.find(listing => listing.id === correspondingRequest.listingId);
+                            const correspondingRequest = requests.find(request => request.id === rental.request_id);
+                            const item = listings.find(listing => listing.id === correspondingRequest.listing_id);
                             const returnDate = correspondingRequest?.rentEndDate || 'N/A';
 
                             return (
@@ -175,9 +230,9 @@ export default function BorrowerDashboard({ authenticatedUser, appData, setAppDa
                     {/* Items are now stacked vertically (space-y-4) */}
                     <div className="space-y-4">
                         {disputedRentals.map(rental => {
-                            const correspondingRequest = requests.find(request => request.id === rental.requestId);
-                            const item = listings.find(listing => listing.id === correspondingRequest.listingId);
-                            const dispute = allDisputes.find(d => d.rentalId === rental.id);
+                            const correspondingRequest = requests.find(request => request.id === rental.request_id);
+                            const item = listings.find(listing => listing.id === correspondingRequest.listing_id);
+                            const dispute = disputes.find(d => d.rentalId === rental.id);
                             const display = getDisputeDisplay(dispute);
 
                             return (
@@ -195,7 +250,6 @@ export default function BorrowerDashboard({ authenticatedUser, appData, setAppDa
                                         </div>
                                     </div>
 
-                                    {/* Dispute Status (Right Side) */}
                                     <span className={`px-3 py-1 text-xs font-semibold rounded-full ${display.color}`}>
                         {display.label}
                     </span>
@@ -210,8 +264,6 @@ export default function BorrowerDashboard({ authenticatedUser, appData, setAppDa
                     </div>
                 </div>
 
-                {/* --- */}
-
                 {/* 3. Past Rentals (Settled) */}
                 <div className="bg-white p-6 rounded-2xl shadow-xl">
                     <h4 className="text-2xl font-semibold text-gray-800 mb-4 border-b pb-3 flex items-center">
@@ -220,9 +272,9 @@ export default function BorrowerDashboard({ authenticatedUser, appData, setAppDa
                     </h4>
                     <div className="space-y-4">
                         {pastRentals.map(rental => {
-                            const correspondingRequest = requests.find(request => request.id === rental.requestId);
-                            const item = listings.find(listing => listing.id === correspondingRequest.listingId);
-                            const dispute = allDisputes.find(d => d.rentalId === rental.id);
+                            const correspondingRequest = requests.find(request => request.id === rental.request_id);
+                            const item = listings.find(listing => listing.id === correspondingRequest.listing_id);
+                            const dispute = disputes.find(d => d.rentalId === rental.id);
                             const display = getDisputeDisplay(dispute);
 
                             return (
@@ -252,3 +304,18 @@ export default function BorrowerDashboard({ authenticatedUser, appData, setAppDa
         </div>
     );
 }
+
+const getDisputeDisplay = (dispute) => {
+    if (!dispute || dispute.status === DISPUTE_STATUS.COMPLETED) {
+        return { label: 'Settled', color: 'bg-green-100 text-green-700' };
+    }
+
+    switch (dispute.status) {
+        case DISPUTE_STATUS.PENDING_DEPOSIT_RETURN:
+            return { label: 'Awaiting Lender Review', color: 'bg-yellow-100 text-yellow-700' };
+        case DISPUTE_STATUS.ACTIVE:
+            return { label: 'Lender Claim Filed', color: 'bg-red-100 text-red-700' };
+        default:
+            return { label: dispute.status, color: 'bg-gray-100 text-gray-700' };
+    }
+};

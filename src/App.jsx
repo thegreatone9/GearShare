@@ -31,9 +31,7 @@ export default function App() {
                 <div className="mt-[72px]"> {/* Ensures content sits below the fixed header */}
                     <Routes>
                         <Route path="/" element={<LandingPage/>}/>
-                        <Route path="/auth" element={<AuthPage accounts={appData.accounts}
-                                                               setAppData={setAppData}
-                                                               setAuthenticatedUser={setAuthenticatedUser} />}/>
+                        <Route path="/auth" element={<AuthPage setAuthenticatedUser={setAuthenticatedUser} />}/>
                         <Route path="/error"
                                element={<ErrorPage message="You must be signed in to view this dashboard."/>}/>
 
@@ -42,17 +40,13 @@ export default function App() {
                         <Route
                             path="/borrower"
                             element={<ProtectedRoute authenticatedUser={authenticatedUser}>
-                                <BorrowerDashboard authenticatedUser={authenticatedUser}
-                                                   appData={appData}
-                                                   setAppData={setAppData}/>
+                                <BorrowerDashboard authenticatedUser={authenticatedUser}/>
                             </ProtectedRoute>}
                         />
                         <Route
                             path="/lender"
                             element={<ProtectedRoute authenticatedUser={authenticatedUser}>
-                                <LenderDashboard authenticatedUser={authenticatedUser}
-                                                 appData={appData}
-                                                 setAppData={setAppData}/>
+                                <LenderDashboard authenticatedUser={authenticatedUser}/>
                             </ProtectedRoute>}
                         />
                         {/* Item Enlistment route: passes the function to update state */}
