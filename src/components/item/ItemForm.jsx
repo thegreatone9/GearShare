@@ -1,7 +1,8 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
 import {Package, Shield} from 'lucide-react';
-import {RENTAL_STATUS} from "../util/Util.js";
+import {RENTAL_STATUS, REQUEST_STATUS} from "../util/Util.js";
+import {supabase} from "../../server/supabaseClient.js";
 
 export default function ItemForm({listings, setAppData, authenticatedUser}) {
     const navigate = useNavigate();
@@ -14,34 +15,62 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
     const itemIdNum = parseInt(id);
     const isEditMode = !isNaN(itemIdNum); // Check if we have a valid numeric ID
 
-    // 1. Logic to find the item and define the initial state
-    const currentItem = isEditMode
-        ? listings.find(item => item.id === itemIdNum)
-        : null;
+    const [currentItem, setCurrentItem] = useState(null);
+    const [itemState, setItemState] = useState(null);
 
-    // Define the initial state based on the mode
-    const initialItemState = isEditMode && currentItem ? {
-        title: currentItem.title || '',
-        description: currentItem.description || '',
-        price: currentItem.price || '',
-        value: currentItem.replacementValue || '', // Assuming replacementValue from mock data
-        unit: currentItem.unit || 'day',
-    } : {
-        title: '',
-        description: '',
-        price: '',
-        value: '',
-        unit: 'day',
-        imageUrl: "https://placehold.co/100x70/6366f1/ffffff?text=NEW"
-    };
-
-    // 2. State setup
-    const [itemState, setItemState] = useState(initialItemState);
     const [statusMessage, setStatusMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (!isEditMode || !itemIdNum) {
+            return;
+        }
+
+        const fetchItem = async () => {
+            setLoading(true);
+
+            const { data, error } = await supabase
+                .from('listings')
+                .select('*')
+                .eq('id', itemIdNum)
+                .single();
+
+            if (error || !data) {
+                console.error(`Error fetching item ${itemIdNum}:`, error);
+
+                setItemState({
+                    title: '',
+                    description: '',
+                    price: '',
+                    value: '',
+                    unit: 'day',
+                    imageUrl: "https://placehold.co/100x70/6366f1/ffffff?text=NEW"
+                });
+
+            } else {
+                setCurrentItem(data);
+
+                setItemState({
+                    title: data.title || '',
+                    description: data.description || '',
+                    price: data.price || '',
+                    value: data.replacement_value || '', // Ensure snake_case matches DB
+                    unit: data.unit || 'day',
+                    imageUrl: data.image_url // Ensure snake_case matches DB
+                });
+            }
+
+            setLoading(false);
+        };
+
+        fetchItem();
+
+    }, [itemIdNum, isEditMode]);
 
     // 3. Handle data changes (for form inputs)
     const handleChange = (e) => {
         const { id, value } = e.target;
+
         setItemState(prevState => ({
             ...prevState,
             [id]: value
@@ -54,95 +83,93 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
         // In a real app, this would upload the file and update itemState.imageUrl
     };
 
-    const handleDelete = function (event) {
+    const handleDelete = async function (event) {
         event.preventDefault();
 
-        setAppData(prevData => {
-            const updatedListings = prevData.listings.filter(item =>
-                item.id !== itemIdNum
-            );
+        try {
+            // 1. Delete pending requests associated with the listing.
+            await supabase
+                .from('requests')
+                .delete()
+                .eq('listing_id', itemIdNum)
+                .neq('status', REQUEST_STATUS.ACTIVE);
 
-            const updatedRequests = prevData.requests.filter(request =>
-                request.listingId !== itemIdNum
-            );
+            // 2. Delete the main listing record.
+            const { error: listingError } = await supabase
+                .from('listings')
+                .delete()
+                .eq('id', itemIdNum);
 
-            return { ...prevData, listings: updatedListings, requests: updatedRequests };
-        });
+            if (listingError) {
+                throw new Error(`Failed to delete listing: ${listingError.message}`);
+            }
 
-        setTimeout(() => {
-            navigate('/lender');
-        }, 100);
-    }
+            setTimeout(() => {
+                navigate('/lender');
+            }, 100);
 
-    // 4. Submission Logic
-    const handleSubmit = (e) => {
+        } catch (error) {
+            console.error("Deletion Error:", error.message);
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const clickedButton = e.nativeEvent.submitter;
-        const action = clickedButton.value;
+        const priceNum = parseFloat(itemState.price);
+        const valueNum = parseFloat(itemState.value);
 
-        if (action === 'save') {
-            // Ensure price and value are numbers
-            const priceNum = parseFloat(itemState.price);
-            const valueNum = parseFloat(itemState.value);
+        const itemData = {
+            title: itemState.title || "Untitled Gear",
+            description: itemState.description,
+            price: priceNum,
+            replacement_value: valueNum,
+            unit: itemState.unit,
+            image_url: itemState.imageUrl
+        };
 
-            setAppData(prevData => {
-                if (isEditMode) {
-                    // --- EDIT MODE LOGIC ---
-                    const updatedListings = prevData.listings.map(item =>
-                        item.id === itemIdNum
-                            ? {
-                                ...item,
-                                ...itemState,
-                                price: priceNum,
-                                replacementValue: valueNum,
-                            }
-                            : item
-                    );
+        let dbError;
 
-                    setStatusMessage('Listing updated successfully!');
+        if (isEditMode) {
+            const { error } = await supabase
+                .from('listings')
+                .update(itemData)
+                .eq('id', itemIdNum);
 
-                    return { ...prevData, listings: updatedListings };
+            dbError = error;
 
-                } else {
-                    // --- NEW ITEM LOGIC ---
-                    const newItem = {
-                        id: Date.now(),
-                        ownerId: authenticatedUser.id,
-                        title: itemState.title || "Untitled Gear",
-                        description: itemState.description,
-                        price: priceNum,
-                        replacementValue: valueNum,
-                        unit: itemState.unit,
-                        listingStatus: 'Available',
-                        imageUrl: itemState.imageUrl,
-                    };
+        } else {
+            // --- NEW ITEM LOGIC (INSERT) ---
+            const newItemData = {
+                ...itemData,
+                owner_id: authenticatedUser.id, // DB column: snake_case
+            };
 
-                    setStatusMessage('New item published successfully!');
+            const { error } = await supabase
+                .from('listings')
+                .insert([newItemData]);
 
-                    return { ...prevData, listings: [...prevData.listings, newItem] };
-                }
-            });
-
-        } else if (action === 'delete') {
-            return setAppData(prevData => {
-                const updatedListings = prevData.listings;
-                updatedListings.remove(item => item.id === itemIdNum);
-
-                return { ...prevData, listings: updatedListings }
-            });
+            dbError = error;
         }
 
-        // Redirect after a brief delay so the user sees the success message
-        setTimeout(() => navigate('/lender'), 500);
+        if (dbError) {
+            console.error("Database submission error:", dbError.message);
+            setStatusMessage(`Error submitting item: ${dbError.message}`);
+
+        } else {
+            setTimeout(() => navigate('/lender'), 500);
+        }
     };
+
+    if (loading) {
+        return <div className="py-8 text-center text-indigo-600">Loading item details...</div>;
+    }
 
     // If we are in edit mode and the item wasn't found (e.g., bad URL ID)
     if (isEditMode && !currentItem) {
         return <div className="py-8 text-center text-red-600">Listing not found. Invalid item ID.</div>;
     }
 
-    // --- Render Logic ---
     return (
         <div className="py-8 max-w-4xl mx-auto">
             <h3 className="text-3xl font-bold text-gray-800 mb-6">
@@ -244,7 +271,6 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
                 </div>
 
                 <div className="flex gap-4 justify-center">
-                    {/* Submit */}
                     {
                         [RENTAL_STATUS.PENDING_BORROW, RENTAL_STATUS.PENDING_LEND].includes(status) &&
                         <button
