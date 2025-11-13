@@ -33,7 +33,7 @@ export default function ItemListPage() {
     }
 
     return (
-        <div className="bg-gray-100 font-inter antialiased pt-5">
+        <div className="bg-indigo-circles font-inter antialiased p-5 rounded-xl">
             <SearchAndFilter/>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {listings.map(item => (

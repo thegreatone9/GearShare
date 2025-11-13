@@ -142,8 +142,8 @@ export default function AuthPage({ setAuthenticatedUser }) {
     };
 
     return (
-        <div className="min-h-screen pt-[72px] flex items-center justify-center bg-gray-50 p-4">
-            <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-center bg-gray-50 p-4 rounded-lg">
+            <div className="w-full max-w-md bg-white shadow-2xl overflow-hidden">
 
                 <div className="flex border-b border-gray-200">
                     <button

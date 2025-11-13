@@ -1,6 +1,6 @@
 export default function TrustSection() {
     return (
-        <div className="py-16 sm:py-24 bg-white">
+        <div className="py-16 sm:py-24 bg-indigo-circles rounded-b-2xl">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <h3 className="text-3xl font-bold tracking-tight text-gray-900 text-center mb-12">
                     How GearShare Keeps Everything Secure

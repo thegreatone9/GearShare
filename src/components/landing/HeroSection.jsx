@@ -1,6 +1,10 @@
+import {useNavigate} from "react-router-dom";
+
 export default function HeroSection () {
+    const navigate = useNavigate();
+
     return (
-        <div className="relative isolate overflow-hidden bg-gray-50 pt-20 pb-16 sm:pb-24 lg:pb-32">
+        <div className="relative isolate overflow-hidden checked-pattern-indigo-vert pt-20 pb-16 sm:pb-24 lg:pb-32 rounded-t-2xl">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <div className="mx-auto max-w-2xl text-center">
                     {/* Main Headline */}
@@ -17,7 +21,7 @@ export default function HeroSection () {
                     {/* CTA Buttons */}
                     <div className="mt-10 flex items-center justify-center gap-x-6">
                         <button
-                            onClick={() => console.log('Navigate to Item List')}
+                            onClick={() => navigate('/marketplace')}
                             className="rounded-xl bg-indigo-600 px-6 py-3 text-base font-semibold text-white shadow-lg
                        hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2
                        focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition duration-150"
@@ -25,8 +29,8 @@ export default function HeroSection () {
                             Browse Items
                         </button>
                         <button
-                            onClick={() => console.log('Navigate to List Item Form')}
-                            className="text-base font-semibold leading-6 text-gray-900 hover:text-indigo-600 transition duration-150"
+                            onClick={() => navigate('/auth')}
+                            className="text-base font-semibold leading-6 text-gray-900 border border-indigo-600 rounded-md px-4 py-2 transition duration-150"
                         >
                             List Your Gear <span aria-hidden="true">→</span>
                         </button>
