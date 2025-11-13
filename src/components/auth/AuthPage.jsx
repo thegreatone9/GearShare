@@ -1,6 +1,8 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {supabase} from "../../server/supabaseClient.js";
+import Cookies from 'js-cookie';
+import {checkSession} from "../util/Util.js";
 
 export default function AuthPage({ setAuthenticatedUser }) {
     const navigate = useNavigate();
@@ -9,6 +11,17 @@ export default function AuthPage({ setAuthenticatedUser }) {
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        checkSession()
+            .then(user => setAuthenticatedUser(user))
+            .then(() => navigate('/borrower'))
+            .catch(error => {
+                console.log(error);
+                navigate('/auth');
+            })
+
+    }, []);
 
     // Placeholder function for handling successful login/logout
     const handleAuth = (user) => {
@@ -69,6 +82,18 @@ export default function AuthPage({ setAuthenticatedUser }) {
             console.error("Sign-In Error:", accountError);
             return null;
         }
+
+        const userDataString = JSON.stringify({
+            name: user.name,
+            email: user.email,
+            id: user.id
+        });
+
+        Cookies.set('user_data', userDataString, {
+            expires: 1,
+            secure: true,
+            sameSite: 'Strict'
+        });
 
         console.log("User successfully signed in:", user);
         return user;

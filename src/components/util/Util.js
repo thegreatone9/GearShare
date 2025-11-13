@@ -1,3 +1,6 @@
+import {supabase} from "../../server/supabaseClient.js";
+import Cookies from "js-cookie";
+
 export const RENTAL_STATUS = {
     PENDING_BORROW: 'pendingBorrow',
     PENDING_LEND: 'pendingLend',
@@ -34,6 +37,25 @@ export const TIME_UNIT = {
     DAY: 'day',
     MONTH: 'month'
 }
+
+export const checkSession = async function () {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (session) {
+        const useDataCookie = Cookies.get('user_data');
+
+        if (useDataCookie) {
+            const user = JSON.parse(useDataCookie);
+
+            console.log(`Loaded user name from cookie: ${user.name}`);
+
+            return user;
+        }
+
+    } else {
+        throw new Error("No active User session.");
+    }
+};
 
 export const MOCK_DATA = {
     accounts: [

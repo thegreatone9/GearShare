@@ -7,21 +7,43 @@ import BorrowerDashboard from "./components/borrower/BorrowerDashboard.jsx";
 import LenderDashboard from "./components/lender/LenderDashboard.jsx";
 import DisputeDashboard from "./components/dispute/DisputeDashboard.jsx";
 import AuthPage from "./components/auth/AuthPage.jsx";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import ErrorPage from "./components/common/ErrorPage.jsx";
 import Footer from "./components/common/Footer.jsx";
 import ItemForm from "./components/item/ItemForm.jsx";
-import {MOCK_DATA} from "./components/util/Util.js";
+import {checkSession, MOCK_DATA} from "./components/util/Util.js";
+import Cookies from "js-cookie";
+import {supabase} from "./server/supabaseClient.js";
 
 export default function App() {
     const navigate = useNavigate();
     const [appData, setAppData] = useState(MOCK_DATA);
     const [authenticatedUser, setAuthenticatedUser] = useState(null);
 
-    const logOut = () => {
-        setAuthenticatedUser(null);
-        navigate('/');
+    const logOut = async () => {
+        const {error} = await supabase.auth.signOut();
+
+        if (error) {
+            console.error('Error signing out:', error.message);
+
+        } else {
+            setAuthenticatedUser(null);
+            Cookies.remove('user_data');
+            navigate('/');
+        }
     };
+
+    useEffect(() => {
+        checkSession()
+            .then(user => setAuthenticatedUser(user))
+            .then(() => navigate('/borrower'))
+            .catch(error => {
+                console.log(error);
+
+                navigate('/');
+            })
+
+    }, []);
 
     return (
         <div className="bg-gray-100 font-inter antialiased">
