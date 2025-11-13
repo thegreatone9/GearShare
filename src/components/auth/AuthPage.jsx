@@ -50,18 +50,28 @@ export default function AuthPage({ setAuthenticatedUser }) {
     };
 
     const authenticateUser = async (email, password) => {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
             email: email,
             password: password,
         });
 
-        if (error) {
-            console.error("Sign-In Error:", error.message);
+        if (authError) {
+            console.error("Sign-In Error:", authError.message);
             return null;
         }
 
-        console.log("User successfully signed in:", data.user.id);
-        return data.user;
+        const { data: user, error: accountError  } = await supabase.from('accounts')
+            .select('*')
+            .eq('email', authData.user.email)
+            .single();
+
+        if (accountError) {
+            console.error("Sign-In Error:", accountError);
+            return null;
+        }
+
+        console.log("User successfully signed in:", user);
+        return user;
     };
 
     const isUserExists = async (email, password) => {

@@ -24,7 +24,10 @@ export default function BorrowerDashboard({ authenticatedUser }) {
                 .select('*')
                 .eq('borrower_id', userId);
 
-            if (reqError) console.error("Error fetching requests:", reqError);
+            if (reqError) {
+                console.error("Error fetching requests:", reqError);
+            }
+
             const fetchedRequests = requestData || [];
             setRequests(fetchedRequests);
 
@@ -34,10 +37,12 @@ export default function BorrowerDashboard({ authenticatedUser }) {
             // 2. Fetch Rentals associated with those Requests
             const { data: rentalData, error: rentalError } = await supabase
                 .from('rentals')
-                .select('*, request_id(*)')
+                .select('*, request_id')
                 .in('request_id', requestIds);
 
-            if (rentalError) console.error("Error fetching rentals:", rentalError);
+            if (rentalError) {
+                console.error("Error fetching rentals:", rentalError);
+            }
             const fetchedRentals = rentalData || [];
             setBorrowerRentals(fetchedRentals);
 
@@ -47,7 +52,9 @@ export default function BorrowerDashboard({ authenticatedUser }) {
                 .select('*')
                 .in('id', listingIds);
 
-            if (listingError) console.error("Error fetching listings:", listingError);
+            if (listingError) {
+                console.error("Error fetching listings:", listingError);
+            }
             setListings(listingData || []);
 
             // 4. Fetch Disputes linked to the retrieved Rentals
@@ -58,9 +65,11 @@ export default function BorrowerDashboard({ authenticatedUser }) {
                 .select('*')
                 .in('rental_id', rentalIds);
 
-            if (disputeError) console.error("Error fetching disputes:", disputeError);
-            setDisputes(disputeData || []);
+            if (disputeError) {
+                console.error("Error fetching disputes:", disputeError);
+            }
 
+            setDisputes(disputeData || []);
             setLoading(false);
         };
 
@@ -181,7 +190,7 @@ export default function BorrowerDashboard({ authenticatedUser }) {
                                     {/* Item Details (Full Width on Top) */}
                                     <div className="flex justify-between items-start w-full">
                                         <div className="flex items-center space-x-4">
-                                            <img src={item.imageUrl} alt={item.title}
+                                            <img src={item.image_url} alt={item.title}
                                                  className="w-14 h-14 rounded-lg object-cover border border-indigo-300"/>
                                             <div>
                                                 <p className="font-medium text-lg text-gray-900">{item.title}</p>
@@ -241,7 +250,7 @@ export default function BorrowerDashboard({ authenticatedUser }) {
 
                                     {/* Item Details (Left Side) */}
                                     <div className="flex items-center space-x-4">
-                                        <img src={item.imageUrl} alt={item.title}
+                                        <img src={item.image_url} alt={item.title}
                                              className="w-12 h-12 rounded-lg object-cover border"/>
                                         <div>
                                             <p className="font-medium text-gray-900">{item.title}</p>
@@ -281,7 +290,7 @@ export default function BorrowerDashboard({ authenticatedUser }) {
                                 <div key={rental.id}
                                      className="flex justify-between items-center p-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition rounded-lg">
                                     <div className='flex space-x-4 items-center'>
-                                        <img src={item.imageUrl} alt={item.title} className="w-10 h-10 rounded-lg object-cover"/>
+                                        <img src={item.image_url} alt={item.title} className="w-10 h-10 rounded-lg object-cover"/>
                                         <div>
                                             <p className="font-medium text-gray-900">{item.title}</p>
                                             <p className="text-sm text-gray-500">Returned: {new Date(rental.returnDate).toLocaleDateString()}</p>

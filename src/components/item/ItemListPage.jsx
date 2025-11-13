@@ -1,7 +1,37 @@
 import ItemCard from "./ItemCard.jsx";
 import SearchAndFilter from "./SearchAndFilter.jsx";
+import React, {useEffect, useState} from "react";
+import {supabase} from "../../server/supabaseClient.js";
 
-export default function ItemListPage({ listings }) {
+export default function ItemListPage() {
+    const [listings, setListings] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchListingData = async () => {
+            setLoading(true);
+
+            const { data: listingData, error: listingError } = await supabase
+                .from('listings')
+                .select('*');
+
+            if (listingError) {
+                console.error("Error fetching listings:", listingError);
+            }
+
+            setListings(listingData || []);
+
+            setLoading(false);
+        }
+
+        fetchListingData();
+
+    }, []);
+
+    if (loading) {
+        return <div className="p-8 text-center text-indigo-600">Loading Marketplace...</div>;
+    }
+
     return (
         <div className="bg-gray-100 font-inter antialiased pt-5">
             <SearchAndFilter/>

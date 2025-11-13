@@ -7,22 +7,22 @@ export const processUserDisputes = (appData, userId) => {
     const allRelevantDisputes = disputes
         .map(dispute => {
             // 1. Link Dispute to Rental
-            const rental = rentals.find(r => r.disputeId === dispute.id);
+            const rental = rentals.find(r => r.dispute_id === dispute.id);
             if (!rental) return null;
 
             // 2. Link Rental to Request
-            const request = requests.find(r => r.id === rental.requestId);
+            const request = requests.find(r => r.id === rental.request_id);
             if (!request) return null;
 
             // 3. Determine User Role
-            const isLender = request.lenderId === userId;
-            const isBorrower = request.borrowerId === userId;
+            const isLender = request.lender_id === userId;
+            const isBorrower = request.borrower_id === userId;
 
             // Filter out disputes the user isn't involved in
             if (!isLender && !isBorrower) return null;
 
             // 4. Get Listing Details
-            const listing = listings.find(l => l.id === request.listingId);
+            const listing = listings.find(l => l.id === request.listing_id);
             const itemTitle = listing ? listing.title : 'Unknown Item';
             const userRole = isLender ? 'Lender' : 'Borrower';
 

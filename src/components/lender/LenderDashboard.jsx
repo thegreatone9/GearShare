@@ -161,7 +161,7 @@ export default function LenderDashboard({ authenticatedUser }) {
 
             const { data: rentalData, error: rentalError } = await supabase
                 .from('rentals')
-                .select('*, request_id(*)')
+                .select('*, request_id')
                 .in('request_id', requestIds);
 
             if (rentalError) console.error("Error fetching rentals:", rentalError);
@@ -284,7 +284,7 @@ export default function LenderDashboard({ authenticatedUser }) {
                                      className="p-4 border border-indigo-200 rounded-xl flex justify-between items-center bg-indigo-50 hover:bg-indigo-100 transition w-full">
 
                                     <div className="flex items-center space-x-4">
-                                        <img src={item.imageUrl} alt={item.title}
+                                        <img src={item.image_url} alt={item.title}
                                              className="w-14 h-14 rounded-lg object-cover border border-indigo-300"/>
                                         <div>
                                             <p className="font-medium text-lg text-gray-900">{item.title}</p>
@@ -367,7 +367,7 @@ export default function LenderDashboard({ authenticatedUser }) {
                                 <div key={item.id}
                                      className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
                                     <div className="flex items-center space-x-3">
-                                        <img src={item.imageUrl} alt={item.title}
+                                        <img src={item.image_url} alt={item.title}
                                              className="w-12 h-12 rounded-lg object-cover"/>
                                         <div>
                                             <p className="font-medium text-gray-900">{item.title}</p>
@@ -416,7 +416,7 @@ export default function LenderDashboard({ authenticatedUser }) {
                                 <div key={rental.id}
                                      className="flex justify-between items-center p-3 border border-red-300 bg-red-50 rounded-lg">
                                     <div className='flex space-x-4 items-center'>
-                                        <img src={item.imageUrl} alt={item.title} className="w-10 h-10 rounded-lg object-cover"/>
+                                        <img src={item.image_url} alt={item.title} className="w-10 h-10 rounded-lg object-cover"/>
                                         <div>
                                             <p className="font-medium text-gray-900">{item.title}</p>
                                             <p className="text-sm text-gray-500">Returned: {new Date(rental.returnDate).toLocaleDateString()}</p>
@@ -452,7 +452,7 @@ export default function LenderDashboard({ authenticatedUser }) {
                                 <div key={rental.id}
                                      className="flex justify-between items-center p-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition rounded-lg">
                                     <div className='flex space-x-4 items-center'>
-                                        <img src={item.imageUrl} alt={item.title} className="w-10 h-10 rounded-lg object-cover"/>
+                                        <img src={item.image_url} alt={item.title} className="w-10 h-10 rounded-lg object-cover"/>
                                         <div>
                                             <p className="font-medium text-gray-900">{item.title}</p>
                                             <p className="text-sm text-gray-500">Returned: {new Date(rental.return_date).toLocaleDateString()}</p>

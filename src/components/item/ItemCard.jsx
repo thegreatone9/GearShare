@@ -3,7 +3,7 @@ export default function ItemCard({item}) {
         <div
             className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden cursor-pointer">
             <img
-                src={item.imageUrl}
+                src={item.image_url}
                 alt={item.title}
                 className="w-full h-48 object-cover object-center"
                 onError={(e) => {

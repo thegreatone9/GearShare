@@ -44,7 +44,7 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
                     price: '',
                     value: '',
                     unit: 'day',
-                    imageUrl: "https://placehold.co/100x70/6366f1/ffffff?text=NEW"
+                    image_url: "https://placehold.co/100x70/6366f1/ffffff?text=NEW"
                 });
 
             } else {
@@ -56,7 +56,7 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
                     price: data.price || '',
                     value: data.replacement_value || '', // Ensure snake_case matches DB
                     unit: data.unit || 'day',
-                    imageUrl: data.image_url // Ensure snake_case matches DB
+                    image_url: data.image_url // Ensure snake_case matches DB
                 });
             }
 
@@ -80,7 +80,7 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
     // Simplistic handling of file input (logging for MVP)
     const handleFileChange = (e) => {
         console.log("File selected:", e.target.files[0]?.name);
-        // In a real app, this would upload the file and update itemState.imageUrl
+        // In a real app, this would upload the file and update itemState.image_url
     };
 
     const handleDelete = async function (event) {
@@ -125,7 +125,7 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
             price: priceNum,
             replacement_value: valueNum,
             unit: itemState.unit,
-            image_url: itemState.imageUrl
+            image_url: itemState.image_url
         };
 
         let dbError;

@@ -35,7 +35,7 @@ export default function App() {
                         <Route path="/error"
                                element={<ErrorPage message="You must be signed in to view this dashboard."/>}/>
 
-                        <Route path="/marketplace" element={<MarketplaceContent listings={appData.listings} />}/>
+                        <Route path="/marketplace" element={<MarketplaceContent />}/>
 
                         <Route
                             path="/borrower"
