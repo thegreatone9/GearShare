@@ -66,9 +66,9 @@ export const MOCK_DATA = {
     ],
 
     disputes: [
-        { id: 901, rentalId: 203, startDate: "15/10/25", endDate: null, status: DISPUTE_STATUS.ACTIVE },
-        { id: 902, rentalId: 204, startDate: "15/10/25", endDate: null, status: DISPUTE_STATUS.PENDING_DEPOSIT_RETURN },
-        { id: 903, rentalId: 205, startDate: "14/10/25", endDate: "15/10/25", status: DISPUTE_STATUS.COMPLETED }
+        { id: 901, rentalId: 203, startDate: "15/10/25", endDate: null, status: DISPUTE_STATUS.ACTIVE, lender_claim_description: null, borrower_defense_description: null, damage_amount: null  },
+        { id: 902, rentalId: 204, startDate: "15/10/25", endDate: null, status: DISPUTE_STATUS.PENDING_DEPOSIT_RETURN, lender_claim_description: null, borrower_defense_description: null, damage_amount: null },
+        { id: 903, rentalId: 205, startDate: "14/10/25", endDate: "15/10/25", status: DISPUTE_STATUS.COMPLETED, lender_claim_description: null, borrower_defense_description: null, damage_amount: null }
     ],
 
     rentals: [

@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {DISPUTE_STATUS} from "../../util/Util.js";
+import {supabase} from "../../../server/supabaseClient.js";
 
 export default function FileClaimContent({ dispute, onClose, setAppData }) {
     const [damageDescription, setDamageDescription] = useState('');
@@ -15,15 +16,34 @@ export default function FileClaimContent({ dispute, onClose, setAppData }) {
         }
     };
 
-    const handleFileClaim = function (disputeId) {
+    const handleFileClaim = async function (disputeId) {
+        const updateData = {
+            status: DISPUTE_STATUS.ACTIVE,
+            end_date: new Date().toISOString(),
+            lender_claim_description: damageDescription
+        };
+
+        const { data: updatedDispute, error } = await supabase
+            .from('disputes')
+            .update(updateData)
+            .eq('id', disputeId)
+            .select()
+            .single();
+
+        if (error) {
+            console.error("Error filing claim:", error);
+            alert(`Failed to file claim: ${error.message}`);
+
+            return;
+        }
+
         setAppData(prevData => {
             const updatedDisputes = prevData.disputes.map(d =>
-                d.id === disputeId
-                    ? { ...d, status: DISPUTE_STATUS.ACTIVE, endDate: Date.now() }
-                    : d
+                d.id === disputeId ? updatedDispute : d
             );
             return { ...prevData, disputes: updatedDisputes };
         });
+
         console.log(`CONFIRMED ACTION: Lender filed claim for Case #${disputeId}`);
         onClose();
     }

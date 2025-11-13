@@ -33,12 +33,12 @@ export default function DisputeActionModal({selectedAction, dispute, closeModal,
 
         case BORROWER_DISPUTE_ACTIONS.SUBMIT_EVIDENCE:
             modalTitle = `Submit Defense Evidence: ${dispute.itemTitle}`;
-            modalContent = <SubmitEvidenceContent dispute={dispute} />;
+            modalContent = <SubmitEvidenceContent dispute={dispute} onClose={closeModal} setAppData={setAppData} />;
             break;
 
         case BORROWER_DISPUTE_ACTIONS.PAY_DAMAGES:
             modalTitle = `Payment Required: ${dispute.itemTitle}`;
-            modalContent = <PayDamagesContent dispute={dispute} />;
+            modalContent = <PayDamagesContent dispute={dispute} onClose={closeModal} setAppData={setAppData} />;
             modalWidth = 'max-w-sm';
             break;
 

@@ -1,17 +1,38 @@
 import React from 'react';
 import {DollarSign} from 'lucide-react';
 import {DISPUTE_STATUS} from "../../util/Util.js";
+import {supabase} from "../../../server/supabaseClient.js";
 
-export default function SettleContent({ dispute, onClose }) {
-    const handleSettle = (disputeId) => {
+export default function SettleContent({ dispute, onClose, setAppData }) {
+    const handleSettle = async (disputeId) => {
+        const updateData = {
+            status: DISPUTE_STATUS.COMPLETED,
+            end_date: new Date().toISOString()
+        };
+
+        const { data: updatedDispute, error } = await supabase
+            .from('disputes')
+            .update(updateData)
+            .eq('id', disputeId)
+            .select()
+            .single();
+
+        if (error) {
+            console.error("Error settling rental:", error);
+            alert(`Failed to settle rental: ${error.message}`);
+
+            return;
+        }
+
         setAppData(prevData => {
             const updatedDisputes = prevData.disputes.map(d =>
                 d.id === disputeId
-                    ? { ...d, status: DISPUTE_STATUS.COMPLETED }
+                    ? { ...d, status: updatedDispute.status, end_date: updatedDispute.end_date }
                     : d
             );
             return { ...prevData, disputes: updatedDisputes };
         });
+
         console.log(`CONFIRMED ACTION: Lender settled deposit for Case #${disputeId}`);
         onClose();
     };

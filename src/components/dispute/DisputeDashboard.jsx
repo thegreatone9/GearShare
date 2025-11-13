@@ -1,10 +1,13 @@
 import {CheckCheck, Handshake, Landmark, Shield,} from 'lucide-react';
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import DisputeActionModal from "./DisputeActionModal.jsx";
 import {processUserDisputes} from "./DisputeUtils.jsx";
 import DisputeCard from "./DisputeCard.jsx";
+import {supabase} from "../../server/supabaseClient.js";
 
-export default function DisputeDashboard({ authenticatedUser, appData, setAppData }) {
+export default function DisputeDashboard({ authenticatedUser }) {
+    const [loading, setLoading] = useState(true);
+    const [appData, setAppData] = useState({ disputes: [], rentals: [], requests: [], listings: [], accounts: [] });
     const [modalState, setModalState] = useState({
         isOpen: false,
         action: null,
@@ -14,7 +17,6 @@ export default function DisputeDashboard({ authenticatedUser, appData, setAppDat
     const closeModal = () => {
         setModalState({ isOpen: false, action: null, dispute: null });
     };
-
     const openActionModal = (actionType, dispute) => {
         setModalState({ isOpen: true, action: actionType, dispute: dispute });
     };
@@ -23,6 +25,73 @@ export default function DisputeDashboard({ authenticatedUser, appData, setAppDat
         return processUserDisputes(appData, authenticatedUser.id);
 
     }, [appData.disputes, appData.rentals, appData.requests, appData.listings, authenticatedUser.id]);
+
+    useEffect(() => {
+        const fetchDisputeData = async () => {
+            setLoading(true);
+
+            // 1. Fetch ALL Requests involving the user (Lender OR Borrower)
+            const { data: allRequests, error: reqError } = await supabase
+                .from('requests')
+                .select('*')
+                .or(`borrower_id.eq.${authenticatedUser.id},lender_id.eq.${authenticatedUser.id}`);
+
+            if (reqError) {
+                console.error("Error fetching requests:", reqError);
+                setLoading(false);
+                return;
+            }
+
+            const requestIds = allRequests.map(req => req.id);
+            const listingIds = [...new Set(allRequests.map(req => req.listing_id))];
+            const uniqueAccountIds = [...new Set([
+                ...allRequests.map(req => req.borrower_id),
+                ...allRequests.map(req => req.lender_id)
+            ])];
+
+            // 2. Fetch Rentals associated with those requests
+            const { data: rentalData, error: rentalError } = await supabase
+                .from('rentals')
+                .select('*')
+                .in('request_id', requestIds);
+
+            if (rentalError) {
+                console.error("Error fetching rentals:", rentalError);
+            }
+
+            const rentalIds = rentalData ? rentalData.map(r => r.id) : [];
+
+            // 3. Fetch Disputes linked to those Rentals
+            const { data: disputeData, error: disputeError } = await supabase
+                .from('disputes')
+                .select('*')
+                .in('rental_id', rentalIds);
+
+            if (disputeError) console.error("Error fetching disputes:", disputeError);
+
+            // 4. Fetch Listings
+            const [{ data: listingsData }, { data: accountsData }] = await Promise.all([
+                supabase.from('listings').select('*').in('id', listingIds),
+                supabase.from('accounts').select('id, name, email').in('id', uniqueAccountIds),
+            ]);
+
+            setAppData({
+                disputes: disputeData || [],
+                rentals: rentalData || [],
+                requests: allRequests || [],
+                listings: listingsData || [],
+                accounts: accountsData || []
+            });
+
+            setLoading(false);
+        };
+
+        fetchDisputeData();
+    }, []);
+
+    if (loading) {
+        return <div className="py-8 text-center text-indigo-600">Loading Dispute Cases...</div>;
+    }
 
     return (
         <div className="py-8 max-w-5xl mx-auto">
