@@ -36,7 +36,7 @@ export default function App() {
             <div className="flex flex-col min-h-screen font-inter antialiased">
                 <main className="flex-grow">
                     <Header />
-                    <div className="mt-[120px] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-indigo-50 rounded-2xl shadow-2xl mb-12">
+                    <div className="mt-[120px] max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 bg-indigo-50 rounded-2xl shadow-2xl mb-12">
                         <Routes>
                             <Route path="/" element={<LandingPage/>}/>
                             <Route path="/auth" element={<AuthPage />}/>

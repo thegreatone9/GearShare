@@ -256,7 +256,7 @@ export default function LenderDashboard() {
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-3xl font-bold text-gray-800">Lender Hub: Manage Inventory & Requests</h3>
                 <Link to={`/item?role=${ROLE.LENDER}`}
-                      className="bg-indigo-50 text-indigo-700 text-sm font-medium px-3 py-1 rounded-full hover:bg-indigo-100 transition">
+                      className="bg-indigo-200 text-indigo-700 text-sm font-medium px-3 py-1 rounded-full hover:bg-indigo-100 transition">
                     <Package className="w-4 h-4 inline mr-1"/>
                     New Item
                 </Link>
@@ -283,7 +283,7 @@ export default function LenderDashboard() {
 
                             return (
                                 <div key={rental.id}
-                                     className="p-4 border border-indigo-200 rounded-xl flex justify-between items-center bg-indigo-50 hover:bg-indigo-100 transition w-full">
+                                     className="p-2 border border-indigo-200 rounded-xl flex justify-between items-center bg-indigo-50 hover:bg-indigo-100 transition w-full">
 
                                     <div className="flex items-center space-x-4">
                                         <img src={item.image_url} alt={item.title}
@@ -295,11 +295,11 @@ export default function LenderDashboard() {
                                         </div>
                                     </div>
 
-                                    <div className="text-right flex flex-col items-end">
-                                        <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700 shadow-sm`}>
-                                          **Rented**
+                                    <div className="text-right flex items-center justify-center">
+                                        <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700`}>
+                                          Rented
                                         </span>
-                                        <button className="text-sm text-indigo-600 mt-2 hover:text-indigo-800 font-medium"
+                                        <button className="text-sm mx-2 text-white bg-indigo-600"
                                                 onClick={() => editItem(item.id, RENTAL_STATUS.ACTIVE)}>
                                             Manage Item
                                         </button>
@@ -324,25 +324,29 @@ export default function LenderDashboard() {
                                 const item = listings.find(listing => listing.id === req.listing_id);
 
                                 return (
-                                    <div key={req.id}
-                                         className="p-4 border border-yellow-200 bg-yellow-50 rounded-xl shadow-inner">
-                                        <p className="text-sm font-medium text-gray-700 mb-1">
-                                            <span className="font-bold text-gray-900">Borrower</span> wants
-                                            to rent <span className="text-indigo-600 font-bold">{item?.title || 'Unknown Item'}</span>.
-                                        </p>
-                                        <p className="text-xs text-gray-600 mb-3">
-                                            Duration: {req.duration || 'N/A'} | Deposit: ${req.deposit || 'N/A'}
-                                        </p>
-                                        <div className="flex justify-end space-x-2">
-                                            <button
-                                                onClick={() => declineRequest(req)}
-                                                className="text-xs font-semibold text-red-600 bg-white border border-red-300 px-3 py-1 rounded-lg hover:bg-red-50 transition">
-                                                Decline
-                                            </button>
+                                    <div key={req.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+                                        <div className="flex items-center space-x-3">
+                                            <img src={item.image_url} alt={item.title} className="w-12 h-12 rounded-lg object-cover"/>
+                                            <div className="flex flex-col justify-center items-center">
+                                                <p className="text-sm text-gray-700 mb-1">
+                                                    <span className="font-bold text-gray-900">Borrower</span> wants
+                                                    to rent <span className="text-indigo-600 font-bold">{item.title}</span>.
+                                                </p>
+                                                <p className="text-xs text-gray-600">
+                                                    Request Date: {req.date || 'N/A'} | Deposit: ${req.deposit || 'N/A'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
                                             <button
                                                 onClick={() => openAcceptModal(req)}
-                                                className="text-xs font-semibold text-white bg-green-600 px-3 py-1 rounded-lg hover:bg-green-700 transition">
+                                                className="text-xs ml-2 font-semibold text-white bg-green-600 px-3 py-1 rounded-lg hover:bg-green-700 transition">
                                                 Accept
+                                            </button>
+                                            <button
+                                                onClick={() => declineRequest(req)}
+                                                className="text-xs ml-2 font-semibold text-red-600 bg-white border border-red-300 px-3 py-1 rounded-lg hover:bg-red-50 transition">
+                                                Decline
                                             </button>
                                         </div>
                                     </div>
@@ -377,12 +381,10 @@ export default function LenderDashboard() {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${
-                                            item.status === 'Rented' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-                                        }`}>
-                                          {item.status}
+                                        <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700`}>
+                                          Available
                                         </span>
-                                        <button className="text-xs text-indigo-600 mt-1 hover:underline"
+                                        <button className="text-xs text-white bg-indigo-600 mt-1 mx-2 hover:underline"
                                                 onClick={() => editItem(item.id, RENTAL_STATUS.PENDING_BORROW)}>Manage
                                         </button>
                                     </div>
@@ -421,7 +423,7 @@ export default function LenderDashboard() {
                                         <img src={item.image_url} alt={item.title} className="w-10 h-10 rounded-lg object-cover"/>
                                         <div>
                                             <p className="font-medium text-gray-900">{item.title}</p>
-                                            <p className="text-sm text-gray-500">Returned: {new Date(rental.returnDate).toLocaleDateString()}</p>
+                                            <p className="text-sm text-gray-500">Return Date: {new Date(rental.return_date).toLocaleDateString()}</p>
                                         </div>
                                     </div>
                                     <span className={`px-3 py-1 text-xs font-semibold rounded-full ${display.color}`}>
@@ -452,7 +454,7 @@ export default function LenderDashboard() {
 
                             return (
                                 <div key={rental.id}
-                                     className="flex justify-between items-center p-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition rounded-lg">
+                                     className="bg-gray-100 flex justify-between items-center p-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition rounded-lg">
                                     <div className='flex space-x-4 items-center'>
                                         <img src={item.image_url} alt={item.title} className="w-10 h-10 rounded-lg object-cover"/>
                                         <div>

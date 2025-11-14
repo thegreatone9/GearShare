@@ -183,31 +183,24 @@ export default function BorrowerDashboard() {
                         {activeRentals.map(rental => {
                             const correspondingRequest = requests.find(request => request.id === rental.request_id);
                             const item = listings.find(listing => listing.id === correspondingRequest.listing_id);
-                            const returnDate = correspondingRequest?.rentEndDate || 'N/A';
+                            const returnDate = correspondingRequest?.rent_end_date || 'N/A';
 
                             return (
                                 <div key={rental.id}
-                                     className="p-4 border border-indigo-200 rounded-xl flex flex-col justify-between bg-indigo-50 hover:bg-indigo-100 transition w-full space-y-3">
-
-                                    {/* Item Details (Full Width on Top) */}
-                                    <div className="flex justify-between items-start w-full">
-                                        <div className="flex items-center space-x-4">
-                                            <img src={item.image_url} alt={item.title}
-                                                 className="w-14 h-14 rounded-lg object-cover border border-indigo-300"/>
-                                            <div>
-                                                <p className="font-medium text-lg text-gray-900">{item.title}</p>
-                                                <p className="text-sm text-gray-600">Due: <span
-                                                    className="font-bold text-indigo-700">{returnDate}</span></p>
-                                            </div>
+                                     className="flex items-center justify-between p-2 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+                                    <div className="flex items-center space-x-3">
+                                        <img src={item.image_url} alt={item.title}
+                                             className="w-12 h-12 rounded-lg object-cover"/>
+                                        <div>
+                                            <p className="font-medium text-gray-900">{item.title}</p>
+                                            <p className="text-sm text-gray-500">Due: <span className="font-bold text-indigo-700">{returnDate}</span></p>
                                         </div>
                                     </div>
-
-                                    {/* Action Button (Full Width on Bottom) */}
-                                    <button
-                                        onClick={(event) => handleReturn(rental, event)}
-                                        className="text-sm text-white bg-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-600 transition font-medium w-full mt-2">
-                                        Pay & Return Item Now
-                                    </button>
+                                    <div className="text-right">
+                                        <button className="text-xs text-white bg-indigo-600 mt-1 hover:underline"
+                                                onClick={(event) => handleReturn(rental, event)}>Pay & Return Item Now
+                                        </button>
+                                    </div>
                                 </div>
                             )
                         })}
@@ -248,8 +241,7 @@ export default function BorrowerDashboard() {
 
                             return (
                                 <div key={rental.id}
-                                     className="p-4 border border-red-300 bg-red-50 rounded-xl flex justify-between items-center hover:bg-red-100 transition w-full">
-
+                                     className="p-2 border border-red-300 bg-red-50 rounded-xl flex justify-between items-center hover:bg-red-100 transition w-full">
                                     {/* Item Details (Left Side) */}
                                     <div className="flex items-center space-x-4">
                                         <img src={item.image_url} alt={item.title}
@@ -257,14 +249,12 @@ export default function BorrowerDashboard() {
                                         <div>
                                             <p className="font-medium text-gray-900">{item.title}</p>
                                             <p className="text-sm text-gray-600">Returned: <span
-                                                className="font-bold">{new Date(rental.returnDate).toLocaleDateString()}</span></p>
+                                                className="font-bold">{new Date(rental.return_date).toLocaleDateString()}</span>
+                                            </p>
                                         </div>
                                     </div>
 
-                                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${display.color}`}>
-                        {display.label}
-                    </span>
-
+                                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${display.color}`}>{display.label}</span>
                                 </div>
                             )
                         })}
@@ -290,7 +280,7 @@ export default function BorrowerDashboard() {
 
                             return (
                                 <div key={rental.id}
-                                     className="flex justify-between items-center p-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition rounded-lg">
+                                     className="flex justify-between items-center p-2 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition rounded-lg">
                                     <div className='flex space-x-4 items-center'>
                                         <img src={item.image_url} alt={item.title} className="w-10 h-10 rounded-lg object-cover"/>
                                         <div>
