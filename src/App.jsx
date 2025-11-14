@@ -49,7 +49,7 @@ export default function App() {
         <div className="font-inter antialiased">
             <Header authenticatedUser={authenticatedUser} logOut={logOut}/>
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-indigo-50 rounded-2xl shadow-2xl">
                 <div className="mt-[72px]"> {/* Ensures content sits below the fixed header */}
                     <Routes>
                         <Route path="/" element={<LandingPage/>}/>
