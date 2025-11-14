@@ -3,8 +3,10 @@ import {Briefcase, ChevronDown, Home, LogOut, Scale, User, Zap} from 'lucide-rea
 import logo from '../../assets/gear-share.svg';
 import React, {useContext, useState} from "react";
 import {AuthContext} from "../../App.jsx";
+import {supabase} from "../../server/supabaseClient.js";
+import Cookies from "js-cookie";
 
-export default function Header ({ logOut }) {
+export default function Header () {
     const location = useLocation();
     const {authenticatedUser} = useContext(AuthContext);
     const isAuthenticated = !!authenticatedUser;
@@ -32,6 +34,19 @@ export default function Header ({ logOut }) {
                 ? 'bg-indigo-100 text-indigo-700 shadow-inner'
                 : 'text-gray-600 hover:bg-gray-100'
         }`;
+    };
+
+    const logOut = async () => {
+        const {error} = await supabase.auth.signOut();
+
+        if (error) {
+            console.error('Error signing out:', error.message);
+
+        } else {
+            setAuthenticatedUser(null);
+            Cookies.remove('user_data');
+            navigate('/');
+        }
     };
 
     // Handler to close all menus on navigation/logout

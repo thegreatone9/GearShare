@@ -1,4 +1,4 @@
-import './App.css'
+import './styles/App.css'
 import LandingPage from "./components/landing/LandingPage.jsx";
 import {Navigate, Route, Routes, useNavigate} from "react-router-dom";
 import MarketplaceContent from "./components/item/MarketPlace.jsx";
@@ -9,31 +9,15 @@ import DisputeDashboard from "./components/dispute/DisputeDashboard.jsx";
 import AuthPage from "./components/auth/AuthPage.jsx";
 import React, {useContext, useEffect, useState} from "react";
 import ErrorPage from "./components/common/ErrorPage.jsx";
-import Footer from "./components/common/Footer.jsx";
 import ItemForm from "./components/item/ItemForm.jsx";
-import {checkSession, MOCK_DATA} from "./components/util/Util.js";
-import Cookies from "js-cookie";
-import {supabase} from "./server/supabaseClient.js";
+import {checkSession} from "./components/util/Util.js";
+import Footer from "./components/common/Footer.jsx";
 
 export const AuthContext = React.createContext();
 
 export default function App() {
     const navigate = useNavigate();
-    const [appData, setAppData] = useState(MOCK_DATA);
     const [authenticatedUser, setAuthenticatedUser] = useState(null);
-
-    const logOut = async () => {
-        const {error} = await supabase.auth.signOut();
-
-        if (error) {
-            console.error('Error signing out:', error.message);
-
-        } else {
-            setAuthenticatedUser(null);
-            Cookies.remove('user_data');
-            navigate('/');
-        }
-    };
 
     useEffect(() => {
         checkSession()
@@ -49,11 +33,10 @@ export default function App() {
 
     return (
         <AuthContext.Provider value={{authenticatedUser, setAuthenticatedUser}}>
-            <div className="font-inter antialiased">
-                <Header logOut={logOut}/>
-
-                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-indigo-50 rounded-2xl shadow-2xl">
-                    <div className="mt-[72px]">
+            <div className="flex flex-col min-h-screen font-inter antialiased">
+                <main className="flex-grow">
+                    <Header />
+                    <div className="mt-[120px] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-indigo-50 rounded-2xl shadow-2xl mb-12">
                         <Routes>
                             <Route path="/" element={<LandingPage/>}/>
                             <Route path="/auth" element={<AuthPage />}/>
