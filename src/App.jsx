@@ -7,13 +7,15 @@ import BorrowerDashboard from "./components/borrower/BorrowerDashboard.jsx";
 import LenderDashboard from "./components/lender/LenderDashboard.jsx";
 import DisputeDashboard from "./components/dispute/DisputeDashboard.jsx";
 import AuthPage from "./components/auth/AuthPage.jsx";
-import {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import ErrorPage from "./components/common/ErrorPage.jsx";
 import Footer from "./components/common/Footer.jsx";
 import ItemForm from "./components/item/ItemForm.jsx";
 import {checkSession, MOCK_DATA} from "./components/util/Util.js";
 import Cookies from "js-cookie";
 import {supabase} from "./server/supabaseClient.js";
+
+export const AuthContext = React.createContext();
 
 export default function App() {
     const navigate = useNavigate();
@@ -46,57 +48,58 @@ export default function App() {
     }, []);
 
     return (
-        <div className="font-inter antialiased">
-            <Header authenticatedUser={authenticatedUser} logOut={logOut}/>
+        <AuthContext.Provider value={{authenticatedUser, setAuthenticatedUser}}>
+            <div className="font-inter antialiased">
+                <Header logOut={logOut}/>
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-indigo-50 rounded-2xl shadow-2xl">
-                <div className="mt-[72px]"> {/* Ensures content sits below the fixed header */}
-                    <Routes>
-                        <Route path="/" element={<LandingPage/>}/>
-                        <Route path="/auth" element={<AuthPage setAuthenticatedUser={setAuthenticatedUser} />}/>
-                        <Route path="/error"
-                               element={<ErrorPage message="You must be signed in to view this dashboard."/>}/>
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-indigo-50 rounded-2xl shadow-2xl">
+                    <div className="mt-[72px]"> {/* Ensures content sits below the fixed header */}
+                        <Routes>
+                            <Route path="/" element={<LandingPage/>}/>
+                            <Route path="/auth" element={<AuthPage />}/>
+                            <Route path="/error"
+                                   element={<ErrorPage message="You must be signed in to view this dashboard."/>}/>
 
-                        <Route path="/marketplace" element={<MarketplaceContent />}/>
+                            <Route path="/marketplace" element={<MarketplaceContent />}/>
 
-                        <Route
-                            path="/borrower"
-                            element={<ProtectedRoute authenticatedUser={authenticatedUser}>
-                                <BorrowerDashboard authenticatedUser={authenticatedUser}/>
-                            </ProtectedRoute>}
-                        />
-                        <Route
-                            path="/lender"
-                            element={<ProtectedRoute authenticatedUser={authenticatedUser}>
-                                <LenderDashboard authenticatedUser={authenticatedUser}/>
-                            </ProtectedRoute>}
-                        />
-                        {/* Item Enlistment route: passes the function to update state */}
-                        <Route
-                            path="/lender/item/:id?"
-                            element={<ProtectedRoute authenticatedUser={authenticatedUser}>
-                                <ItemForm listings={appData.listings}
-                                          setAppData={setAppData}
-                                          authenticatedUser={authenticatedUser} />
-                            </ProtectedRoute>}
-                        />
-                        <Route
-                            path="/disputes"
-                            element={<ProtectedRoute authenticatedUser={authenticatedUser}>
-                                <DisputeDashboard authenticatedUser={authenticatedUser} appData={appData} setAppData={setAppData}/>
-                            </ProtectedRoute>}
-                        />
+                            <Route
+                                path="/borrower"
+                                element={<ProtectedRoute>
+                                    <BorrowerDashboard/>
+                                </ProtectedRoute>}
+                            />
+                            <Route
+                                path="/lender"
+                                element={<ProtectedRoute>
+                                    <LenderDashboard/>
+                                </ProtectedRoute>}
+                            />
+                            <Route
+                                path="/item/:id?"
+                                element={<ProtectedRoute>
+                                    <ItemForm />
+                                </ProtectedRoute>}
+                            />
+                            <Route
+                                path="/disputes"
+                                element={<ProtectedRoute>
+                                    <DisputeDashboard/>
+                                </ProtectedRoute>}
+                            />
 
-                        <Route path="*" element={<ErrorPage message={'404: Page Not Found'}/>}/>
-                    </Routes>
-                </div>
-            </main>
-            <Footer/>
-        </div>
+                            <Route path="*" element={<ErrorPage message={'404: Page Not Found'}/>}/>
+                        </Routes>
+                    </div>
+                </main>
+                <Footer/>
+            </div>
+        </AuthContext.Provider>
     )
 }
 
-const ProtectedRoute = ({children, authenticatedUser}) => {
+const ProtectedRoute = ({children}) => {
+    const {authenticatedUser} = useContext(AuthContext);
+
     if (!authenticatedUser) {
         return <Navigate to="/auth" replace/>;
     }

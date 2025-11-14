@@ -1,10 +1,11 @@
 import {CheckCheck, Clock, Landmark, Package, ShieldAlert, Wrench, Zap} from 'lucide-react';
 import {Link, useNavigate} from 'react-router-dom';
-import {DISPUTE_STATUS, RENTAL_STATUS} from "../util/Util.js";
+import {DISPUTE_STATUS, RENTAL_STATUS, ROLE} from "../util/Util.js";
 import Modal from "../common/Modal.jsx";
 import AcceptRentalRequest from "./AcceptRentalRequest.jsx";
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import {supabase} from "../../server/supabaseClient.js";
+import {AuthContext} from "../../App.jsx";
 
 const getDisputeDisplay = (dispute) => {
     if (!dispute || dispute.status === DISPUTE_STATUS.COMPLETED) {
@@ -21,7 +22,8 @@ const getDisputeDisplay = (dispute) => {
     }
 };
 
-export default function LenderDashboard({ authenticatedUser }) {
+export default function LenderDashboard() {
+    const {authenticatedUser} = useContext(AuthContext);
     const navigate = useNavigate();
 
     const userId = authenticatedUser.id;
@@ -55,7 +57,7 @@ export default function LenderDashboard({ authenticatedUser }) {
     });
 
     const editItem = function (itemId, itemStatus) {
-        navigate(`/lender/item/${itemId}?status=${itemStatus}`);
+        navigate(`/item/${itemId}?status=${itemStatus}&role=${ROLE.LENDER}`);
     }
 
     const handleViewDisputes = function() {
@@ -253,7 +255,7 @@ export default function LenderDashboard({ authenticatedUser }) {
 
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-3xl font-bold text-gray-800">Lender Hub: Manage Inventory & Requests</h3>
-                <Link to="/lender/item"
+                <Link to={`/item?role=${ROLE.LENDER}`}
                       className="bg-indigo-50 text-indigo-700 text-sm font-medium px-3 py-1 rounded-full hover:bg-indigo-100 transition">
                     <Package className="w-4 h-4 inline mr-1"/>
                     New Item

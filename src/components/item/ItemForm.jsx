@@ -1,41 +1,107 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
 import {Package, Shield} from 'lucide-react';
-import {RENTAL_STATUS, REQUEST_STATUS} from "../util/Util.js";
+import {BORROWER_ITEM_ACTIONS, LENDER_ITEM_ACTIONS, RENTAL_STATUS, REQUEST_STATUS, ROLE} from "../util/Util.js";
 import {supabase} from "../../server/supabaseClient.js";
+import {AuthContext} from "../../App.jsx";
 
-export default function ItemForm({listings, setAppData, authenticatedUser}) {
+export default function ItemForm() {
+    const {authenticatedUser} = useContext(AuthContext);
     const navigate = useNavigate();
     const { id } = useParams(); // Renamed from 'id' to 'itemId' for clarity, based on the route definition
 
     const [searchParams] = useSearchParams();
-    const status = searchParams.get('status');
+    const role = searchParams.get('role');
+    const itemStatusForLender = searchParams.get('status');
 
     // Convert itemId to a number for safe comparison with mock data
     const itemIdNum = parseInt(id);
-    const isEditMode = !isNaN(itemIdNum); // Check if we have a valid numeric ID
 
     const [currentItem, setCurrentItem] = useState(null);
     const [itemState, setItemState] = useState(null);
 
+    const [editMode, setEditMode] = useState(false);
+    const [canRequestBorrow, setCanRequestBorrow] = useState(false);
     const [statusMessage, setStatusMessage] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    // --- Button Mapping Function ---
+    const getActionButtons = () => {
+        const commonClasses = "flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-lg text-lg font-bold focus:outline-none focus:ring-2 focus:ring-offset-2 transition duration-150 w-full";
+        let buttonProps;
+
+        // Button properties include: label, onClick handler (type 'submit' is handled below), and classes.
+        if (role === ROLE.LENDER) {
+            if (editMode) {
+                buttonProps = [
+                    {
+                        label: "Save Changes",
+                        action: LENDER_ITEM_ACTIONS.SAVE,
+                        classes: `${commonClasses} bg-indigo-600 hover:bg-indigo-700 text-white focus:ring-indigo-500`
+                    },
+                ];
+
+                if ([RENTAL_STATUS.PENDING_BORROW, RENTAL_STATUS.PENDING_LEND].includes(itemStatusForLender)) {
+                    buttonProps.push({
+                        label: "Delete Listing",
+                        action: LENDER_ITEM_ACTIONS.DELETE,
+                        classes: `${commonClasses} bg-red-600 hover:bg-red-700 text-white focus:ring-red-500`,
+                        onClick: (event) => handleDelete(event)
+                    });
+                }
+            } else {
+                // New Item Mode
+                buttonProps = [
+                    {
+                        label: "Publish Item & Start Earning",
+                        action: LENDER_ITEM_ACTIONS.SAVE,
+                        classes: `${commonClasses} bg-indigo-600 hover:bg-indigo-700 text-white focus:ring-indigo-500`
+                    }
+                ];
+            }
+
+        } else if (role === ROLE.BORROWER && canRequestBorrow) {
+            // Only show the request button in 'view' mode for an existing item
+            buttonProps = [
+                {
+                    label: "Request Borrow",
+                    action: BORROWER_ITEM_ACTIONS.REQUEST_BORROW,
+                    classes: `${commonClasses} bg-green-600 hover:bg-green-700 text-white focus:ring-green-500`,
+                    onClick: (event) => handleBorrowRequest(event)
+                }
+            ];
+        }
+
+        return buttonProps.map(prop => (
+            <button
+                key={prop.action}
+                type="submit"
+                value={prop.action}
+                className={prop.classes}
+                onClick={prop.onClick}
+            >
+                {prop.label}
+            </button>
+        ));
+    };
 
     useEffect(() => {
-        if (!isEditMode || !itemIdNum) {
+        if (!itemIdNum) {
             return;
         }
 
         const fetchItem = async () => {
             setLoading(true);
+            setEditMode(false);
+            setCanRequestBorrow(false);
 
-            const { data, error } = await supabase
+            const { data: item, error } = await supabase
                 .from('listings')
                 .select('*')
                 .eq('id', itemIdNum)
                 .single();
 
-            if (error || !data) {
+            if (error || !item) {
                 console.error(`Error fetching item ${itemIdNum}:`, error);
 
                 setItemState({
@@ -48,16 +114,36 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
                 });
 
             } else {
-                setCurrentItem(data);
+                setCurrentItem(item);
 
                 setItemState({
-                    title: data.title || '',
-                    description: data.description || '',
-                    price: data.price || '',
-                    value: data.replacement_value || '', // Ensure snake_case matches DB
-                    unit: data.unit || 'day',
-                    image_url: data.image_url // Ensure snake_case matches DB
+                    title: item.title || '',
+                    description: item.description || '',
+                    price: item.price || '',
+                    value: item.replacement_value || '', // Ensure snake_case matches DB
+                    unit: item.unit || 'day',
+                    image_url: item.image_url // Ensure snake_case matches DB
                 });
+            }
+
+            if (role === ROLE.LENDER) {
+                setEditMode(!isNaN(itemIdNum));
+
+            } else {
+                const { data: request, error } = await supabase
+                    .from('requests')
+                    .select('id')
+                    .eq('listing_id', item.id)
+                    .eq('borrower_id', authenticatedUser.id)
+                    .eq('status', REQUEST_STATUS.ACTIVE)
+                    .limit(1)
+                    .maybeSingle();
+
+                if (error) {
+                    throw new Error("Error checking request existence for borrower!");
+                }
+
+                setCanRequestBorrow(!request);
             }
 
             setLoading(false);
@@ -65,7 +151,7 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
 
         fetchItem();
 
-    }, [itemIdNum, isEditMode]);
+    }, [itemIdNum]);
 
     // 3. Handle data changes (for form inputs)
     const handleChange = (e) => {
@@ -82,6 +168,34 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
         console.log("File selected:", e.target.files[0]?.name);
         // In a real app, this would upload the file and update itemState.image_url
     };
+
+    const handleBorrowRequest = async function (event) {
+        event.preventDefault();
+
+        try {
+            // 1. Add to pending requests associated with the listing.
+            const { error: requestError } = await supabase
+                .from('requests')
+                .insert([
+                    {
+                        listing_id: itemIdNum,
+                        borrower_id: authenticatedUser.id,
+                        status: REQUEST_STATUS.PENDING // Assuming REQUEST_STATUS.PENDING exists
+                    }
+                ]);
+
+            if (requestError) {
+                throw new Error(`Failed to request borrowing of listing: ${requestError.message}`);
+            }
+
+            setTimeout(() => {
+                navigate('/borrower');
+            }, 100);
+
+        } catch (error) {
+            console.error("Request to Borrow Error:", error.message);
+        }
+    }
 
     const handleDelete = async function (event) {
         event.preventDefault();
@@ -130,7 +244,7 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
 
         let dbError;
 
-        if (isEditMode) {
+        if (editMode) {
             const { error } = await supabase
                 .from('listings')
                 .update(itemData)
@@ -165,15 +279,14 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
         return <div className="py-8 text-center text-indigo-600">Loading item details...</div>;
     }
 
-    // If we are in edit mode and the item wasn't found (e.g., bad URL ID)
-    if (isEditMode && !currentItem) {
+    if (editMode && !currentItem) {
         return <div className="py-8 text-center text-red-600">Listing not found. Invalid item ID.</div>;
     }
 
     return (
         <div className="py-8 max-w-4xl mx-auto">
             <h3 className="text-3xl font-bold text-gray-800 mb-6">
-                {isEditMode ? `Edit Listing: ${itemState.title}` : 'List a New Item'}
+                {editMode ? `Edit Listing: ${itemState.title}` : `Viewing Listing: ${itemState.title}`}
             </h3>
 
             {statusMessage && (
@@ -183,54 +296,66 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
             )}
 
             <form onSubmit={handleSubmit} className="bg-white p-6 md:p-10 rounded-2xl shadow-2xl space-y-6">
-
-                {/* Item Details */}
                 <div className="space-y-4 border-b pb-6">
                     <h4 className="text-xl font-semibold text-indigo-700">1. Basic Item Information</h4>
                     <div>
-                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">Item Name /
-                            Title</label>
-                        <input
-                            id="title"
-                            type="text"
-                            required
-                            placeholder="e.g., DeWalt Cordless Drill Set"
-                            value={itemState.title}
-                            onChange={handleChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
-                        />
+                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">Item Name / Title</label>
+                        {editMode ? (
+                            <input
+                                id="title"
+                                type="text"
+                                required
+                                placeholder="e.g., DeWalt Cordless Drill Set"
+                                value={itemState.title}
+                                onChange={handleChange}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
+                            />
+                        ) : (
+                            <p className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
+                                {itemState.title}
+                            </p>
+                        )}
                     </div>
                     <div>
-                        <label htmlFor="description"
-                               className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea
-                            id="description"
-                            rows="4"
-                            required
-                            placeholder="Describe condition, accessories included, and pickup details."
-                            value={itemState.description}
-                            onChange={handleChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
-                        ></textarea>
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        {editMode ? (
+                            <textarea
+                                id="description"
+                                rows="4"
+                                required
+                                placeholder="Describe condition, accessories included, and pickup details."
+                                value={itemState.description}
+                                onChange={handleChange}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
+                            ></textarea>
+                        ) : (
+                            <p className="w-full px-4 py-3 bg-white text-gray-700 rounded-lg border border-gray-200 whitespace-pre-wrap">
+                                <i>{itemState.description ? itemState.description : 'No description provided for this item'}</i>
+                            </p>
+                        )}
                     </div>
                 </div>
 
-                {/* Pricing and Value (CRITICAL for Policy) */}
                 <div className="space-y-4 border-b pb-6">
                     <h4 className="text-xl font-semibold text-indigo-700">2. Pricing & Protection Policy</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">Daily Rental
-                                Rate ($)</label>
-                            <input
-                                id="price"
-                                type="number"
-                                required
-                                placeholder="e.g., 15"
-                                value={itemState.price}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
-                            />
+                            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">Daily Rental Rate ($)</label>
+                            {editMode ? (
+                                <input
+                                    id="price"
+                                    type="number"
+                                    required
+                                    placeholder="e.g., 15"
+                                    value={itemState.price}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
+                                />
+                            ) : (
+                                <p className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
+                                    ${itemState.price} / {itemState.unit}
+                                </p>
+                            )}
                         </div>
                         <div>
                             <label htmlFor="value"
@@ -239,17 +364,22 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
                                 <Shield className="w-4 h-4 ml-2 text-red-500"
                                         title="Required for calculating security deposit"/>
                             </label>
-                            <input
-                                id="value"
-                                type="number"
-                                required
-                                placeholder="e.g., 350 (Mid-Value Tier)"
-                                value={itemState.value}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
-                            />
-                            <p className="mt-1 text-xs text-gray-500">This determines the borrower's security deposit
-                                amount.</p>
+                            {editMode ? (
+                                <input
+                                    id="value"
+                                    type="number"
+                                    required
+                                    placeholder="e.g., 350 (Mid-Value Tier)"
+                                    value={itemState.value}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
+                                />
+                            ) : (
+                                <p className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
+                                    ${itemState.value}
+                                </p>
+                            )}
+                            <p className="mt-1 text-xs text-gray-500">This determines the borrower's security deposit amount.</p>
                         </div>
                     </div>
                 </div>
@@ -257,39 +387,32 @@ export default function ItemForm({listings, setAppData, authenticatedUser}) {
                 {/* Photos */}
                 <div className="space-y-4">
                     <h4 className="text-xl font-semibold text-indigo-700">3. Photos (Proof of Condition)</h4>
-                    <div
-                        className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50 hover:bg-gray-100 transition cursor-pointer">
-                        <label htmlFor="photos" className="cursor-pointer">
-                            <input id="photos" type="file" accept="image/*" multiple className="hidden"
-                                   onChange={handleFileChange}/>
-                            <Package className="w-8 h-8 text-gray-400 mx-auto mb-2"/>
-                            <p className="text-sm font-medium text-gray-700">Click to upload up to 5 photos.</p>
-                            <p className="text-xs text-gray-500">Clear photos of item and accessories are required for
-                                dispute resolution.</p>
-                        </label>
-                    </div>
+
+                    {editMode ? (
+                        <div
+                            className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50 hover:bg-gray-100 transition cursor-pointer">
+                            <label htmlFor="photos" className="cursor-pointer">
+                                <input id="photos" type="file" accept="image/*" multiple className="hidden"
+                                       onChange={handleFileChange}/>
+                                <Package className="w-8 h-8 text-gray-400 mx-auto mb-2"/>
+                                <p className="text-sm font-medium text-gray-700">Click to upload up to 5 photos.</p>
+                                <p className="text-xs text-gray-500">Clear photos of item and accessories are required for
+                                    dispute resolution.</p>
+                            </label>
+                        </div>
+                    ) : (
+                        <div className="rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                            <img
+                                src={itemState.image_url || "https://placehold.co/600x400/cccccc/000000?text=No+Image"}
+                                alt={`Photo of ${itemState.title}`}
+                                className="w-full h-80 object-cover"
+                            />
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex gap-4 justify-center">
-                    {
-                        [RENTAL_STATUS.PENDING_BORROW, RENTAL_STATUS.PENDING_LEND].includes(status) &&
-                        <button
-                            type="button"
-                            value="delete"
-                            onClick={(event) => handleDelete(event)}
-                            className="flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-lg text-lg font-bold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150"
-                        >
-                            {"Delete Item"}
-                        </button>
-                    }
-
-                    <button
-                        type="submit"
-                        value="save"
-                        className="flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-lg text-lg font-bold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150"
-                    >
-                        {isEditMode ? "Save Changes" : "Publish Item & Start Earning"}
-                    </button>
+                    {getActionButtons()}
                 </div>
             </form>
         </div>

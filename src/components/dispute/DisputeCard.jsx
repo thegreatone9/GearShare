@@ -1,9 +1,9 @@
 import React from "react";
-import {BORROWER_DISPUTE_ACTIONS, LENDER_DISPUTE_ACTIONS} from "../util/Util.js";
+import {BORROWER_DISPUTE_ACTIONS, LENDER_DISPUTE_ACTIONS, ROLE} from "../util/Util.js";
 import {ACTION_ICONS} from "./DisputeUtils.jsx";
 
 export default function DisputeCard ({ dispute, openActionModal }) {
-    const isLender = dispute.userRole === 'Lender';
+    const isLender = dispute.userRole === ROLE.LENDER;
 
     const LENDER_ACTION_CARD = {
         [LENDER_DISPUTE_ACTIONS.SETTLE]: {

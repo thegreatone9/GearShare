@@ -1,6 +1,24 @@
+import {useNavigate} from "react-router-dom";
+import {useContext} from "react";
+import {AuthContext} from "../../App.jsx";
+import {ROLE} from "../util/Util.js";
+
 export default function ItemCard({item}) {
+    const navigate = useNavigate();
+    const {authenticatedUser} = useContext(AuthContext);
+
+    const handleItemClick = function () {
+        if (authenticatedUser) {
+            navigate(`/item/${item.id}?role=${ROLE.BORROWER}`);
+
+        } else {
+            navigate('/auth');
+        }
+    }
+
     return (
         <div
+            onClick={handleItemClick}
             className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden cursor-pointer">
             <img
                 src={item.image_url}

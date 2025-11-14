@@ -1,10 +1,12 @@
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {supabase} from "../../server/supabaseClient.js";
 import Cookies from 'js-cookie';
 import {checkSession} from "../util/Util.js";
+import {AuthContext} from "../../App.jsx";
 
-export default function AuthPage({ setAuthenticatedUser }) {
+export default function AuthPage() {
+    const {setAuthenticatedUser} = useContext(AuthContext);
     const navigate = useNavigate();
     const [isSigningUp, setIsSigningUp] = useState(true);
     const [email, setEmail] = useState('');

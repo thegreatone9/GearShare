@@ -1,5 +1,5 @@
 import {DollarSign, Eye, FileText, MessageSquareWarning, XCircle} from 'lucide-react';
-import {BORROWER_DISPUTE_ACTIONS, DISPUTE_STATUS, LENDER_DISPUTE_ACTIONS} from "../util/Util.js";
+import {BORROWER_DISPUTE_ACTIONS, DISPUTE_STATUS, LENDER_DISPUTE_ACTIONS, ROLE} from "../util/Util.js";
 
 export const processUserDisputes = (appData, userId) => {
     const { disputes, rentals, requests, listings } = appData;
@@ -24,7 +24,7 @@ export const processUserDisputes = (appData, userId) => {
             // 4. Get Listing Details
             const listing = listings.find(l => l.id === request.listing_id);
             const itemTitle = listing ? listing.title : 'Unknown Item';
-            const userRole = isLender ? 'Lender' : 'Borrower';
+            const userRole = isLender ? ROLE.LENDER : ROLE.BORROWER;
 
             // 5. Get Status Details using the external helper function
             const statusDetails = getStatusDetails(dispute.status, userRole);
@@ -58,7 +58,7 @@ export const ACTION_ICONS = {
 
 const getStatusDetails = (status, userRole) => {
     if (status === DISPUTE_STATUS.PENDING_DEPOSIT_RETURN) {
-        if (userRole === 'Lender') {
+        if (userRole === ROLE.LENDER) {
             return {
                 label: 'Awaiting Your Review',
                 color: 'bg-red-100 text-red-700',
@@ -76,7 +76,7 @@ const getStatusDetails = (status, userRole) => {
     }
 
     if (status === DISPUTE_STATUS.ACTIVE) {
-        if (userRole === 'Borrower') {
+        if (userRole === ROLE.BORROWER) {
             return {
                 label: 'Lender Claim Filed: Action Required',
                 color: 'bg-red-100 text-red-700',

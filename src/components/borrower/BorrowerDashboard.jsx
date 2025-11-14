@@ -1,11 +1,13 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useContext, useEffect, useMemo, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {Landmark, Package, ShieldAlert, Zap} from 'lucide-react';
 import {DISPUTE_STATUS, RENTAL_STATUS} from "../util/Util.js";
 import {supabase} from "../../server/supabaseClient.js";
+import {AuthContext} from "../../App.jsx";
 
-export default function BorrowerDashboard({ authenticatedUser }) {
+export default function BorrowerDashboard() {
     const navigate = useNavigate();
+    const {authenticatedUser} = useContext(AuthContext);
     const userId = authenticatedUser.id;
 
     const [loading, setLoading] = useState(true);

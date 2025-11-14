@@ -1,10 +1,12 @@
 import {Link, useLocation} from "react-router-dom";
 import {Briefcase, ChevronDown, Home, LogOut, Scale, User, Zap} from 'lucide-react';
-import logo from '../../../public/gear-share.svg';
-import React, {useState} from "react";
+import logo from '../../assets/gear-share.svg';
+import React, {useContext, useState} from "react";
+import {AuthContext} from "../../App.jsx";
 
-export default function Header ({ authenticatedUser, logOut }) {
+export default function Header ({ logOut }) {
     const location = useLocation();
+    const {authenticatedUser} = useContext(AuthContext);
     const isAuthenticated = !!authenticatedUser;
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);

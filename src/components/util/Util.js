@@ -1,6 +1,12 @@
 import {supabase} from "../../server/supabaseClient.js";
 import Cookies from "js-cookie";
 
+export const ROLE = {
+    LENDER: 'lender',
+    BORROWER: 'borrower',
+    ADMIN: 'admin'
+}
+
 export const RENTAL_STATUS = {
     PENDING_BORROW: 'pendingBorrow',
     PENDING_LEND: 'pendingLend',
@@ -17,6 +23,15 @@ export const DISPUTE_STATUS = {
     ACTIVE: 'active',
     PENDING_DEPOSIT_RETURN: 'pendingDepositReturn',
     COMPLETED: 'completed'
+}
+
+export const LENDER_ITEM_ACTIONS = {
+    SAVE: 'save',
+    DELETE: 'delete'
+}
+
+export const BORROWER_ITEM_ACTIONS = {
+    REQUEST_BORROW: 'requestBorrow'
 }
 
 export const LENDER_DISPUTE_ACTIONS = {
