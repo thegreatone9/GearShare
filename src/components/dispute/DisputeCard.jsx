@@ -32,7 +32,7 @@ export default function DisputeCard ({ dispute, openActionModal }) {
         [BORROWER_DISPUTE_ACTIONS.SUBMIT_EVIDENCE]: {
             icon: ACTION_ICONS[BORROWER_DISPUTE_ACTIONS.SUBMIT_EVIDENCE],
             label: 'Submit Evidence',
-            className: 'bg-red-600 hover:bg-red-700'
+            className: 'bg-yellow-600 hover:bg-red-700'
         },
         [BORROWER_DISPUTE_ACTIONS.VIEW_REPORT]: {
             icon: ACTION_ICONS[BORROWER_DISPUTE_ACTIONS.VIEW_REPORT],

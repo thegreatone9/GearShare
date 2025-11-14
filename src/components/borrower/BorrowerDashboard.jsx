@@ -205,7 +205,7 @@ export default function BorrowerDashboard() {
                                     {/* Action Button (Full Width on Bottom) */}
                                     <button
                                         onClick={(event) => handleReturn(rental, event)}
-                                        className="text-sm text-white bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700 transition font-medium w-full mt-2">
+                                        className="text-sm text-white bg-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-600 transition font-medium w-full mt-2">
                                         Pay & Return Item Now
                                     </button>
                                 </div>
@@ -232,7 +232,7 @@ export default function BorrowerDashboard() {
                     {disputedRentals.length > 0 && (
                         <button
                             onClick={handleViewDispute}
-                            className="text-sm text-white bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700 transition font-medium mb-4 w-full flex items-center justify-center">
+                            className="text-sm text-white bg-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-600 transition font-medium mb-4 w-full flex items-center justify-center">
                             <Landmark className='w-4 h-4 mr-2'/>
                             Go to Disputes Dashboard
                         </button>

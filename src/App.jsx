@@ -53,7 +53,7 @@ export default function App() {
                 <Header logOut={logOut}/>
 
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-indigo-50 rounded-2xl shadow-2xl">
-                    <div className="mt-[72px]"> {/* Ensures content sits below the fixed header */}
+                    <div className="mt-[72px]">
                         <Routes>
                             <Route path="/" element={<LandingPage/>}/>
                             <Route path="/auth" element={<AuthPage />}/>
