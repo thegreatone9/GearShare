@@ -12,6 +12,7 @@ import ErrorPage from "./components/common/ErrorPage.jsx";
 import ItemForm from "./components/item/ItemForm.jsx";
 import {checkSession} from "./components/util/Util.js";
 import Footer from "./components/common/Footer.jsx";
+import UserProfile from "./components/user/UserProfile.jsx";
 
 export const AuthContext = React.createContext();
 
@@ -67,6 +68,12 @@ export default function App() {
                                 path="/disputes"
                                 element={<ProtectedRoute>
                                     <DisputeDashboard/>
+                                </ProtectedRoute>}
+                            />
+                            <Route
+                                path="/profile"
+                                element={<ProtectedRoute>
+                                    <UserProfile/>
                                 </ProtectedRoute>}
                             />
 

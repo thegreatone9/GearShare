@@ -3,7 +3,6 @@ import {Briefcase, ChevronDown, Home, LogOut, Scale, User, Zap} from 'lucide-rea
 import logo from '../../assets/gear-share.svg';
 import React, {useContext, useState} from "react";
 import {AuthContext} from "../../App.jsx";
-import {supabase} from "../../server/supabaseClient.js";
 import Cookies from "js-cookie";
 
 export default function Header () {
@@ -38,23 +37,15 @@ export default function Header () {
     };
 
     const logOut = async () => {
-        const {error} = await supabase.auth.signOut();
-
-        if (error) {
-            console.error('Error signing out:', error.message);
-
-        } else {
-            setAuthenticatedUser(null);
-            Cookies.remove('user_data');
-            navigate('/');
-        }
+        setAuthenticatedUser(null);
+        Cookies.remove('user_data');
+        navigate('/');
     };
 
-    // Handler to close all menus on navigation/logout
     const handleLogoutAndClose = () => {
-        logOut();
-        setIsDropdownOpen(false);
-        closeMobileMenu();
+        logOut()
+            .then(() => setIsDropdownOpen(false))
+            .then(() => closeMobileMenu());
     };
 
     return (
@@ -65,9 +56,7 @@ export default function Header () {
                     <img src={logo} alt="GearShare Logo" style={{ width: '24px' }}/> GearShare
                 </Link>
 
-                {/* A. Desktop Navigation (Visible on SM screens and up) */}
-                {/* NOTE: We keep 'sm:flex' but make the profile icon positioning relative */}
-                <div className="relative"> {/* NEW: Relative container for dropdown positioning */}
+                <div className="relative">
                     <nav className="hidden sm:flex items-center space-x-3">
                         {/* 1. Public Links */}
                         {publicTabs.map((tab) => (
@@ -107,16 +96,24 @@ export default function Header () {
                                 onMouseLeave={() => setIsDropdownOpen(false)}
                                 className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl py-2 z-50 border border-gray-100 origin-top-right animate-fadeIn"
                             >
-                                <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100 font-semibold">
+                                <Link
+                                    to="/profile"
+                                    className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition"
+                                >
+                                    <User className="w-4 h-4 mr-2" />
                                     {authenticatedUser.name}
-                                </div>
-                                <button
+                                </Link>
+
+                                <div className="border-t border-gray-100 my-1"></div>
+
+                                <Link
+                                    to="#"
                                     onClick={handleLogoutAndClose}
                                     className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition"
                                 >
                                     <LogOut className="w-4 h-4 mr-2" />
                                     Sign Out
-                                </button>
+                                </Link>
                             </div>
                         )}
                     </nav>

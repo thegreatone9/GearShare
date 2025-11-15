@@ -1,8 +1,7 @@
 import {useContext, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {supabase} from "../../server/supabaseClient.js";
-import Cookies from 'js-cookie';
-import {checkSession} from "../util/Util.js";
+import {checkSession, updateUserCookie, userSessionData} from "../util/Util.js";
 import {AuthContext} from "../../App.jsx";
 
 export default function AuthPage() {
@@ -16,7 +15,7 @@ export default function AuthPage() {
 
     useEffect(() => {
         checkSession()
-            .then(user => setAuthenticatedUser(user))
+            .then(user => setAuthenticatedUser(userSessionData(user)))
             .then(() => navigate('/borrower'))
             .catch(error => {
                 console.log(error);
@@ -27,75 +26,41 @@ export default function AuthPage() {
 
     // Placeholder function for handling successful login/logout
     const handleAuth = (user) => {
-        setAuthenticatedUser(user);
+        setAuthenticatedUser(userSessionData(user));
     };
 
     const addAccount = async  (newUser) => {
-        const { email, password, name } = newUser;
-
-        const {
-            data: authData,
-            error: authError
-        } = await supabase.auth.signUp({ email, password });
-
-        if (authError) {
-            console.error("Supabase Auth Error:", authError);
-            return { error: authError.message };
-        }
-
-        const user = authData.user;
+        const user = newUser;
 
         const { error: accountError } = await supabase
             .from('accounts')
             .insert([
                 {
-                    id: user.id,
-                    email: user.email,
-                    name: name,
-                    password: password
+                    email: newUser.email,
+                    name: newUser.name,
+                    password: newUser.password
                 }
             ]);
 
         if (accountError) {
-            console.error("Account Insert Error:", accountError);
-            return { error: accountError.message };
+            throw new Error(accountError.message);
         }
 
         return user;
     };
 
     const authenticateUser = async (email, password) => {
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password,
-        });
-
-        if (authError) {
-            console.error("Sign-In Error:", authError.message);
-            return null;
-        }
-
         const { data: user, error: accountError  } = await supabase.from('accounts')
             .select('*')
-            .eq('email', authData.user.email)
+            .eq('email', email)
+            .eq('password', password)
             .single();
 
         if (accountError) {
-            console.error("Sign-In Error:", accountError);
-            return null;
+            throw new Error(accountError.message);
         }
 
-        const userDataString = JSON.stringify({
-            name: user.name,
-            email: user.email,
-            id: user.id
-        });
-
-        Cookies.set('user_data', userDataString, {
-            expires: 1,
-            secure: true,
-            sameSite: 'Strict'
-        });
+        updateUserCookie(user);
 
         console.log("User successfully signed in:", user);
         return user;
@@ -121,9 +86,8 @@ export default function AuthPage() {
                 return;
             }
 
-            const newUserId = Date.now();
-            const newUser = { newUserId, email, password, name };
-            await addAccount(newUser);
+            let newUser = { email, password, name };
+            newUser = await addAccount(newUser);
 
             console.log(`Sign Up successful for ${email}. New account added.`);
             handleAuth(newUser);
@@ -179,11 +143,12 @@ export default function AuthPage() {
                             id="email"
                             name="email"
                             type="email"
+                            autoComplete={isSigningUp ? 'new-password' : 'current-password'}
                             required
                             placeholder="you@example.com"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition"
+                            className="autofill-fix appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition"
                         />
                     </div>
 
@@ -193,11 +158,12 @@ export default function AuthPage() {
                             id="password"
                             name="password"
                             type="password"
+                            autoComplete={isSigningUp ? 'new-password' : 'current-password'}
                             required
                             placeholder="••••••••"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition"
+                            className="autofill-fix appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition"
                         />
                     </div>
 

@@ -1,4 +1,3 @@
-import {supabase} from "../../server/supabaseClient.js";
 import Cookies from "js-cookie";
 
 export const ROLE = {
@@ -65,24 +64,39 @@ export const LISTING_CATEGORY = {
     OTHERS: 'Others'
 }
 
+export const updateUserCookie = function (user) {
+    const userDataString = JSON.stringify({
+        name: user.name,
+        email: user.email,
+        id: user.id
+    });
+
+    Cookies.set('user_data', userDataString, {
+        expires: 1,
+        secure: true,
+        sameSite: 'Strict'
+    });
+}
+
 export const checkSession = async function () {
-    const { data: { session } } = await supabase.auth.getSession();
+    const useDataCookie = Cookies.get('user_data');
 
-    if (session) {
-        const useDataCookie = Cookies.get('user_data');
+    if (useDataCookie) {
+        const user = JSON.parse(useDataCookie);
 
-        if (useDataCookie) {
-            const user = JSON.parse(useDataCookie);
+        console.log(`Loaded user name from cookie: ${user.name}`);
 
-            console.log(`Loaded user name from cookie: ${user.name}`);
-
-            return user;
-        }
-
-    } else {
-        throw new Error("No active User session.");
+        return user;
     }
 };
+
+export const userSessionData = function (user) {
+    return {
+        id: user.id,
+        name: user.name,
+        email: user.email
+    }
+}
 
 export const MOCK_DATA = {
     accounts: [
