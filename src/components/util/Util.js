@@ -82,11 +82,7 @@ export const checkSession = async function () {
     const useDataCookie = Cookies.get('user_data');
 
     if (useDataCookie) {
-        const user = JSON.parse(useDataCookie);
-
-        console.log(`Loaded user name from cookie: ${user.name}`);
-
-        return user;
+        return JSON.parse(useDataCookie);
     }
 };
 

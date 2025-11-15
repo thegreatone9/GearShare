@@ -1,7 +1,7 @@
-import {useContext, useEffect, useState} from "react";
+import {useContext, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {supabase} from "../../server/supabaseClient.js";
-import {checkSession, updateUserCookie, userSessionData} from "../util/Util.js";
+import {updateUserCookie, userSessionData} from "../util/Util.js";
 import {AuthContext} from "../../App.jsx";
 
 export default function AuthPage() {
@@ -12,17 +12,6 @@ export default function AuthPage() {
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [error, setError] = useState('');
-
-    useEffect(() => {
-        checkSession()
-            .then(user => setAuthenticatedUser(userSessionData(user)))
-            .then(() => navigate('/borrower'))
-            .catch(error => {
-                console.log(error);
-                navigate('/auth');
-            })
-
-    }, []);
 
     const handleAuth = (user) => {
         setAuthenticatedUser(userSessionData(user));

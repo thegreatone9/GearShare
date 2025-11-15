@@ -22,13 +22,15 @@ export default function App() {
 
     useEffect(() => {
         checkSession()
-            .then(user => setAuthenticatedUser(user))
-            .then(() => navigate('/borrower'))
-            .catch(error => {
-                console.log(error);
+            .then(user => {
+                if (user) {
+                    setAuthenticatedUser(user);
+                    navigate('/borrower');
 
-                navigate('/');
-            })
+                } else {
+                    navigate('/');
+                }
+            });
 
     }, []);
 
