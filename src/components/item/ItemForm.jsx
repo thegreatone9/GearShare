@@ -64,6 +64,15 @@ export default function ItemForm() {
             // Only show the request button in 'view' mode for an existing item
             buttonProps = [
                 {
+                    label: "Back",
+                    action: "BACK",
+                    classes: `${commonClasses} bg-gray-200 hover:bg-gray-500 text-black focus:ring-gray-900`,
+                    onClick: (event) => {
+                        event.preventDefault();
+                        navigate('/marketplace');
+                    }
+                },
+                {
                     label: "Request Borrow",
                     action: BORROWER_ITEM_ACTIONS.REQUEST_BORROW,
                     classes: `${commonClasses} bg-green-600 hover:bg-green-700 text-white focus:ring-green-500`,
