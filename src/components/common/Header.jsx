@@ -1,4 +1,4 @@
-import {Link, useLocation} from "react-router-dom";
+import {Link, useLocation, useNavigate} from "react-router-dom";
 import {Briefcase, ChevronDown, Home, LogOut, Scale, User, Zap} from 'lucide-react';
 import logo from '../../assets/gear-share.svg';
 import React, {useContext, useState} from "react";
@@ -8,7 +8,8 @@ import Cookies from "js-cookie";
 
 export default function Header () {
     const location = useLocation();
-    const {authenticatedUser} = useContext(AuthContext);
+    const navigate = useNavigate();
+    const {authenticatedUser, setAuthenticatedUser} = useContext(AuthContext);
     const isAuthenticated = !!authenticatedUser;
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
