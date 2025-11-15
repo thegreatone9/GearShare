@@ -1,7 +1,14 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
 import {Package, Shield} from 'lucide-react';
-import {BORROWER_ITEM_ACTIONS, LENDER_ITEM_ACTIONS, RENTAL_STATUS, REQUEST_STATUS, ROLE} from "../util/Util.js";
+import {
+    BORROWER_ITEM_ACTIONS,
+    LENDER_ITEM_ACTIONS,
+    LISTING_CATEGORY,
+    RENTAL_STATUS,
+    REQUEST_STATUS,
+    ROLE
+} from "../util/Util.js";
 import {supabase} from "../../server/supabaseClient.js";
 import {AuthContext} from "../../App.jsx";
 
@@ -116,6 +123,8 @@ export default function ItemForm() {
                 setItemState({
                     title: '',
                     description: '',
+                    location: '',
+                    category: '',
                     price: '',
                     value: '',
                     unit: 'day',
@@ -130,6 +139,8 @@ export default function ItemForm() {
                     description: item.description || '',
                     price: item.price || '',
                     value: item.replacement_value || '', // Ensure snake_case matches DB
+                    location: item.location || '',
+                    category: item.category || '',
                     unit: item.unit || 'day',
                     image_url: item.image_url // Ensure snake_case matches DB
                 });
@@ -245,6 +256,8 @@ export default function ItemForm() {
         const itemData = {
             title: itemState.title || "Untitled Gear",
             description: itemState.description,
+            location: itemState.location,
+            category: itemState.category,
             price: priceNum,
             replacement_value: valueNum,
             unit: itemState.unit,
@@ -292,6 +305,8 @@ export default function ItemForm() {
         return <div className="py-8 text-center text-red-600">Listing not found. Invalid item ID.</div>;
     }
 
+    // Assume LISTING_CATEGORY is imported and itemState now includes location and category keys.
+
     return (
         <div className="py-8 max-w-4xl mx-auto">
             <h3 className="text-3xl font-bold text-gray-800 mb-6">
@@ -307,6 +322,8 @@ export default function ItemForm() {
             <form onSubmit={handleSubmit} className="bg-white p-6 md:p-10 rounded-2xl shadow-2xl space-y-6">
                 <div className="space-y-4 border-b pb-6">
                     <h4 className="text-xl font-semibold text-indigo-700">1. Basic Item Information</h4>
+
+                    {/* --- TITLE FIELD --- */}
                     <div>
                         <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">Item Name / Title</label>
                         {editMode ? (
@@ -325,6 +342,55 @@ export default function ItemForm() {
                             </p>
                         )}
                     </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Location Field */}
+                        <div>
+                            <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">Location / Pickup Area</label>
+                            {editMode ? (
+                                <input
+                                    id="location"
+                                    type="text"
+                                    required
+                                    placeholder="e.g., San Francisco, CA"
+                                    value={itemState.location}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
+                                />
+                            ) : (
+                                <p className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
+                                    {itemState.location}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Category Dropdown */}
+                        <div>
+                            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            {editMode ? (
+                                <select
+                                    id="category"
+                                    required
+                                    value={itemState.category}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition bg-white"
+                                >
+                                    <option value="" disabled>Select a Category</option>
+                                    {
+                                        Object.values(LISTING_CATEGORY).map(category => {
+                                            return <option key={category}>{category}</option>
+                                        })
+                                    }
+                                </select>
+                            ) : (
+                                <p className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
+                                    {itemState.category}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* --- DESCRIPTION FIELD --- */}
                     <div>
                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                         {editMode ? (

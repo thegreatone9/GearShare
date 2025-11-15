@@ -53,6 +53,18 @@ export const TIME_UNIT = {
     MONTH: 'month'
 }
 
+export const LISTING_CATEGORY = {
+    ELECTRONICS: 'Electronics',
+    SPORTS: 'Sports',
+    TRAVEL: 'Travel',
+    HOUSEHOLD: 'Household',
+    EDUCATION: 'Education',
+    MEDICAL: 'Medical',
+    FOOD: 'Food',
+    MUSIC: 'Music',
+    OTHERS: 'Others'
+}
+
 export const checkSession = async function () {
     const { data: { session } } = await supabase.auth.getSession();
 
