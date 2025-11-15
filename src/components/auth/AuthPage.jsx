@@ -24,15 +24,12 @@ export default function AuthPage() {
 
     }, []);
 
-    // Placeholder function for handling successful login/logout
     const handleAuth = (user) => {
         setAuthenticatedUser(userSessionData(user));
     };
 
     const addAccount = async  (newUser) => {
-        const user = newUser;
-
-        const { error: accountError } = await supabase
+        const { data: user, error: accountError } = await supabase
             .from('accounts')
             .insert([
                 {
@@ -40,7 +37,9 @@ export default function AuthPage() {
                     name: newUser.name,
                     password: newUser.password
                 }
-            ]);
+            ])
+            .select()
+            .single();
 
         if (accountError) {
             throw new Error(accountError.message);
@@ -66,13 +65,15 @@ export default function AuthPage() {
         return user;
     };
 
-    const isUserExists = async (email, password) => {
-        const { error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
+    const isUserExists = async (email) => {
+        const { data } = await supabase
+            .from('accounts')
+            .select('id')
+            .eq('email', email)
+            .limit(1)
+            .maybeSingle();
 
-        return !error;
+        return !!data;
     };
 
     const handleSubmit = async (e) => {
@@ -80,7 +81,7 @@ export default function AuthPage() {
         setError('');
 
         if (isSigningUp) {
-            const userIsValid = await isUserExists(email, password);
+            const userIsValid = await isUserExists(email);
             if (userIsValid) {
                 setError('An account with this email already exists.');
                 return;
@@ -89,7 +90,7 @@ export default function AuthPage() {
             let newUser = { email, password, name };
             newUser = await addAccount(newUser);
 
-            console.log(`Sign Up successful for ${email}. New account added.`);
+            console.log(`Sign Up successful for ${newUser}. New account added.`);
             handleAuth(newUser);
             navigate('/borrower');
 
