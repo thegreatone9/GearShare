@@ -198,8 +198,8 @@ export default function LenderDashboard() {
 
         const fetchModalData = async () => {
             setModalLoading(true);
-            const listingId = selectedRequest.listingId;
-            const borrowerId = selectedRequest.borrowerId;
+            const listingId = selectedRequest.listing_id;
+            const borrowerId = selectedRequest.borrower_id;
 
             // --- Fetch Modal Item (Listing) ---
             const { data: itemData, error: itemError } = await supabase
@@ -214,7 +214,7 @@ export default function LenderDashboard() {
             // --- Fetch Modal Borrower (Account) ---
             const { data: borrowerData, error: borrowerError } = await supabase
                 .from('accounts')
-                .select('name, email') // Only fetch necessary borrower details
+                .select('name, email')
                 .eq('id', borrowerId)
                 .single();
 
@@ -413,7 +413,7 @@ export default function LenderDashboard() {
                         {disputedRentals.map(rental => {
                             const correspondingRequest = requests.find(request => request.id === rental.request_id);
                             const item = listings.find(listing => listing.id === correspondingRequest.listing_id);
-                            const dispute = disputes.find(d => d.rentalId === rental.id);
+                            const dispute = disputes.find(d => d.rental_id === rental.id);
                             const display = getDisputeDisplay(dispute);
 
                             return (
