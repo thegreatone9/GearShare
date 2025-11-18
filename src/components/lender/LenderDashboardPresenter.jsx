@@ -1,11 +1,11 @@
 import {CheckCheck, Clock, Landmark, Package, ShieldAlert, Wrench, Zap} from 'lucide-react';
-import {Link, useNavigate} from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import {RENTAL_STATUS, ROLE} from "../util/Util.js";
 import LenderActionModal from "./LenderActionModal.jsx";
 import DashboardListSection from "./DashboardListSection.jsx";
-import React from 'react'; // Ensure React is imported
+import React from 'react';
+import {getDisputeDisplay} from "./LenderUtil.js";
 
-// The component now accepts all necessary data and handlers via props.
 export default function LenderDashboardPresenter({
                                                      itemDetailsModalActive,
                                                      isModalOpen,
@@ -24,10 +24,8 @@ export default function LenderDashboardPresenter({
                                                      openItemDetailsModal,
                                                      declineRequest,
                                                      editItem,
-                                                     handleViewDisputes,
-                                                     getDisputeDisplay,
+                                                     handleViewDisputes
                                                  }) {
-    // --- RENDER FUNCTIONS (Use destructured props) ---
 
     // 1. Active Rentals Item Renderer
     const renderActiveRental = (rental) => {
@@ -128,7 +126,7 @@ export default function LenderDashboardPresenter({
     const renderDisputedRental = (rental) => {
         const correspondingRequest = requests.find(request => request.id === rental.request_id);
         const item = listings.find(listing => listing.id === correspondingRequest.listing_id);
-        const dispute = disputes.find(d => d.rental_id === rental.id);
+        const dispute = disputedRentals.find(d => d.rental_id === rental.id);
         const display = getDisputeDisplay(dispute);
 
         return (
@@ -153,7 +151,7 @@ export default function LenderDashboardPresenter({
     const renderPastRental = (rental) => {
         const correspondingRequest = requests.find(request => request.id === rental.request_id);
         const item = listings.find(listing => listing.id === correspondingRequest.listing_id);
-        const dispute = disputes.find(d => d.rental_id === rental.id);
+        const dispute = disputedRentals.find(d => d.rental_id === rental.id);
         const display = getDisputeDisplay(dispute);
 
         return (

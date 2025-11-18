@@ -1,18 +1,62 @@
 import React from 'react';
 import {Calendar, DollarSign, Package, Star, User} from 'lucide-react';
+import {RENTAL_STATUS} from "../../util/Util.js";
+import {supabase} from "../../../server/supabaseClient.js";
 
 /**
  * Content for the modal used to confirm a rental acceptance.
  * @param {Object} props - Contains request, item, borrower details, and action handlers.
  */
-export default function AcceptRentalRequest({ request, item, borrower, onClose, onConfirm }) {
-    console.log('req', request);
-    console.log('item', item);
-    console.log('borrower', borrower);
-
+export default function AcceptRentalRequest({ request, item, borrower, onClose, setRequests, setLenderRentals, closeAllModals }) {
     if (!request || !item || !borrower) return (
         <div className="text-center text-red-500">Error: Missing request details.</div>
     );
+
+    const confirmAcceptance = async () => {
+        const { id, listing_id, borrower_id, lender_id } = request;
+
+        const newRental = {
+            id: Date.now(),
+            request_id: id,
+            listing_id: listing_id,
+            borrower_id: borrower_id,
+            lender_id: lender_id,
+            return_date: null,
+            status: RENTAL_STATUS.ACTIVE
+        };
+
+        const { data: rentalResult, error: rentalError } = await supabase
+            .from('rentals')
+            .insert([newRental])
+            .single();
+
+        if (rentalError) {
+            return console.error("Error inserting new rental:", rentalError);
+        }
+
+        const { error: listingError } = await supabase
+            .from('listings')
+            .update({ listing_status: RENTAL_STATUS.ACTIVE })
+            .eq('id', listing_id);
+
+        if (listingError) {
+            return console.error("Error updating listing status:", listingError);
+        }
+
+        const { error: requestError } = await supabase
+            .from('requests')
+            .delete()
+            .eq('id', id);
+
+        if (requestError) {
+            return console.error("Error deleting request:", requestError);
+        }
+
+        setRequests(prevRequests => prevRequests.filter(req => req.id !== id));
+        setLenderRentals(prevRentals => [...prevRentals, rentalResult]);
+
+        closeAllModals();
+    };
 
     return (
         <div className="space-y-5">
@@ -62,7 +106,7 @@ export default function AcceptRentalRequest({ request, item, borrower, onClose, 
                     Dismiss / Back
                 </button>
                 <button
-                    onClick={onConfirm}
+                    onClick={confirmAcceptance}
                     className="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition shadow-md"
                 >
                     Confirm & Accept Rental

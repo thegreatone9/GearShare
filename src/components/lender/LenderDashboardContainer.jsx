@@ -1,24 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from 'react-router-dom';
-import { supabase } from "../../server/supabaseClient.js";
-import { AuthContext } from "../../App.jsx";
-import { DISPUTE_STATUS, RENTAL_STATUS, ROLE } from "../util/Util.js";
+import React, {useContext, useEffect, useState} from "react";
+import {useNavigate} from 'react-router-dom';
+import {supabase} from "../../server/supabaseClient.js";
+import {AuthContext} from "../../App.jsx";
+import {DISPUTE_STATUS, RENTAL_STATUS, ROLE} from "../util/Util.js";
 import LenderDashboardPresenter from "./LenderDashboardPresenter.jsx"; // Importing the new Presenter Component
-
-const getDisputeDisplay = (dispute) => {
-    if (!dispute || dispute.status === DISPUTE_STATUS.COMPLETED) {
-        return { label: 'Settled', color: 'bg-green-100 text-green-700' };
-    }
-
-    switch (dispute.status) {
-        case DISPUTE_STATUS.PENDING_DEPOSIT_RETURN:
-            return { label: 'Awaiting Your Review', color: 'bg-red-100 text-red-700' };
-        case DISPUTE_STATUS.ACTIVE:
-            return { label: 'Awaiting Borrower Evidence', color: 'bg-blue-100 text-blue-700' };
-        default:
-            return { label: dispute.status, color: 'bg-gray-100 text-gray-700' };
-    }
-};
 
 export default function LenderDashboardContainer() {
     const { authenticatedUser } = useContext(AuthContext);
@@ -36,7 +21,6 @@ export default function LenderDashboardContainer() {
     const [modalLoading, setModalLoading] = useState(false);
 
     // --- ACTION HANDLERS ---
-
     const editItem = function (itemId, itemStatus) {
         navigate(`/item/${itemId}?status=${itemStatus}&role=${ROLE.LENDER}`);
     }
@@ -59,58 +43,6 @@ export default function LenderDashboardContainer() {
         setIsModalOpen(false);
         setModalPayload(null);
     }
-
-    // Complex state/DB actions remain here
-    const confirmAcceptance = async () => {
-        if (!modalPayload || modalPayload.category !== 'acceptRentalRequest' || !modalPayload.data) {
-            return;
-        }
-
-        const selectedRequest = modalPayload.data;
-        const { id, listing_id, borrower_id, lender_id } = selectedRequest;
-
-        const newRental = {
-            id: Date.now(),
-            request_id: id,
-            listing_id: listing_id,
-            borrower_id: borrower_id,
-            lender_id: lender_id,
-            return_date: null,
-            status: RENTAL_STATUS.ACTIVE
-        };
-
-        const { data: rentalResult, error: rentalError } = await supabase
-            .from('rentals')
-            .insert([newRental])
-            .single();
-
-        if (rentalError) {
-            return console.error("Error inserting new rental:", rentalError);
-        }
-
-        const { error: listingError } = await supabase
-            .from('listings')
-            .update({ listing_status: RENTAL_STATUS.ACTIVE })
-            .eq('id', listing_id);
-
-        if (listingError) {
-            return console.error("Error updating listing status:", listingError);
-        }
-
-        const { error: requestError } = await supabase
-            .from('requests')
-            .delete()
-            .eq('id', id);
-
-        if (requestError) {
-            return console.error("Error deleting request:", requestError);
-        }
-
-        setRequests(prevRequests => prevRequests.filter(req => req.id !== id));
-        setLenderRentals(prevRentals => [...prevRentals, rentalResult]);
-
-        closeAllModals();
-    };
 
     const declineRequest = async (request) => {
         const { error } = await supabase
@@ -175,7 +107,9 @@ export default function LenderDashboardContainer() {
             setDisputes(disputeData || []);
             setLoading(false);
         };
+
         fetchLenderData();
+
     }, [userId]);
 
     // --- DYNAMIC MODAL DATA FETCHING EFFECT ---
@@ -240,9 +174,10 @@ export default function LenderDashboardContainer() {
 
             setModalLoading(false);
         };
+
         fetchModalData();
 
-    }, [modalPayload, listings]); // Added listings as dependency for full reload reliability
+    }, [modalPayload, listings]);
 
     // --- DATA FILTERING (Moved from component body) ---
     const activeRentals = lenderRentals.filter(rental => rental.status === RENTAL_STATUS.ACTIVE);
@@ -274,7 +209,9 @@ export default function LenderDashboardContainer() {
                 request: requestData,
                 item: itemData,
                 borrower: borrowerData,
-                onConfirm: confirmAcceptance,
+                setRequests: setRequests,
+                setLenderRentals: setLenderRentals,
+                closeAllModals: closeAllModals
             }
         },
         item: {
@@ -316,7 +253,7 @@ export default function LenderDashboardContainer() {
             disputedRentals={disputedRentals}
             pastRentals={pastRentals}
             requests={requests}
-            listings={listings} // Still needed for item lookups in render functions
+            listings={listings}
 
             // Action Handlers
             openAcceptModal={openAcceptModal}
@@ -324,7 +261,6 @@ export default function LenderDashboardContainer() {
             declineRequest={declineRequest}
             editItem={editItem}
             handleViewDisputes={handleViewDisputes}
-            getDisputeDisplay={getDisputeDisplay}
         />
     );
 }
