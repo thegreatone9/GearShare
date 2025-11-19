@@ -1,8 +1,8 @@
-import Modal from "../common/Modal.jsx";
+import Modal from "./Modal.jsx";
 import React from 'react';
-import {MODAL_CATEGORY, ModalComponentMap} from "./LenderUtil.js";
+import {MODAL_CATEGORY, ModalComponentMap} from "../util/Util.js";
 
-export default function LenderActionModal({ category, modalProps, isModalOpen, setIsModalOpen }) {
+export default function ActionModal({ category, modalProps, isModalOpen, setIsModalOpen }) {
     const ComponentToRender = ModalComponentMap[category];
     const { title, maxWidth, ...componentSpecificProps } = modalProps;
 

@@ -1,8 +1,8 @@
 import {CheckCheck, Clock, Landmark, Package, ShieldAlert, Wrench, Zap} from 'lucide-react';
 import {Link} from 'react-router-dom';
 import {RENTAL_STATUS, ROLE} from "../util/Util.js";
-import LenderActionModal from "./LenderActionModal.jsx";
-import DashboardListSection from "./DashboardListSection.jsx";
+import ActionModal from "../common/ActionModal.jsx";
+import DashboardListSection from "../common/DashboardListSection.jsx";
 import React from 'react';
 import {getDisputeDisplay} from "./LenderUtil.js";
 
@@ -181,7 +181,7 @@ export default function LenderDashboardPresenter({
 
             {/* USE THE WRAPPER MODAL COMPONENT */}
             {itemDetailsModalActive && (
-                <LenderActionModal
+                <ActionModal
                     isModalOpen={isModalOpen}
                     setIsModalOpen={closeAllModals}
                     category={category}

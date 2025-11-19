@@ -1,4 +1,7 @@
 import Cookies from "js-cookie";
+import AcceptRentalRequest from "../lender/modalContent/AcceptRentalRequest.jsx";
+import ModalItemDetails from "../common/ModalItemDetails.jsx";
+import BorrowerDetails from "../lender/modalContent/BorrowerDetails.jsx";
 
 export const ROLE = {
     LENDER: 'lender',
@@ -93,6 +96,20 @@ export const userSessionData = function (user) {
         email: user.email
     }
 }
+
+export const MODAL_CATEGORY= {
+    ITEM: 'item',
+    ACCEPT_RENTAL_REQUEST: 'acceptRentalRequest',
+    BORROWER: 'borrower'
+}
+
+export const ModalComponentMap = {
+    [MODAL_CATEGORY.ACCEPT_RENTAL_REQUEST]: AcceptRentalRequest,
+    [MODAL_CATEGORY.ITEM]: ModalItemDetails,
+    [MODAL_CATEGORY.BORROWER]: BorrowerDetails
+
+    // Can add other generic item modals here as needed (e.g., disputeReview, returnFlow)
+};
 
 export const MOCK_DATA = {
     accounts: [

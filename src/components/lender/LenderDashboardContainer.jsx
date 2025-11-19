@@ -2,9 +2,8 @@ import React, {useContext, useEffect, useState} from "react";
 import {useNavigate} from 'react-router-dom';
 import {supabase} from "../../server/supabaseClient.js";
 import {AuthContext} from "../../App.jsx";
-import {DISPUTE_STATUS, RENTAL_STATUS, ROLE} from "../util/Util.js";
+import {DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS, ROLE} from "../util/Util.js";
 import LenderDashboardPresenter from "./LenderDashboardPresenter.jsx";
-import {MODAL_CATEGORY} from "./LenderUtil.js";
 
 export default function LenderDashboardContainer() {
     const { authenticatedUser } = useContext(AuthContext);

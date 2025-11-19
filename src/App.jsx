@@ -3,7 +3,6 @@ import LandingPage from "./components/landing/LandingPage.jsx";
 import {Navigate, Route, Routes, useNavigate} from "react-router-dom";
 import MarketplaceContent from "./components/item/MarketPlace.jsx";
 import Header from "./components/common/Header.jsx";
-import BorrowerDashboard from "./components/borrower/BorrowerDashboard.jsx";
 import DisputeDashboard from "./components/dispute/DisputeDashboard.jsx";
 import AuthPage from "./components/auth/AuthPage.jsx";
 import React, {useContext, useEffect, useState} from "react";
@@ -13,6 +12,7 @@ import {checkSession} from "./components/util/Util.js";
 import Footer from "./components/common/Footer.jsx";
 import UserProfile from "./components/user/UserProfile.jsx";
 import LenderDashboardContainer from "./components/lender/LenderDashboardContainer.jsx";
+import BorrowerDashboardContainer from "./components/borrower/BorrowerDashboardContainer.jsx";
 
 export const AuthContext = React.createContext();
 
@@ -51,7 +51,7 @@ export default function App() {
                             <Route
                                 path="/borrower"
                                 element={<ProtectedRoute>
-                                    <BorrowerDashboard/>
+                                    <BorrowerDashboardContainer/>
                                 </ProtectedRoute>}
                             />
                             <Route
