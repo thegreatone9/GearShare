@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {Calendar, DollarSign, Package, Star, User} from 'lucide-react';
 import {RENTAL_STATUS} from "../../util/Util.js";
 import {supabase} from "../../../server/supabaseClient.js";
@@ -7,20 +7,50 @@ import {supabase} from "../../../server/supabaseClient.js";
  * Content for the modal used to confirm a rental acceptance.
  * @param {Object} props - Contains request, item, borrower details, and action handlers.
  */
-export default function AcceptRentalRequest({ request, item, borrower, onClose, setRequests, setLenderRentals, closeAllModals }) {
-    if (!request || !item || !borrower) return (
+export default function AcceptRentalRequest({ request, onClose, setRequests, setLenderRentals, closeAllModals }) {
+    if (!request) return (
         <div className="text-center text-red-500">Error: Missing request details.</div>
     );
 
-    const confirmAcceptance = async () => {
-        const { id, listing_id, borrower_id, lender_id } = request;
+    const [borrower, setBorrower] = useState(null);
+    const [item, setItem] = useState(null);
+    const [loading, setLoading] = useState(true);
 
+    const { id, listing_id: listingId, borrower_id: borrowerId, lender_id: lenderId } = request;
+
+    useEffect(() => {
+        const fetchData = async function () {
+            const { data: itemData, error: itemError } = await supabase
+                .from('listings')
+                .select('*')
+                .eq('id', listingId)
+                .single();
+
+            if (itemError) console.error("Error fetching item:", itemError);
+            setItem(itemData);
+
+            const { data: borrowerData, error: borrowerError } = await supabase
+                .from('accounts')
+                .select('name, email')
+                .eq('id', borrowerId)
+                .single();
+
+            if (borrowerError) console.error("Error fetching borrower:", borrowerError);
+            setBorrower(borrowerData);
+        }
+
+        fetchData()
+            .then(() => setLoading(false));
+
+    }, [request]);
+
+    const confirmAcceptance = async () => {
         const newRental = {
             id: Date.now(),
             request_id: id,
-            listing_id: listing_id,
-            borrower_id: borrower_id,
-            lender_id: lender_id,
+            listing_id: listingId,
+            borrower_id: borrowerId,
+            lender_id: lenderId,
             return_date: null,
             status: RENTAL_STATUS.ACTIVE
         };
@@ -37,7 +67,7 @@ export default function AcceptRentalRequest({ request, item, borrower, onClose, 
         const { error: listingError } = await supabase
             .from('listings')
             .update({ listing_status: RENTAL_STATUS.ACTIVE })
-            .eq('id', listing_id);
+            .eq('id', listingId);
 
         if (listingError) {
             return console.error("Error updating listing status:", listingError);
@@ -57,6 +87,10 @@ export default function AcceptRentalRequest({ request, item, borrower, onClose, 
 
         closeAllModals();
     };
+
+    if (loading) {
+        return <div className="p-8 text-center text-indigo-600">Loading Request Details...</div>;
+    }
 
     return (
         <div className="space-y-5">
@@ -99,12 +133,6 @@ export default function AcceptRentalRequest({ request, item, borrower, onClose, 
 
             {/* Actions */}
             <div className="pt-4 flex justify-end space-x-3 bg-gray-50 -mb-6 p-6 rounded-b-xl">
-                <button
-                    onClick={onClose}
-                    className="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition"
-                >
-                    Dismiss / Back
-                </button>
                 <button
                     onClick={confirmAcceptance}
                     className="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition shadow-md"

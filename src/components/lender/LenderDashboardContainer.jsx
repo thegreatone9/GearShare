@@ -19,7 +19,6 @@ export default function LenderDashboardContainer() {
     const [requests, setRequests] = useState([]);
     const [lenderRentals, setLenderRentals] = useState([]);
     const [disputes, setDisputes] = useState([]);
-    const [modalLoading, setModalLoading] = useState(false);
 
     const category = modalPayload?.category;
 
@@ -33,7 +32,7 @@ export default function LenderDashboardContainer() {
     }
 
     const openAcceptModal = (request) => {
-        setModalPayload({ category: MODAL_CATEGORY.ACCEPT_RENTAL_REQUEST, data: request });
+        setModalPayload({ category: MODAL_CATEGORY.ACCEPT_RENTAL_REQUEST, data: {request} });
         setIsModalOpen(true);
     };
 
@@ -41,12 +40,12 @@ export default function LenderDashboardContainer() {
         event.preventDefault();
         event.stopPropagation();
 
-        setModalPayload({ category: MODAL_CATEGORY.BORROWER, data: {borrowerId: 2} });
+        setModalPayload({ category: MODAL_CATEGORY.BORROWER, data: {borrowerId} });
         setIsModalOpen(true);
     };
 
     const openItemDetailsModal = (item) => {
-        setModalPayload({ category: MODAL_CATEGORY.ITEM, data: item });
+        setModalPayload({ category: MODAL_CATEGORY.ITEM, data: {item} });
         setIsModalOpen(true);
     }
 
@@ -122,76 +121,6 @@ export default function LenderDashboardContainer() {
 
     }, [userId]);
 
-    // --- DYNAMIC MODAL DATA FETCHING EFFECT ---
-    useEffect(() => {
-        if (!modalPayload || !modalPayload.data) {
-            return;
-        }
-
-        const { category, data } = modalPayload;
-
-        const fetchModalData = async () => {
-            setModalLoading(true);
-
-            let listingId = null;
-            let borrowerId = null;
-            let itemToUse = data.item || data;
-            let borrowerToUse = null;
-
-            switch (category) {
-                case MODAL_CATEGORY.ACCEPT_RENTAL_REQUEST:
-                    listingId = data.listing_id;
-                    borrowerId = data.borrower_id;
-                    break;
-                case MODAL_CATEGORY.ITEM:
-                    itemToUse = data;
-                    listingId = data.id;
-                    break;
-                case MODAL_CATEGORY.BORROWER:
-                    borrowerId = data.borrowerId;
-                    break;
-                default:
-                    setModalLoading(false);
-                    return;
-            }
-
-            if (listingId && !itemToUse.title) {
-                const { data: itemData, error: itemError } = await supabase
-                    .from('listings')
-                    .select('*')
-                    .eq('id', listingId)
-                    .single();
-                if (itemError) console.error("Error fetching item:", itemError);
-                itemToUse = itemData;
-            }
-
-            if (borrowerId) {
-                const { data: borrowerData, error: borrowerError } = await supabase
-                    .from('accounts')
-                    .select('name, email')
-                    .eq('id', borrowerId)
-                    .single();
-
-                if (borrowerError) console.error("Error fetching borrower:", borrowerError);
-                borrowerToUse = borrowerData;
-            }
-
-            setModalPayload(prev => ({
-                ...prev,
-                data: {
-                    ...prev.data,
-                    item: itemToUse,
-                    borrower: borrowerToUse
-                }
-            }));
-
-            setModalLoading(false);
-        };
-
-        fetchModalData();
-
-    }, [category]);
-
     // --- DATA FILTERING (Moved from component body) ---
     const activeRentals = lenderRentals.filter(rental => rental.status === RENTAL_STATUS.ACTIVE);
     const pendingRentalListings = listings.filter(item => !activeRentals.map(aR => aR.listing_id).includes(item.id));
@@ -209,26 +138,22 @@ export default function LenderDashboardContainer() {
     });
 
     // --- MODAL CONFIGURATION SETUP ---
-    const itemData = modalPayload?.data?.item || (category === MODAL_CATEGORY.ITEM ? modalPayload.data : null);
-
     const MODAL_REGISTRY = {
         [MODAL_CATEGORY.ACCEPT_RENTAL_REQUEST]: {
             title: "Review Rental Confirmation",
             maxWidth: "max-w-lg",
             props: {
-                request: modalPayload?.data,
-                item: itemData,
-                borrower: modalPayload?.data?.borrower,
+                request: modalPayload?.data?.request,
                 setRequests: setRequests,
                 setLenderRentals: setLenderRentals,
                 closeAllModals: closeAllModals
             }
         },
         [MODAL_CATEGORY.ITEM]: {
-            title: itemData ? `Details: ${itemData.title}` : "Item Details",
+            title: modalPayload?.data?.item ? `Details: ${modalPayload?.data?.item.title}` : "Item Details",
             maxWidth: "max-w-xl",
             props: {
-                item: itemData,
+                item: modalPayload?.data?.item,
             }
         },
         [MODAL_CATEGORY.BORROWER]: {
@@ -243,7 +168,6 @@ export default function LenderDashboardContainer() {
     const currentModalConfig = MODAL_REGISTRY[category] || {};
 
     const modalProps = {
-        modalLoading: modalLoading,
         title: currentModalConfig.title,
         maxWidth: currentModalConfig.maxWidth,
         ...currentModalConfig.props

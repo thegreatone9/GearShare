@@ -40,15 +40,6 @@ export default function BorrowerDetails({ borrowerId, onClose }) {
                 <p className="text-gray-700 mb-2"><strong>Name:</strong> {borrower.name}</p>
                 <p className="text-gray-700"><strong>Email:</strong> {borrower.email}</p>
             </div>
-
-            <div className="pt-4 flex justify-end space-x-3 bg-gray-50 -mb-6 p-6 rounded-b-xl">
-                <button
-                    onClick={onClose}
-                    className="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition"
-                >
-                    Dismiss / Back
-                </button>
-            </div>
         </div>
     )
 }

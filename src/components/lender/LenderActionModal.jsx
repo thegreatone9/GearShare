@@ -4,7 +4,7 @@ import {MODAL_CATEGORY, ModalComponentMap} from "./LenderUtil.js";
 
 export default function LenderActionModal({ category, modalProps, isModalOpen, setIsModalOpen }) {
     const ComponentToRender = ModalComponentMap[category];
-    const { title, maxWidth, modalLoading, ...componentSpecificProps } = modalProps;
+    const { title, maxWidth, ...componentSpecificProps } = modalProps;
 
     if (!ComponentToRender) {
         return null;
@@ -27,17 +27,12 @@ export default function LenderActionModal({ category, modalProps, isModalOpen, s
             title={modalTitle}
             maxWidth={modalMaxWidth}
         >
-            {modalLoading ? (
-                <div className="p-4 text-center text-indigo-600">Loading Details...</div>
-            ) : (
-                // RENDER THE IFRAME-STYLE CONTAINER for the component content
-                <div
-                    className={category === 'item' ? "h-[60vh] overflow-y-auto border border-gray-300 rounded-xl bg-gray-50 shadow-inner p-4" : ""}
-                    style={{ minHeight: category === 'item' ? '400px' : 'auto' }}
-                >
-                    <ComponentToRender {...finalComponentProps} />
-                </div>
-            )}
+            <div
+                className={category === 'item' ? "h-[60vh] overflow-y-auto border border-gray-300 rounded-xl bg-gray-50 shadow-inner p-4" : ""}
+                style={{ minHeight: category === 'item' ? '400px' : 'auto' }}
+            >
+                <ComponentToRender {...finalComponentProps} />
+            </div>
         </Modal>
     );
 }
