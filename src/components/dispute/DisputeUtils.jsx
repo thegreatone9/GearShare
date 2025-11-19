@@ -32,6 +32,7 @@ export const processUserDisputes = (appData, userId) => {
             return {
                 id: dispute.id,
                 itemTitle: itemTitle,
+                image: listing.image_url,
                 userRole: userRole,
                 isLent: isLender, // Used for final categorization
                 ...statusDetails,

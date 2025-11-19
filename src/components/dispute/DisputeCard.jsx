@@ -2,7 +2,7 @@ import React from "react";
 import {BORROWER_DISPUTE_ACTIONS, LENDER_DISPUTE_ACTIONS, ROLE} from "../util/Util.js";
 import {ACTION_ICONS} from "./DisputeUtils.jsx";
 
-export default function DisputeCard ({ dispute, openActionModal }) {
+export default function DisputeCard({dispute, openActionModal}) {
     const isLender = dispute.userRole === ROLE.LENDER;
 
     const LENDER_ACTION_CARD = {
@@ -48,41 +48,40 @@ export default function DisputeCard ({ dispute, openActionModal }) {
 
     return (
         <div key={dispute.id}
-             className="p-4 border border-gray-200 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white hover:bg-gray-50 transition duration-150">
-            <div className="flex-grow">
-                <p className="font-semibold text-lg text-gray-900">Case #{dispute.id} - {dispute.itemTitle}</p>
-                <p className="text-sm text-gray-600 mt-1">Your Role: <span
-                    className="font-bold text-indigo-700">{dispute.userRole}</span></p>
-            </div>
-
-            <div className="mt-3 sm:mt-0 text-left sm:text-right flex items-center space-x-3">
-                    <span className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${dispute.color} shadow-sm`}>
+             className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+            <div className="flex items-center space-x-3 cursor-pointer"
+                 onClick={() => openItemDetailsModal(dispute.itemid)}>
+                <img src={dispute.image} alt={dispute.itemTitle}
+                     className="w-12 h-12 rounded-lg object-cover"/>
+                <div>
+                    <p className="text-md text-gray-900">{dispute.itemTitle}</p>
+                    <p className={`inline-block my-1 px-2 py-1 text-xs font-medium rounded-full ${dispute.color} shadow-sm`}>
                         {dispute.label}
-                    </span>
-
-                {dispute.showAction && (
-                    <div className="flex space-x-2">
-                        {
-                            dispute.actions.map(actionKey => {
-                                const actionProps = isLender ? LENDER_ACTION_CARD[actionKey] : BORROWER_ACTION_CARD[actionKey];
-
-                                if (!actionProps) return null; // Safety check
-                                const ActionIcon = actionProps.icon;
-
-                                return (
-                                    <button
-                                        key={actionKey}
-                                        onClick={() => openActionModal(actionKey, dispute)}
-                                        className={`text-sm text-white px-4 py-2 rounded-lg transition flex items-center font-medium shadow-md ${actionProps.className}`}>
-                                        <ActionIcon className="w-4 h-4 mr-2"/>
-                                        {actionProps.label}
-                                    </button>
-                                )
-                            })
-                        }
-                    </div>
-                )}
+                    </p>
+                </div>
             </div>
+            {dispute.showAction && (
+                <div className="flex space-x-2">
+                    {
+                        dispute.actions.map(actionKey => {
+                            const actionProps = isLender ? LENDER_ACTION_CARD[actionKey] : BORROWER_ACTION_CARD[actionKey];
+
+                            if (!actionProps) return null; // Safety check
+                            const ActionIcon = actionProps.icon;
+
+                            return (
+                                <button
+                                    key={actionKey}
+                                    onClick={() => openActionModal(actionKey, dispute)}
+                                    className={`text-sm text-white px-4 py-2 rounded-lg transition flex items-center font-medium shadow-md ${actionProps.className}`}>
+                                    <ActionIcon className="w-4 h-4 mr-2"/>
+                                    {actionProps.label}
+                                </button>
+                            )
+                        })
+                    }
+                </div>
+            )}
         </div>
     );
 }
