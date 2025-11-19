@@ -5,6 +5,7 @@ import {processUserDisputes} from "./DisputeUtils.jsx";
 import DisputeCard from "./DisputeCard.jsx";
 import {supabase} from "../../server/supabaseClient.js";
 import {AuthContext} from "../../App.jsx";
+import {BORROWER_DISPUTE_ACTIONS, LENDER_DISPUTE_ACTIONS, ROLE} from "../util/Util.js";
 
 export default function DisputeDashboard() {
     const {authenticatedUser} = useContext(AuthContext);
@@ -12,15 +13,30 @@ export default function DisputeDashboard() {
     const [appData, setAppData] = useState({ disputes: [], rentals: [], requests: [], listings: [], accounts: [] });
     const [modalState, setModalState] = useState({
         isOpen: false,
-        action: null,
+        action: '',
         dispute: null,
+        opponentId: null,
+        item: null
     });
 
     const closeModal = () => {
-        setModalState({ isOpen: false, action: null, dispute: null });
+        setModalState({ isOpen: false, action: '', dispute: null, item: null, opponentId: null });
     };
     const openActionModal = (actionType, dispute) => {
-        setModalState({ isOpen: true, action: actionType, dispute: dispute });
+        setModalState({ isOpen: true, action: actionType, dispute: dispute, item: null, opponentId: null });
+    };
+    const openOpponentDetails = (event, role, opponentId) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const actionType = ROLE.LENDER === role ? LENDER_DISPUTE_ACTIONS.VIEW_BORROWER : BORROWER_DISPUTE_ACTIONS.VIEW_LENDER;
+
+        setModalState({ isOpen: true, action: actionType, dispute: null, item: null, opponentId: opponentId });
+    };
+    const openItemDetails = (role, item) => {
+        const actionType = ROLE.LENDER === role ? LENDER_DISPUTE_ACTIONS.VIEW_ITEM : BORROWER_DISPUTE_ACTIONS.VIEW_ITEM;
+
+        setModalState({ isOpen: true, action: actionType, dispute: null, opponentId: null, item: item });
     };
 
     const { disputedLentItems, disputedBorrowedItems } = useMemo(() => {
@@ -120,7 +136,11 @@ export default function DisputeDashboard() {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {disputedLentItems.map(dispute => <DisputeCard key={dispute.id} dispute={dispute} openActionModal={openActionModal} />)}
+                            {disputedLentItems.map(dispute => <DisputeCard key={dispute.id}
+                                                                           dispute={dispute}
+                                                                           openItemDetails={openItemDetails}
+                                                                           openActionModal={openActionModal}
+                                                                           openOpponentDetails={openOpponentDetails} />)}
                         </div>
                     )}
                 </section>
@@ -140,14 +160,17 @@ export default function DisputeDashboard() {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {disputedBorrowedItems.map(dispute => <DisputeCard key={dispute.id} dispute={dispute} openActionModal={openActionModal} />)}
+                            {disputedBorrowedItems.map(dispute => <DisputeCard key={dispute.id}
+                                                                               dispute={dispute}
+                                                                               openItemDetails={openItemDetails}
+                                                                               openActionModal={openActionModal}
+                                                                               openOpponentDetails={openOpponentDetails} />)}
                         </div>
                     )}
                 </section>
             </div>
 
-            <DisputeActionModal selectedAction={modalState.action}
-                                dispute={modalState.dispute}
+            <DisputeActionModal modalState={modalState}
                                 closeModal={closeModal}
                                 setAppData={setAppData}/>
         </div>

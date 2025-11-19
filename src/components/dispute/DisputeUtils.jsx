@@ -23,7 +23,6 @@ export const processUserDisputes = (appData, userId) => {
 
             // 4. Get Listing Details
             const listing = listings.find(l => l.id === request.listing_id);
-            const itemTitle = listing ? listing.title : 'Unknown Item';
             const userRole = isLender ? ROLE.LENDER : ROLE.BORROWER;
 
             // 5. Get Status Details using the external helper function
@@ -31,10 +30,12 @@ export const processUserDisputes = (appData, userId) => {
 
             return {
                 id: dispute.id,
-                itemTitle: itemTitle,
-                image: listing.image_url,
+                item: listing,
+                request: request,
+                rental: rental,
                 userRole: userRole,
                 isLent: isLender, // Used for final categorization
+                opponentId: isLender ? request.borrower_id : request.lender_id,
                 ...statusDetails,
             };
         })

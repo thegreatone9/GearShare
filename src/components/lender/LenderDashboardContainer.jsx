@@ -35,11 +35,11 @@ export default function LenderDashboardContainer() {
         setIsModalOpen(true);
     };
 
-    const openBorrowerModal = (event, borrowerId) => {
+    const openBorrowerModal = (event, userId) => {
         event.preventDefault();
         event.stopPropagation();
 
-        setModalPayload({ category: MODAL_CATEGORY.BORROWER, data: {borrowerId} });
+        setModalPayload({ category: MODAL_CATEGORY.BORROWER, data: {userId} });
         setIsModalOpen(true);
     };
 
@@ -159,7 +159,7 @@ export default function LenderDashboardContainer() {
             title: "Borrower Details",
             maxWidth: "max-w-xl",
             props: {
-                borrowerId: modalPayload?.data?.borrowerId,
+                userId: modalPayload?.data?.userId,
             }
         }
     };

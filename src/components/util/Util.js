@@ -1,7 +1,7 @@
 import Cookies from "js-cookie";
 import AcceptRentalRequest from "../lender/modalContent/AcceptRentalRequest.jsx";
 import ModalItemDetails from "../common/ModalItemDetails.jsx";
-import BorrowerDetails from "../lender/modalContent/BorrowerDetails.jsx";
+import UserDetails from "../common/UserDetails.jsx";
 
 export const ROLE = {
     LENDER: 'lender',
@@ -40,13 +40,17 @@ export const LENDER_DISPUTE_ACTIONS = {
     FILE_CLAIM: 'fileClaim',
     SETTLE: 'settle',
     VIEW_CLAIM_DETAILS: 'viewClaimDetails',
-    VIEW_REPORT: 'viewReport'
+    VIEW_REPORT: 'viewReport',
+    VIEW_BORROWER: 'viewBorrower',
+    VIEW_ITEM: 'viewItem'
 }
 
 export const BORROWER_DISPUTE_ACTIONS = {
     SUBMIT_EVIDENCE: 'submitEvidence',
     VIEW_REPORT: 'viewReport',
-    PAY_DAMAGES: 'payDamages'
+    PAY_DAMAGES: 'payDamages',
+    VIEW_LENDER: 'viewLender',
+    VIEW_ITEM: 'viewItem'
 }
 
 export const TIME_UNIT = {
@@ -106,10 +110,14 @@ export const MODAL_CATEGORY= {
 export const ModalComponentMap = {
     [MODAL_CATEGORY.ACCEPT_RENTAL_REQUEST]: AcceptRentalRequest,
     [MODAL_CATEGORY.ITEM]: ModalItemDetails,
-    [MODAL_CATEGORY.BORROWER]: BorrowerDetails
+    [MODAL_CATEGORY.BORROWER]: UserDetails
 
     // Can add other generic item modals here as needed (e.g., disputeReview, returnFlow)
 };
+
+export const isEmptyString = function (str) {
+    return str === null || str === undefined || str.length === 0;
+}
 
 export const MOCK_DATA = {
     accounts: [

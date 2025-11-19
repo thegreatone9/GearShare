@@ -2,7 +2,7 @@ import React from "react";
 import {BORROWER_DISPUTE_ACTIONS, LENDER_DISPUTE_ACTIONS, ROLE} from "../util/Util.js";
 import {ACTION_ICONS} from "./DisputeUtils.jsx";
 
-export default function DisputeCard({dispute, openActionModal}) {
+export default function DisputeCard({dispute, openActionModal, openOpponentDetails, openItemDetails}) {
     const isLender = dispute.userRole === ROLE.LENDER;
 
     const LENDER_ACTION_CARD = {
@@ -25,6 +25,16 @@ export default function DisputeCard({dispute, openActionModal}) {
             icon: ACTION_ICONS[LENDER_DISPUTE_ACTIONS.VIEW_REPORT],
             label: 'View Report',
             className: 'bg-indigo-600 hover:bg-indigo-700'
+        },
+        [LENDER_DISPUTE_ACTIONS.VIEW_BORROWER]: {
+            icon: ACTION_ICONS[LENDER_DISPUTE_ACTIONS.VIEW_BORROWER],
+            label: 'Borrower Details',
+            className: 'bg-indigo-600 hover:bg-indigo-700'
+        },
+        [LENDER_DISPUTE_ACTIONS.VIEW_ITEM]: {
+            icon: ACTION_ICONS[LENDER_DISPUTE_ACTIONS.VIEW_ITEM],
+            label: 'Item Details',
+            className: 'bg-indigo-600 hover:bg-indigo-700'
         }
     }
 
@@ -43,6 +53,16 @@ export default function DisputeCard({dispute, openActionModal}) {
             icon: ACTION_ICONS[BORROWER_DISPUTE_ACTIONS.PAY_DAMAGES],
             label: 'Pay Damages',
             className: 'bg-red-600 hover:bg-red-700'
+        },
+        [BORROWER_DISPUTE_ACTIONS.VIEW_LENDER]: {
+            icon: ACTION_ICONS[BORROWER_DISPUTE_ACTIONS.VIEW_LENDER],
+            label: 'Lender Details',
+            className: 'bg-indigo-600 hover:bg-indigo-700'
+        },
+        [BORROWER_DISPUTE_ACTIONS.VIEW_ITEM]: {
+            icon: ACTION_ICONS[BORROWER_DISPUTE_ACTIONS.VIEW_ITEM],
+            label: 'Item Details',
+            className: 'bg-indigo-600 hover:bg-indigo-700'
         }
     }
 
@@ -50,12 +70,13 @@ export default function DisputeCard({dispute, openActionModal}) {
         <div key={dispute.id}
              className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
             <div className="flex items-center space-x-3 cursor-pointer"
-                 onClick={() => openItemDetailsModal(dispute.itemid)}>
-                <img src={dispute.image} alt={dispute.itemTitle}
+                 onClick={() => openItemDetails(dispute.userRole, dispute.item)}>
+                <img src={dispute.item.image_url} alt={dispute.item.title}
                      className="w-12 h-12 rounded-lg object-cover"/>
                 <div>
-                    <p className="text-md text-gray-900">{dispute.itemTitle}</p>
-                    <p className={`inline-block my-1 px-2 py-1 text-xs font-medium rounded-full ${dispute.color} shadow-sm`}>
+                    <p className="text-md text-gray-900">{dispute.item.title}</p>
+                    <a className="text-sm text-indigo-900 hover:underline" href="#" onClick={(event) => openOpponentDetails(event, dispute.userRole, dispute.opponentId)}>{isLender ? 'Borrower' : 'Lender'} Details</a>
+                    <p className={`my-1 px-2 py-1 text-xs font-medium rounded-full ${dispute.color} shadow-sm`}>
                         {dispute.label}
                     </p>
                 </div>
