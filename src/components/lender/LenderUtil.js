@@ -1,4 +1,7 @@
 import {DISPUTE_STATUS} from "../util/Util.js";
+import AcceptRentalRequest from "./modalContent/AcceptRentalRequest.jsx";
+import ItemDetails from "./modalContent/ItemDetails.jsx";
+import BorrowerDetails from "./modalContent/BorrowerDetails.jsx";
 
 export const getDisputeDisplay = (dispute) => {
     if (!dispute || dispute.status === DISPUTE_STATUS.COMPLETED) {
@@ -17,5 +20,14 @@ export const getDisputeDisplay = (dispute) => {
 
 export const MODAL_CATEGORY= {
     ITEM: 'item',
-    ACCEPT_RENTAL_REQUEST: 'acceptRentalRequest'
+    ACCEPT_RENTAL_REQUEST: 'acceptRentalRequest',
+    BORROWER: 'borrower'
 }
+
+export const ModalComponentMap = {
+    [MODAL_CATEGORY.ACCEPT_RENTAL_REQUEST]: AcceptRentalRequest,
+    [MODAL_CATEGORY.ITEM]: ItemDetails,
+    [MODAL_CATEGORY.BORROWER]: BorrowerDetails
+
+    // Can add other generic item modals here as needed (e.g., disputeReview, returnFlow)
+};

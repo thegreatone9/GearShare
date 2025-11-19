@@ -24,7 +24,8 @@ export default function LenderDashboardPresenter({
                                                      openItemDetailsModal,
                                                      declineRequest,
                                                      editItem,
-                                                     handleViewDisputes
+                                                     handleViewDisputes,
+                                                     openBorrowerModal
                                                  }) {
 
     // 1. Active Rentals Item Renderer
@@ -72,7 +73,7 @@ export default function LenderDashboardPresenter({
                     <img src={item.image_url} alt={item.title} className="w-12 h-12 rounded-lg object-cover"/>
                     <div className="flex flex-col justify-center items-center">
                         <p className="text-sm text-gray-700 mb-1">
-                            <span className="font-bold text-gray-900">Borrower</span> wants
+                            <a href="#" className="font-bold text-indigo-900 hover:underline" onClick={(event) => openBorrowerModal(event, req.borrower_id)}>Borrower</a> wants
                             to rent <span className="text-indigo-600 font-bold">{item.title}</span>.
                         </p>
                         <p className="text-xs text-gray-600">

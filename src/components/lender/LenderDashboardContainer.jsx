@@ -37,6 +37,14 @@ export default function LenderDashboardContainer() {
         setIsModalOpen(true);
     };
 
+    const openBorrowerModal = (event, borrowerId) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        setModalPayload({ category: MODAL_CATEGORY.BORROWER, data: {borrowerId: 2} });
+        setIsModalOpen(true);
+    };
+
     const openItemDetailsModal = (item) => {
         setModalPayload({ category: MODAL_CATEGORY.ITEM, data: item });
         setIsModalOpen(true);
@@ -139,6 +147,9 @@ export default function LenderDashboardContainer() {
                     itemToUse = data;
                     listingId = data.id;
                     break;
+                case MODAL_CATEGORY.BORROWER:
+                    borrowerId = data.borrowerId;
+                    break;
                 default:
                     setModalLoading(false);
                     return;
@@ -219,6 +230,13 @@ export default function LenderDashboardContainer() {
             props: {
                 item: itemData,
             }
+        },
+        [MODAL_CATEGORY.BORROWER]: {
+            title: "Borrower Details",
+            maxWidth: "max-w-xl",
+            props: {
+                borrowerId: modalPayload?.data?.borrowerId,
+            }
         }
     };
 
@@ -260,6 +278,7 @@ export default function LenderDashboardContainer() {
             declineRequest={declineRequest}
             editItem={editItem}
             handleViewDisputes={handleViewDisputes}
+            openBorrowerModal={openBorrowerModal}
         />
     );
 }
