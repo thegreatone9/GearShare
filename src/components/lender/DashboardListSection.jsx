@@ -1,6 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { RENTAL_STATUS } from '../util/Util.js'; // Assuming correct path
 
 /**
  * Reusable component to render one list section (e.g., Active Rentals, Inventory).
@@ -24,13 +22,13 @@ export default function DashboardListSection({
                                              }) {
     return (
         <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-100">
-            <h4 className={`text-2xl font-semibold text-gray-800 mb-4 border-b pb-3 flex items-center justify-between`}>
+            <h5 className={`text-xl font-semibold text-gray-800 mb-4 border-b pb-3 flex items-center justify-between`}>
                 <span className="flex items-center">
                     <Icon className={`w-7 h-7 mr-2 ${iconColor}`} />
                     {title}
                 </span>
                 {HeaderAction}
-            </h4>
+            </h5>
 
             <div className="space-y-4">
                 {list.length > 0 ? (

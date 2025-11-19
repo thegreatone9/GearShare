@@ -243,9 +243,9 @@ export default function LenderDashboardPresenter({
                         disputedRentals.length > 0 && (
                             <button
                                 onClick={handleViewDisputes}
-                                className="text-sm text-white bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700 transition font-medium w-auto flex items-center justify-center">
+                                className="text-sm text-white bg-red-600 rounded-lg hover:bg-red-700 transition font-medium w-auto flex items-center justify-center">
                                 <Landmark className='w-4 h-4 mr-2'/>
-                                Go to Disputes Dashboard
+                                <span style={{fontSize: '1rem'}}>Go to Disputes Dashboard</span>
                             </button>
                         )
                     }

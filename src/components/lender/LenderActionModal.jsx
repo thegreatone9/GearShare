@@ -26,7 +26,7 @@ const ModalComponentMap = {
             <Link
                 to={`/item/${item.id}?role=LENDER`}
                 onClick={onClose}
-                className="w-full inline-flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition"
+                className="w-full inline-flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition pointer-events-auto"
             >
                 Manage/Edit Item Details
             </Link>
