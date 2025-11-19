@@ -15,7 +15,7 @@ import {AuthContext} from "../../App.jsx";
 export default function ItemForm() {
     const {authenticatedUser} = useContext(AuthContext);
     const navigate = useNavigate();
-    const { id } = useParams(); // Renamed from 'id' to 'itemId' for clarity, based on the route definition
+    const { id } = useParams();
 
     const [searchParams] = useSearchParams();
     const role = searchParams.get('role');
@@ -88,7 +88,7 @@ export default function ItemForm() {
             ];
         }
 
-        return buttonProps.map(prop => (
+        return buttonProps?.map(prop => (
             <button
                 key={prop.action}
                 type="submit"
@@ -173,7 +173,6 @@ export default function ItemForm() {
 
     }, [itemIdNum]);
 
-    // 3. Handle data changes (for form inputs)
     const handleChange = (e) => {
         const { id, value } = e.target;
 
@@ -193,7 +192,6 @@ export default function ItemForm() {
         event.preventDefault();
 
         try {
-            // 1. Add to pending requests associated with the listing.
             const { error: requestError } = await supabase
                 .from('requests')
                 .insert([
@@ -304,8 +302,6 @@ export default function ItemForm() {
     if (editMode && !currentItem) {
         return <div className="py-8 text-center text-red-600">Listing not found. Invalid item ID.</div>;
     }
-
-    // Assume LISTING_CATEGORY is imported and itemState now includes location and category keys.
 
     return (
         <div className="py-8 max-w-4xl mx-auto">
