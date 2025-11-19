@@ -14,3 +14,8 @@ export const getDisputeDisplay = (dispute) => {
             return { label: dispute.status, color: 'bg-gray-100 text-gray-700' };
     }
 };
+
+export const MODAL_CATEGORY= {
+    ITEM: 'item',
+    ACCEPT_RENTAL_REQUEST: 'acceptRentalRequest'
+}
