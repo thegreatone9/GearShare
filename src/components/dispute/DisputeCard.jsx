@@ -68,7 +68,7 @@ export default function DisputeCard({dispute, openActionModal, openOpponentDetai
 
     return (
         <div key={dispute.id}
-             className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+             className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-8 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
             <div className="flex items-center space-x-3 cursor-pointer"
                  onClick={() => openItemDetails(dispute.userRole, dispute.item)}>
                 <img src={dispute.item.image_url} alt={dispute.item.title}
@@ -82,7 +82,7 @@ export default function DisputeCard({dispute, openActionModal, openOpponentDetai
                 </div>
             </div>
             {dispute.showAction && (
-                <div className="flex space-x-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     {
                         dispute.actions.map(actionKey => {
                             const actionProps = isLender ? LENDER_ACTION_CARD[actionKey] : BORROWER_ACTION_CARD[actionKey];
@@ -94,8 +94,8 @@ export default function DisputeCard({dispute, openActionModal, openOpponentDetai
                                 <button
                                     key={actionKey}
                                     onClick={() => openActionModal(actionKey, dispute)}
-                                    className={`text-sm text-white px-4 py-2 rounded-lg transition flex items-center font-medium shadow-md ${actionProps.className}`}>
-                                    <ActionIcon className="w-4 h-4 mr-2"/>
+                                    className={`text-sm text-white px-4 py-2 rounded-lg transition flex items-center justify-center font-medium shadow-md ${actionProps.className}`}>
+                                    <ActionIcon className="w-4 h-4"/>
                                     {actionProps.label}
                                 </button>
                             )

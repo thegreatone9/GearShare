@@ -22,7 +22,7 @@ export default function DashboardListSection({
                                              }) {
     return (
         <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-100">
-            <h5 className={`text-xl font-semibold text-gray-800 mb-4 border-b pb-3 flex items-center justify-between`}>
+            <h5 className={`flex flex-col sm:flex-row sm:items-center sm:justify-between text-xl font-semibold text-gray-800 mb-4 border-b pb-3 gap-2`}>
                 <span className="flex items-center">
                     <Icon className={`w-7 h-7 mr-2 ${iconColor}`} />
                     {title}

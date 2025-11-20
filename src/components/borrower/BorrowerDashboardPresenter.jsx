@@ -40,7 +40,7 @@ export default function BorrowerDashboardPresenter({
 
         return (
             <div key={rental.id}
-                 className="flex items-center justify-between p-2 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+                 className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 bg-gray-50 rounded-xl hover:bg-gray-100 transition gap-8">
                 <div className="flex items-center space-x-3 cursor-pointer" onClick={() => openItemDetailsModal(item)}>
                     <img src={item.image_url} alt={item.title}
                          className="w-12 h-12 rounded-lg object-cover"/>
@@ -49,7 +49,7 @@ export default function BorrowerDashboardPresenter({
                         <p className="text-sm text-gray-500">Due: <span className="font-bold text-indigo-700">{returnDate}</span></p>
                     </div>
                 </div>
-                <div className="text-right">
+                <div className="sm:text-right">
                     {/* Action button to initiate return/dispute */}
                     <button className="text-xs text-white bg-indigo-600 px-3 py-1 rounded-lg hover:bg-indigo-700 transition"
                             onClick={(event) => handleReturn(rental, event)}>Pay & Return Item Now
@@ -68,7 +68,7 @@ export default function BorrowerDashboardPresenter({
 
         return (
             <div key={rental.id}
-                 className="p-2 border border-red-300 bg-red-50 rounded-xl flex justify-between items-center hover:bg-red-100 transition w-full">
+                 className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-2 border border-red-300 bg-red-50 rounded-xl hover:bg-red-100 transition w-full gap-8">
                 {/* Item Details (Left Side) */}
                 <div className="flex items-center space-x-4 cursor-pointer" onClick={() => openItemDetailsModal(item)}>
                     <img src={item.image_url} alt={item.title}
@@ -95,7 +95,7 @@ export default function BorrowerDashboardPresenter({
 
         return (
             <div key={rental.id}
-                 className="flex justify-between items-center p-2 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition rounded-lg">
+                 className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-2 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition rounded-lg gap-8">
                 <div className='flex space-x-4 items-center cursor-pointer' onClick={() => openItemDetailsModal(item)}>
                     <img src={item.image_url} alt={item.title} className="w-10 h-10 rounded-lg object-cover"/>
                     <div>
@@ -103,7 +103,7 @@ export default function BorrowerDashboardPresenter({
                         <p className="text-sm text-gray-500">Returned: {new Date(rental.return_date).toLocaleDateString()}</p>
                     </div>
                 </div>
-                <div className='text-right'>
+                <div className='sm:text-right'>
                     <span className={`px-3 py-1 text-xs font-semibold rounded-full ${display.color}`}>
                         {display.label}
                     </span>

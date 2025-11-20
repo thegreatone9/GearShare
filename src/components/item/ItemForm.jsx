@@ -34,7 +34,7 @@ export default function ItemForm() {
 
     // --- Button Mapping Function ---
     const getActionButtons = () => {
-        const commonClasses = "flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-lg text-lg font-bold focus:outline-none focus:ring-2 focus:ring-offset-2 transition duration-150 w-full";
+        const commonClasses = "flex justify-center items-center py-4 px-4 border border-transparent rounded-xl shadow-lg text-lg font-bold focus:outline-none focus:ring-2 focus:ring-offset-2 transition duration-150 w-full";
         let buttonProps;
 
         // Button properties include: label, onClick handler (type 'submit' is handled below), and classes.
