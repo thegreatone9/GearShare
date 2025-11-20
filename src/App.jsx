@@ -1,6 +1,6 @@
 import './styles/App.css'
 import LandingPage from "./components/landing/LandingPage.jsx";
-import {Navigate, Route, Routes, useNavigate} from "react-router-dom";
+import {Navigate, Route, Routes, useLocation, useNavigate} from "react-router-dom";
 import MarketplaceContent from "./components/item/MarketPlace.jsx";
 import Header from "./components/common/Header.jsx";
 import DisputeDashboard from "./components/dispute/DisputeDashboard.jsx";
@@ -17,6 +17,7 @@ import BorrowerDashboardContainer from "./components/borrower/BorrowerDashboardC
 export const AuthContext = React.createContext();
 
 export default function App() {
+    const location = useLocation();
     const navigate = useNavigate();
     const [authenticatedUser, setAuthenticatedUser] = useState(null);
 
@@ -34,12 +35,14 @@ export default function App() {
 
     }, []);
 
+    const paddingClasses = location.pathname === '/' ? '' : 'px-4 sm:px-6 lg:px-8';
+
     return (
         <AuthContext.Provider value={{authenticatedUser, setAuthenticatedUser}}>
             <div className="flex flex-col min-h-screen font-inter antialiased">
                 <main className="flex-grow px-4">
                     <Header />
-                    <div className="mt-[120px] max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 bg-indigo-50 rounded-2xl shadow-2xl mb-12">
+                    <div className={`mt-[120px] max-w-4xl mx-auto ${paddingClasses} bg-indigo-50 rounded-2xl shadow-2xl mb-12`}>
                         <Routes>
                             <Route path="/" element={<LandingPage/>}/>
                             <Route path="/auth" element={<AuthPage />}/>
