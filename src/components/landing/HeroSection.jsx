@@ -9,10 +9,10 @@ export default function HeroSection () {
             {/* Needs to be contained by the parent and sit at the back. */}
             <div className="absolute inset-0 z-0">
                 <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
+                    autoPlay={true}
+                    loop={true}
+                    muted={true}
+                    playsInline={true}
                     poster="https://placehold.co/1920x1080/4F46E5/ffffff?text=Video+Poster"
                     className="w-full h-full object-cover opacity-50" // Reduced opacity for subtlety
                 >
