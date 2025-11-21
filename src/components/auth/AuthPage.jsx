@@ -1,7 +1,7 @@
 import {useContext, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {supabase} from "../../server/supabaseClient.js";
-import {updateUserCookie, userSessionData} from "../util/Util.js";
+import {updateUserCookie, getUserSessionData} from "../util/Util.js";
 import {AuthContext} from "../../App.jsx";
 
 export default function AuthPage() {
@@ -14,7 +14,7 @@ export default function AuthPage() {
     const [error, setError] = useState('');
 
     const handleAuth = (user) => {
-        setAuthenticatedUser(userSessionData(user));
+        setAuthenticatedUser(getUserSessionData(user));
     };
 
     const addAccount = async  (newUser) => {

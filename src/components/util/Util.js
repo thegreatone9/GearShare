@@ -93,7 +93,7 @@ export const checkSession = async function () {
     }
 };
 
-export const userSessionData = function (user) {
+export const getUserSessionData = function (user) {
     return {
         id: user.id,
         name: user.name,

@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
-import {Mail, Package, Shield, User} from 'lucide-react';
+import {Mail, Package, Phone, Shield, User} from 'lucide-react';
 import {
     BORROWER_ITEM_ACTIONS,
     LENDER_ITEM_ACTIONS,
@@ -530,10 +530,10 @@ export default function ItemForm() {
 
                         <div className="flex flex-col items-center w-full">
                             <label htmlFor="phone" className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
-                                <Mail className="w-4 h-4 mr-2 text-indigo-600"/> Phone Number
+                                <Phone className="w-4 h-4 mr-2 text-indigo-600"/> Phone Number
                             </label>
                             <p className="w-1/2 px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200 text-center">
-                                {lender.phone || ''}
+                                {lender.phone || 'N/A'}
                             </p>
                         </div>
                     </div>
