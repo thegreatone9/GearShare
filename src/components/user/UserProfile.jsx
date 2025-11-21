@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {AlertTriangle, CheckCircle, Hash, Mail, Save, User} from 'lucide-react';
+import {AlertTriangle, CheckCircle, Hash, Mail, Phone, Save, User} from 'lucide-react';
 import {AuthContext} from "../../App.jsx";
 import {supabase} from "../../server/supabaseClient.js";
 import {updateUserCookie, userSessionData} from "../util/Util.js";
@@ -7,12 +7,16 @@ import {updateUserCookie, userSessionData} from "../util/Util.js";
 export default function UserProfile() {
     const {authenticatedUser, setAuthenticatedUser} = useContext(AuthContext);
     const MIN_PASSWORD_LEN = 1;
+    const MIN_PHONE_LEN = 9;
+    const MAX_PHONE_LEN = 12;
+    const PHONE_REGEX = /^[0-9]{9,12}$/;
 
     const [initialUserData, setInitialUserData] = useState();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        password: ''
+        password: '',
+        phone: ''
     });
 
     const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
@@ -38,7 +42,8 @@ export default function UserProfile() {
                     id: user.id,
                     name: user.name,
                     email: user.email,
-                    password: user.password
+                    password: user.password,
+                    phone: user.phone || ''
                 };
 
                 setInitialUserData(userData);
@@ -54,7 +59,8 @@ export default function UserProfile() {
     const isDataDirty =
         formData.name !== initialUserData?.name ||
         formData.email !== initialUserData?.email ||
-        formData.password !== initialUserData?.password;
+        formData.password !== initialUserData?.password ||
+        formData.phone !== initialUserData?.phone;
 
     const handleSave = async (e) => {
         e.preventDefault();
@@ -76,6 +82,15 @@ export default function UserProfile() {
 
             if (formData.name !== initialUserData.name) {
                 updatePayload.name = formData.name;
+            }
+
+            if (formData.phone !== initialUserData.phone) {
+                if (PHONE_REGEX.test(formData.phone)) {
+                    updatePayload.phone = formData.phone;
+
+                } else {
+                    throw new Error(`Phone must be ${MIN_PHONE_LEN} to ${MAX_PHONE_LEN} digits.`);
+                }
             }
 
             if (formData.password.length >= MIN_PASSWORD_LEN) {
@@ -194,6 +209,21 @@ export default function UserProfile() {
                             type="password"
                             placeholder={`Min ${MIN_PASSWORD_LEN} characters required for change`}
                             value={formData.password}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition autofill-fix"
+                        />
+                    </div>
+
+                    {/* Phone Number Input */}
+                    <div>
+                        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                            <Phone className="w-4 h-4 mr-2 text-indigo-600" /> Phone Number
+                        </label>
+                        <input
+                            id="phone"
+                            type="phone"
+                            placeholder={`${MIN_PHONE_LEN} to ${MAX_PHONE_LEN} Digits`}
+                            value={formData.phone || ''}
                             onChange={handleChange}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition autofill-fix"
                         />

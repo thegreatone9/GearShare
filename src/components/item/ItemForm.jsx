@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
-import {Package, Shield} from 'lucide-react';
+import {Mail, Package, Shield, User} from 'lucide-react';
 import {
     BORROWER_ITEM_ACTIONS,
     LENDER_ITEM_ACTIONS,
@@ -15,7 +15,7 @@ import {AuthContext} from "../../App.jsx";
 export default function ItemForm() {
     const {authenticatedUser} = useContext(AuthContext);
     const navigate = useNavigate();
-    const { id } = useParams();
+    const {id} = useParams();
 
     const [searchParams] = useSearchParams();
     const role = searchParams.get('role');
@@ -26,6 +26,7 @@ export default function ItemForm() {
 
     const [currentItem, setCurrentItem] = useState(null);
     const [itemState, setItemState] = useState(null);
+    const [lender, setLender] = useState(null);
 
     const [editMode, setEditMode] = useState(false);
     const [canRequestBorrow, setCanRequestBorrow] = useState(false);
@@ -111,7 +112,7 @@ export default function ItemForm() {
             setEditMode(false);
             setCanRequestBorrow(false);
 
-            const { data: item, error } = await supabase
+            const {data: item, error} = await supabase
                 .from('listings')
                 .select('*')
                 .eq('id', itemIdNum)
@@ -150,7 +151,7 @@ export default function ItemForm() {
                 setEditMode(!isNaN(itemIdNum));
 
             } else {
-                const { data: request, error } = await supabase
+                const {data: request, error: requestFetchError} = await supabase
                     .from('requests')
                     .select('id')
                     .eq('listing_id', item.id)
@@ -159,11 +160,25 @@ export default function ItemForm() {
                     .limit(1)
                     .maybeSingle();
 
-                if (error) {
+                if (requestFetchError) {
                     throw new Error("Error checking request existence for borrower!");
                 }
 
                 setCanRequestBorrow(!request);
+
+                if (role === ROLE.BORROWER) {
+                    const {data: lenderData, error: lenderFetchError} = await supabase
+                        .from('accounts')
+                        .select('name, email')
+                        .eq('id', item.owner_id)
+                        .single();
+
+                    if (lenderFetchError) {
+                        throw new Error("There was an error fetching Lender Details!");
+                    }
+
+                    setLender(lenderData);
+                }
             }
 
             setLoading(false);
@@ -174,7 +189,7 @@ export default function ItemForm() {
     }, [itemIdNum]);
 
     const handleChange = (e) => {
-        const { id, value } = e.target;
+        const {id, value} = e.target;
 
         setItemState(prevState => ({
             ...prevState,
@@ -192,7 +207,7 @@ export default function ItemForm() {
         event.preventDefault();
 
         try {
-            const { error: requestError } = await supabase
+            const {error: requestError} = await supabase
                 .from('requests')
                 .insert([
                     {
@@ -227,7 +242,7 @@ export default function ItemForm() {
                 .neq('status', REQUEST_STATUS.ACTIVE);
 
             // 2. Delete the main listing record.
-            const { error: listingError } = await supabase
+            const {error: listingError} = await supabase
                 .from('listings')
                 .delete()
                 .eq('id', itemIdNum);
@@ -265,7 +280,7 @@ export default function ItemForm() {
         let dbError;
 
         if (editMode) {
-            const { error } = await supabase
+            const {error} = await supabase
                 .from('listings')
                 .update(itemData)
                 .eq('id', itemIdNum);
@@ -279,7 +294,7 @@ export default function ItemForm() {
                 owner_id: authenticatedUser.id, // DB column: snake_case
             };
 
-            const { error } = await supabase
+            const {error} = await supabase
                 .from('listings')
                 .insert([newItemData]);
 
@@ -321,7 +336,8 @@ export default function ItemForm() {
 
                     {/* --- TITLE FIELD --- */}
                     <div>
-                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">Item Name / Title</label>
+                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">Item Name /
+                            Title</label>
                         {editMode ? (
                             <input
                                 id="title"
@@ -342,7 +358,8 @@ export default function ItemForm() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Location Field */}
                         <div>
-                            <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">Location / Pickup Area</label>
+                            <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">Location
+                                / Pickup Area</label>
                             {editMode ? (
                                 <input
                                     id="location"
@@ -362,7 +379,8 @@ export default function ItemForm() {
 
                         {/* Category Dropdown */}
                         <div>
-                            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            <label htmlFor="category"
+                                   className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                             {editMode ? (
                                 <select
                                     id="category"
@@ -388,7 +406,8 @@ export default function ItemForm() {
 
                     {/* --- DESCRIPTION FIELD --- */}
                     <div>
-                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <label htmlFor="description"
+                               className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                         {editMode ? (
                             <textarea
                                 id="description"
@@ -411,7 +430,8 @@ export default function ItemForm() {
                     <h4 className="text-xl font-semibold text-indigo-700">2. Pricing & Protection Policy</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">Daily Rental Rate ($)</label>
+                            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">Daily Rental
+                                Rate ($)</label>
                             {editMode ? (
                                 <input
                                     id="price"
@@ -450,7 +470,8 @@ export default function ItemForm() {
                                     ${itemState.value}
                                 </p>
                             )}
-                            <p className="mt-1 text-xs text-gray-500">This determines the borrower's security deposit amount.</p>
+                            <p className="mt-1 text-xs text-gray-500">This determines the borrower's security deposit
+                                amount.</p>
                         </div>
                     </div>
                 </div>
@@ -467,7 +488,8 @@ export default function ItemForm() {
                                        onChange={handleFileChange}/>
                                 <Package className="w-8 h-8 text-gray-400 mx-auto mb-2"/>
                                 <p className="text-sm font-medium text-gray-700">Click to upload up to 5 photos.</p>
-                                <p className="text-xs text-gray-500">Clear photos of item and accessories are required for
+                                <p className="text-xs text-gray-500">Clear photos of item and accessories are required
+                                    for
                                     dispute resolution.</p>
                             </label>
                         </div>
@@ -481,6 +503,42 @@ export default function ItemForm() {
                         </div>
                     )}
                 </div>
+
+                {/* Lender Details */}
+                {
+                    role === ROLE.BORROWER && lender &&
+                    <div className="space-y-4 border-b pb-6 mx-auto flex flex-col items-center">
+                        <h4 className="text-xl font-semibold text-indigo-700">4. Lender Details</h4>
+
+                        <div className="flex flex-col items-center w-full">
+                            <label htmlFor="name" className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
+                                <User className="w-4 h-4 mr-2 text-indigo-600"/> Full Name
+                            </label>
+                            <p className="w-1/2 px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200 text-center">
+                                {lender.name}
+                            </p>
+                        </div>
+
+                        <div className="flex flex-col items-center w-full">
+                            <label htmlFor="email" className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
+                                <Mail className="w-4 h-4 mr-2 text-indigo-600"/> Email Address
+                            </label>
+                            <p className="w-1/2 px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200 text-center">
+                                {lender.email}
+                            </p>
+                        </div>
+
+                        <div className="flex flex-col items-center w-full">
+                            <label htmlFor="phone" className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
+                                <Mail className="w-4 h-4 mr-2 text-indigo-600"/> Phone Number
+                            </label>
+                            <p className="w-1/2 px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200 text-center">
+                                {lender.phone || ''}
+                            </p>
+                        </div>
+                    </div>
+
+                }
 
                 <div className="flex gap-4 justify-center">
                     {getActionButtons()}
