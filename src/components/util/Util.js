@@ -71,6 +71,14 @@ export const LISTING_CATEGORY = {
     OTHERS: 'Others'
 }
 
+export const LISTING_CONDITION = {
+    ONE: '1',
+    TWO: '2',
+    THREE: '3',
+    FOUR: '4',
+    FIVE: '5'
+}
+
 export const updateUserCookie = function (user) {
     const userDataString = JSON.stringify({
         name: user.name,
@@ -113,6 +121,19 @@ export const ModalComponentMap = {
     [MODAL_CATEGORY.BORROWER]: UserDetails
 
     // Can add other generic item modals here as needed (e.g., disputeReview, returnFlow)
+};
+
+export const getStatusClasses = (type) => {
+    switch (type) {
+        case 'success':
+            return 'bg-green-100 border-green-500 text-green-700';
+        case 'error':
+            return 'bg-red-100 border-red-500 text-red-700';
+        case 'warning':
+            return 'bg-yellow-100 border-yellow-500 text-yellow-700';
+        default:
+            return 'hidden';
+    }
 };
 
 export const isEmptyString = function (str) {

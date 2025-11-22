@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from 'react';
 import {AlertTriangle, CheckCircle, Hash, Mail, Phone, Save, User} from 'lucide-react';
 import {AuthContext} from "../../App.jsx";
 import {supabase} from "../../server/supabaseClient.js";
-import {getUserSessionData, updateUserCookie} from "../util/Util.js";
+import {getStatusClasses, getUserSessionData, updateUserCookie} from "../util/Util.js";
 
 export default function UserProfile() {
     const {authenticatedUser, setAuthenticatedUser} = useContext(AuthContext);
@@ -110,19 +110,6 @@ export default function UserProfile() {
             </div>
         );
     }
-
-    const getStatusClasses = (type) => {
-        switch (type) {
-            case 'success':
-                return 'bg-green-100 border-green-500 text-green-700';
-            case 'error':
-                return 'bg-red-100 border-red-500 text-red-700';
-            case 'warning':
-                return 'bg-yellow-100 border-yellow-500 text-yellow-700';
-            default:
-                return 'hidden';
-        }
-    };
 
     return (
         <div className="py-12 px-4 sm:px-6 lg:px-8">

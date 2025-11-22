@@ -127,7 +127,7 @@ export default function AcceptRentalRequest({ request, onClose, setRequests, set
                 </div>
                 <div className="flex text-sm text-gray-600">
                     <Star className="w-4 h-4 mr-2 flex-shrink-0 text-yellow-500"  />
-                    <p>Rating: {item.rating}</p>
+                    <p>Rating: {item.condition}</p>
                 </div>
             </div>
 

@@ -1,10 +1,11 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
-import {Mail, Package, Phone, Shield, User} from 'lucide-react';
+import {AlertTriangle, CheckCircle, Mail, Package, Phone, Shield, User} from 'lucide-react';
 import {
-    BORROWER_ITEM_ACTIONS,
+    BORROWER_ITEM_ACTIONS, getStatusClasses,
     LENDER_ITEM_ACTIONS,
     LISTING_CATEGORY,
+    LISTING_CONDITION,
     RENTAL_STATUS,
     REQUEST_STATUS,
     ROLE
@@ -25,12 +26,22 @@ export default function ItemForm() {
     const itemIdNum = parseInt(id);
 
     const [currentItem, setCurrentItem] = useState(null);
-    const [itemState, setItemState] = useState(null);
+    const [itemState, setItemState] = useState({
+        title: '',
+        description: '',
+        location: '',
+        category: '',
+        condition: '',
+        price: '',
+        value: '',
+        unit: '',
+        image_url: ''
+    });
     const [lender, setLender] = useState(null);
 
     const [editMode, setEditMode] = useState(false);
     const [canRequestBorrow, setCanRequestBorrow] = useState(false);
-    const [statusMessage, setStatusMessage] = useState('');
+    const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
     const [loading, setLoading] = useState(true);
 
     // --- Button Mapping Function ---
@@ -104,6 +115,9 @@ export default function ItemForm() {
 
     useEffect(() => {
         if (!itemIdNum) {
+            setLoading(false);
+            setEditMode(true);
+
             return;
         }
 
@@ -126,6 +140,7 @@ export default function ItemForm() {
                     description: '',
                     location: '',
                     category: '',
+                    condition: '',
                     price: '',
                     value: '',
                     unit: 'day',
@@ -142,6 +157,7 @@ export default function ItemForm() {
                     value: item.replacement_value || '', // Ensure snake_case matches DB
                     location: item.location || '',
                     category: item.category || '',
+                    condition: item.condition || '',
                     unit: item.unit || 'day',
                     image_url: item.image_url // Ensure snake_case matches DB
                 });
@@ -271,6 +287,7 @@ export default function ItemForm() {
             description: itemState.description,
             location: itemState.location,
             category: itemState.category,
+            condition: itemState.condition,
             price: priceNum,
             replacement_value: valueNum,
             unit: itemState.unit,
@@ -294,6 +311,14 @@ export default function ItemForm() {
                 owner_id: authenticatedUser.id, // DB column: snake_case
             };
 
+            try {
+                //Add Form Validations
+
+            } catch (error) {
+                console.error("Save Error:", error);
+                setStatusMessage({ type: 'error', text: `Failed to save Item: ${error.message}` });
+            }
+
             const {error} = await supabase
                 .from('listings')
                 .insert([newItemData]);
@@ -303,7 +328,7 @@ export default function ItemForm() {
 
         if (dbError) {
             console.error("Database submission error:", dbError.message);
-            setStatusMessage(`Error submitting item: ${dbError.message}`);
+            setStatusMessage({type: '', text: `Error submitting item: ${dbError.message}`});
 
         } else {
             setTimeout(() => navigate('/lender'), 500);
@@ -314,23 +339,23 @@ export default function ItemForm() {
         return <div className="py-8 text-center text-indigo-600">Loading item details...</div>;
     }
 
-    if (editMode && !currentItem) {
+    if (editMode && itemIdNum && !currentItem) {
         return <div className="py-8 text-center text-red-600">Listing not found. Invalid item ID.</div>;
     }
 
     return (
         <div className="py-8 max-w-4xl mx-auto">
             <h3 className="text-3xl font-bold text-gray-800 mb-6">
-                {editMode ? `Edit Listing: ${itemState.title}` : `Viewing Listing: ${itemState.title}`}
+                {editMode ? `Edit Listing: ${itemIdNum && itemState.title}` : `Viewing Listing: ${itemState.title}`}
             </h3>
 
-            {statusMessage && (
-                <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded-lg">
-                    {statusMessage}
-                </div>
-            )}
-
             <form onSubmit={handleSubmit} className="bg-white p-6 md:p-10 rounded-2xl shadow-2xl space-y-6">
+                {statusMessage.text && (
+                    <div className={`p-4 rounded-lg border-l-4 font-medium ${getStatusClasses(statusMessage.type)} flex items-center`}>
+                        {statusMessage.type === 'success' ? <CheckCircle className="w-5 h-5 mr-3" /> : <AlertTriangle className="w-5 h-5 mr-3" />}
+                        {statusMessage.text}
+                    </div>
+                )}
                 <div className="space-y-4 border-b pb-6">
                     <h4 className="text-xl font-semibold text-indigo-700">1. Basic Item Information</h4>
 
@@ -355,28 +380,28 @@ export default function ItemForm() {
                         )}
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Location Field */}
-                        <div>
-                            <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">Location
-                                / Pickup Area</label>
-                            {editMode ? (
-                                <input
-                                    id="location"
-                                    type="text"
-                                    required
-                                    placeholder="e.g., San Francisco, CA"
-                                    value={itemState.location}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
-                                />
-                            ) : (
-                                <p className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
-                                    {itemState.location}
-                                </p>
-                            )}
-                        </div>
+                    {/* Location Field */}
+                    <div>
+                        <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">Location
+                            / Pickup Area</label>
+                        {editMode ? (
+                            <input
+                                id="location"
+                                type="text"
+                                required
+                                placeholder="e.g., San Francisco, CA"
+                                value={itemState.location}
+                                onChange={handleChange}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
+                            />
+                        ) : (
+                            <p className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
+                                {itemState.location}
+                            </p>
+                        )}
+                    </div>
 
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Category Dropdown */}
                         <div>
                             <label htmlFor="category"
@@ -387,18 +412,44 @@ export default function ItemForm() {
                                     required
                                     value={itemState.category}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition bg-white"
+                                    className="text-black w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition bg-white"
                                 >
                                     <option value="" disabled>Select a Category</option>
                                     {
                                         Object.values(LISTING_CATEGORY).map(category => {
-                                            return <option key={category}>{category}</option>
+                                            return <option key={category} value={category}>{category}</option>
                                         })
                                     }
                                 </select>
                             ) : (
                                 <p className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
                                     {itemState.category}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Condition Dropdown */}
+                        <div>
+                            <label htmlFor="condition"
+                                   className="block text-sm font-medium text-gray-700 mb-1">Condition</label>
+                            {editMode ? (
+                                <select
+                                    id="condition"
+                                    required
+                                    value={itemState.condition}
+                                    onChange={handleChange}
+                                    className="text-black w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition bg-white"
+                                >
+                                    <option value="" disabled>Select a Condition</option>
+                                    {
+                                        Object.values(LISTING_CONDITION).map(condition => {
+                                            return <option key={condition} value={condition}>{condition}</option>
+                                        })
+                                    }
+                                </select>
+                            ) : (
+                                <p className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
+                                    {itemState.condition}
                                 </p>
                             )}
                         </div>
@@ -489,8 +540,7 @@ export default function ItemForm() {
                                 <Package className="w-8 h-8 text-gray-400 mx-auto mb-2"/>
                                 <p className="text-sm font-medium text-gray-700">Click to upload up to 5 photos.</p>
                                 <p className="text-xs text-gray-500">Clear photos of item and accessories are required
-                                    for
-                                    dispute resolution.</p>
+                                    for dispute resolution.</p>
                             </label>
                         </div>
                     ) : (

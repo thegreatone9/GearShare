@@ -38,7 +38,7 @@ export default function ItemCard({item}) {
                 </div>
                 <p className="text-sm text-gray-500 mt-1">{item.location}</p>
                 <div className="mt-2 flex items-center text-sm text-yellow-500">
-                    <span className="mr-1">★</span> {item.rating}
+                    <span className="mr-1">★</span> {item.condition}
                     <span className="ml-2 text-gray-500">· Available Now</span>
                 </div>
             </div>
