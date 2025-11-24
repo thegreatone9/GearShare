@@ -109,6 +109,18 @@ export const getUserSessionData = function (user) {
     }
 }
 
+export const parseDDMMYYYY = function (dateString) {
+    if (!dateString || dateString.length !== 10) return null;
+    const parts = dateString.split('-');
+    const day = parseInt(parts[2], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const year = parseInt(parts[0], 10);
+
+    const date = new Date(year, month, day);
+
+    return date.getFullYear() === year && date.getMonth() === month ? date : null;
+};
+
 export const MODAL_CATEGORY= {
     ITEM: 'item',
     ACCEPT_RENTAL_REQUEST: 'acceptRentalRequest',

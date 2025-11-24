@@ -1,11 +1,13 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
-import {AlertTriangle, CheckCircle, Mail, Package, Phone, Shield, User} from 'lucide-react';
+import {AlertTriangle, CalendarDays, CheckCircle, Mail, Package, Phone, Shield, User} from 'lucide-react';
 import {
-    BORROWER_ITEM_ACTIONS, getStatusClasses,
+    BORROWER_ITEM_ACTIONS,
+    getStatusClasses,
     LENDER_ITEM_ACTIONS,
     LISTING_CATEGORY,
     LISTING_CONDITION,
+    parseDDMMYYYY,
     RENTAL_STATUS,
     REQUEST_STATUS,
     ROLE
@@ -41,7 +43,11 @@ export default function ItemForm() {
 
     const [editMode, setEditMode] = useState(false);
     const [canRequestBorrow, setCanRequestBorrow] = useState(false);
-    const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
+    const [requestDates, setRequestDates] = useState({
+        start_date: '',
+        end_date: ''
+    });
+    const [statusMessage, setStatusMessage] = useState({ type: '', field: '', text: '' });
     const [loading, setLoading] = useState(true);
 
     // --- Button Mapping Function ---
@@ -185,7 +191,7 @@ export default function ItemForm() {
                 if (role === ROLE.BORROWER) {
                     const {data: lenderData, error: lenderFetchError} = await supabase
                         .from('accounts')
-                        .select('name, email')
+                        .select('id, name, email')
                         .eq('id', item.owner_id)
                         .single();
 
@@ -222,6 +228,24 @@ export default function ItemForm() {
     const handleBorrowRequest = async function (event) {
         event.preventDefault();
 
+        setStatusMessage({ type: '', field: '', text: '' });
+
+        const rentStartDate = requestDates.start_date;
+        const rentEndDate = requestDates.end_date;
+
+        if (!rentStartDate || !rentEndDate) {
+            setStatusMessage({ type: 'error', field: 'rent_dates', text: 'Both Start Date and End Date must be provided.' });
+            return;
+        }
+
+        const startDateObj = parseDDMMYYYY(rentStartDate);
+        const endDateObj = parseDDMMYYYY(rentEndDate);
+
+        if (startDateObj.getTime() >= endDateObj.getTime()) {
+            setStatusMessage({ type: 'error', field: 'rent_dates', text: 'Start Date must be before End Date.' });
+            return;
+        }
+
         try {
             const {error: requestError} = await supabase
                 .from('requests')
@@ -229,7 +253,11 @@ export default function ItemForm() {
                     {
                         listing_id: itemIdNum,
                         borrower_id: authenticatedUser.id,
-                        status: REQUEST_STATUS.PENDING // Assuming REQUEST_STATUS.PENDING exists
+                        lender_id: lender.id,
+                        status: REQUEST_STATUS.ACTIVE,
+                        date: new Date().toISOString(),
+                        start_date: rentStartDate,
+                        end_date: rentEndDate
                     }
                 ]);
 
@@ -238,7 +266,7 @@ export default function ItemForm() {
             }
 
             setTimeout(() => {
-                navigate('/borrower');
+                navigate(`/item/${itemIdNum}`);
             }, 100);
 
         } catch (error) {
@@ -328,7 +356,7 @@ export default function ItemForm() {
 
         if (dbError) {
             console.error("Database submission error:", dbError.message);
-            setStatusMessage({type: '', text: `Error submitting item: ${dbError.message}`});
+            setStatusMessage({type: 'error', field: '', text: `Error submitting item: ${dbError.message}`});
 
         } else {
             setTimeout(() => navigate('/lender'), 500);
@@ -356,7 +384,7 @@ export default function ItemForm() {
                         {statusMessage.text}
                     </div>
                 )}
-                <div className="space-y-4 border-b pb-6">
+                <div className="space-y-4 pb-6">
                     <h4 className="text-xl font-semibold text-indigo-700">1. Basic Item Information</h4>
 
                     {/* --- TITLE FIELD --- */}
@@ -374,7 +402,7 @@ export default function ItemForm() {
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
                             />
                         ) : (
-                            <p className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
+                            <p id="title" className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
                                 {itemState.title}
                             </p>
                         )}
@@ -395,7 +423,7 @@ export default function ItemForm() {
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
                             />
                         ) : (
-                            <p className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
+                            <p id="location" className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
                                 {itemState.location}
                             </p>
                         )}
@@ -448,7 +476,7 @@ export default function ItemForm() {
                                     }
                                 </select>
                             ) : (
-                                <p className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
+                                <p id="location" className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
                                     {itemState.condition}
                                 </p>
                             )}
@@ -470,14 +498,14 @@ export default function ItemForm() {
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
                             ></textarea>
                         ) : (
-                            <p className="w-full px-4 py-3 bg-white text-gray-700 rounded-lg border border-gray-200 whitespace-pre-wrap">
+                            <p id="description" className="w-full px-4 py-3 bg-white text-gray-700 rounded-lg border border-gray-200 whitespace-pre-wrap">
                                 <i>{itemState.description ? itemState.description : 'No description provided for this item'}</i>
                             </p>
                         )}
                     </div>
                 </div>
 
-                <div className="space-y-4 border-b pb-6">
+                <div className="space-y-4 pb-6">
                     <h4 className="text-xl font-semibold text-indigo-700">2. Pricing & Protection Policy</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -494,7 +522,7 @@ export default function ItemForm() {
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
                                 />
                             ) : (
-                                <p className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
+                                <p id="price" className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
                                     ${itemState.price} / {itemState.unit}
                                 </p>
                             )}
@@ -517,7 +545,7 @@ export default function ItemForm() {
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
                                 />
                             ) : (
-                                <p className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
+                                <p id="value" className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
                                     ${itemState.value}
                                 </p>
                             )}
@@ -546,6 +574,7 @@ export default function ItemForm() {
                     ) : (
                         <div className="rounded-xl shadow-lg border border-gray-200 overflow-hidden">
                             <img
+                                id="photos"
                                 src={itemState.image_url || "https://placehold.co/600x400/cccccc/000000?text=No+Image"}
                                 alt={`Photo of ${itemState.title}`}
                                 className="w-full h-80 object-cover"
@@ -557,11 +586,11 @@ export default function ItemForm() {
                 {/* Lender Details */}
                 {
                     role === ROLE.BORROWER && lender &&
-                    <div className="space-y-4 border-b pb-6 mx-auto flex flex-col items-center">
+                    <div className="space-y-4 pb-6 mx-auto flex flex-col items-center">
                         <h4 className="text-xl font-semibold text-indigo-700">4. Lender Details</h4>
 
                         <div className="flex flex-col items-center w-full">
-                            <label htmlFor="name" className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
+                            <label className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
                                 <User className="w-4 h-4 mr-2 text-indigo-600"/> Full Name
                             </label>
                             <p className="w-1/2 px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200 text-center">
@@ -570,7 +599,7 @@ export default function ItemForm() {
                         </div>
 
                         <div className="flex flex-col items-center w-full">
-                            <label htmlFor="email" className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
+                            <label className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
                                 <Mail className="w-4 h-4 mr-2 text-indigo-600"/> Email Address
                             </label>
                             <p className="w-1/2 px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200 text-center">
@@ -579,7 +608,7 @@ export default function ItemForm() {
                         </div>
 
                         <div className="flex flex-col items-center w-full">
-                            <label htmlFor="phone" className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
+                            <label className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
                                 <Phone className="w-4 h-4 mr-2 text-indigo-600"/> Phone Number
                             </label>
                             <p className="w-1/2 px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200 text-center">
@@ -588,6 +617,58 @@ export default function ItemForm() {
                         </div>
                     </div>
 
+                }
+
+                {
+                    role === ROLE.BORROWER && canRequestBorrow &&
+                    <div className="space-y-4 pb-6 mx-auto flex flex-col">
+                        <h4 className="text-xl font-semibold text-indigo-700 text-center">
+                            5. Request Rent Dates
+                        </h4>
+                        {
+                            statusMessage.type === 'error' && statusMessage.field === 'rent_dates' &&
+                            <p className="font-medium text-red-500 mb-2 flex items-center justify-center">
+                                Invalid: {statusMessage.text}
+                            </p>
+                        }
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
+                                    <CalendarDays className="w-4 h-4 mr-2 text-indigo-600" /> Start Date
+                                </label>
+
+                                <input
+                                    type="date"
+                                    value={requestDates.start_date}
+                                    onChange={(e) =>
+                                        setRequestDates({
+                                            ...requestDates,
+                                            start_date: e.target.value
+                                        })
+                                    }
+                                    className="w-3/5 border border-gray-300 rounded-md px-3 py-2"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
+                                    <CalendarDays className="w-4 h-4 mr-2 text-indigo-600" /> End Date
+                                </label>
+
+                                <input
+                                    type="date"
+                                    value={requestDates.end_date}
+                                    onChange={(e) =>
+                                        setRequestDates({
+                                            ...requestDates,
+                                            end_date: e.target.value
+                                        })
+                                    }
+                                    className="w-3/5 border border-gray-300 rounded-md px-3 py-2"
+                                />
+                            </div>
+                        </div>
+                    </div>
                 }
 
                 <div className="flex gap-4 justify-center">

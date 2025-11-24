@@ -77,7 +77,7 @@ export default function LenderDashboardPresenter({
                             to rent <span className="text-indigo-600 font-bold">{item.title}</span>.
                         </p>
                         <p className="text-xs text-gray-600">
-                            Request Date: {req.date || 'N/A'} | Deposit: ${req.deposit || 'N/A'}
+                            Request Date: {req.date || 'N/A'} | Deposit: ${item.replacement_value || 'N/A'}
                         </p>
                     </div>
                 </div>

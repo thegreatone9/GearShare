@@ -103,7 +103,7 @@ export default function AcceptRentalRequest({ request, onClose, setRequests, set
                     Item: {item.title}
                 </p>
                 <p className="text-sm text-gray-600">
-                    Price: ${item.price}/{item.unit} | Deposit Hold: ${request.deposit}
+                    Price: ${item.price}/{item.unit} | Deposit Hold: ${item.replacement_value}
                 </p>
             </div>
 
