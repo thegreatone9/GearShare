@@ -124,13 +124,15 @@ export const parseDDMMYYYY = function (dateString) {
 export const MODAL_CATEGORY= {
     ITEM: 'item',
     ACCEPT_RENTAL_REQUEST: 'acceptRentalRequest',
-    BORROWER: 'borrower'
+    BORROWER: 'borrower',
+    LENDER: 'lender'
 }
 
 export const ModalComponentMap = {
     [MODAL_CATEGORY.ACCEPT_RENTAL_REQUEST]: AcceptRentalRequest,
     [MODAL_CATEGORY.ITEM]: ModalItemDetails,
-    [MODAL_CATEGORY.BORROWER]: UserDetails
+    [MODAL_CATEGORY.BORROWER]: UserDetails,
+    [MODAL_CATEGORY.LENDER]: UserDetails
 
     // Can add other generic item modals here as needed (e.g., disputeReview, returnFlow)
 };

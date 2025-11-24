@@ -135,8 +135,31 @@ export default function BorrowerDashboardContainer() {
         navigate(`/disputes`);
     }
 
+    const cancelRequest = async (request) => {
+        const { error } = await supabase
+            .from('requests')
+            .delete()
+            .eq('id', request.id);
+
+        if (error) {
+            console.error(`Error declining request ${request.id}:`, error);
+            return;
+        }
+
+        setRequests(prevRequests =>
+            prevRequests.filter(req => req.id !== request.id)
+        );
+    };
+
     const openItemDetailsModal = (item) => {
         setModalPayload({ category: MODAL_CATEGORY.ITEM, data: {item} });
+        setIsModalOpen(true);
+    }
+
+    const openLenderDetailsModal = (event, userId) => {
+        event.stopPropagation();
+
+        setModalPayload({ category: MODAL_CATEGORY.LENDER, data: {userId} });
         setIsModalOpen(true);
     }
 
@@ -152,6 +175,14 @@ export default function BorrowerDashboardContainer() {
             maxWidth: "max-w-xl",
             props: {
                 item: modalPayload?.data?.item,
+                userId: modalPayload?.data?.lenderId
+            }
+        },
+        [MODAL_CATEGORY.LENDER]: {
+            title: "Lender Details",
+            maxWidth: "max-w-xl",
+            props: {
+                userId: modalPayload?.data?.userId,
             }
         }
     };
@@ -186,8 +217,10 @@ export default function BorrowerDashboardContainer() {
             disputes={disputes}
 
             openItemDetailsModal={openItemDetailsModal}
+            openLenderDetailsModal={openLenderDetailsModal}
             handleReturn={handleReturn}
             handleViewDispute={handleViewDispute}
+            cancelRequest={cancelRequest}
         />
     );
 }

@@ -12,6 +12,7 @@ export default function BorrowerDashboardPresenter({
                                                        modalProps,
 
                                                        activeRentals,
+                                                       pendingRentals,
                                                        disputedRentals,
                                                        pastRentals,
                                                        requests,
@@ -19,8 +20,10 @@ export default function BorrowerDashboardPresenter({
                                                        disputes,
 
                                                        openItemDetailsModal,
+                                                       openLenderDetailsModal,
                                                        handleReturn,
-                                                       handleViewDispute
+                                                       handleViewDispute,
+                                                       cancelRequest
                                                    }) {
 
     const getItemAndRequest = (rental) => {
@@ -53,6 +56,35 @@ export default function BorrowerDashboardPresenter({
                     {/* Action button to initiate return/dispute */}
                     <button className="text-xs text-white bg-indigo-600 px-3 py-1 rounded-lg hover:bg-indigo-700 transition"
                             onClick={(event) => handleReturn(rental, event)}>Pay & Return Item Now
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
+    const renderRequestedRental = (req) => {
+        const item = listings.find(listing => listing.id === req.listing_id);
+
+        return (
+            <div key={req.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-8 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+                <div className="flex items-center space-x-3 cursor-pointer"
+                     onClick={() => openItemDetailsModal(item)}>
+                    <img src={item.image_url} alt={item.title} className="w-12 h-12 rounded-lg object-cover"/>
+                    <div className="flex flex-col justify-center items-center">
+                        <p className="text-sm text-gray-700 mb-1">
+                            <a href="#" className="font-bold text-indigo-900 hover:underline" onClick={(event) => openLenderDetailsModal(event, req.lender_id)}>Lender</a> wants
+                            to lend <span className="text-indigo-600 font-bold">{item.title}</span>.
+                        </p>
+                        <p className="text-xs text-gray-600">
+                            Request Date: {req.date || 'N/A'} | Deposit: ${item.replacement_value || 'N/A'}
+                        </p>
+                    </div>
+                </div>
+                <div className="sm:text-right">
+                    <button
+                        onClick={() => cancelRequest(req)}
+                        className="text-xs ml-2 font-semibold text-red-600 bg-white border border-red-300 px-3 py-1 rounded-lg hover:bg-red-50 transition">
+                        Cancel Request
                     </button>
                 </div>
             </div>
@@ -137,7 +169,17 @@ export default function BorrowerDashboardPresenter({
                     emptyMessage="No items are currently out on rent."
                 />
 
-                {/* 2. Disputed Rentals (Returned but Unsettled) */}
+                {/* 2. Pending Rentals */}
+                <DashboardListSection
+                    title={`Requested Rentals (${requests.length})`}
+                    Icon={Zap}
+                    iconColor="text-indigo-500"
+                    list={requests}
+                    renderItem={renderRequestedRental}
+                    emptyMessage="No requests for rentals are made."
+                />
+
+                {/* 3. Disputed Rentals (Returned but Unsettled) */}
                 <DashboardListSection
                     title={`Disputed Rentals (${disputedRentals.length})`}
                     Icon={ShieldAlert}
@@ -156,7 +198,7 @@ export default function BorrowerDashboardPresenter({
                     }
                 />
 
-                {/* 3. Past Rentals (Settled) */}
+                {/* 4. Past Rentals (Settled) */}
                 <DashboardListSection
                     title={`Past Rentals (Settled) (${pastRentals.length})`}
                     Icon={Package}

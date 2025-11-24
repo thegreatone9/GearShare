@@ -208,6 +208,14 @@ export default function ItemForm() {
 
         fetchItem();
 
+        if (role === ROLE.BORROWER && !canRequestBorrow) {
+            setStatusMessage({
+                type: 'warning',
+                field: '',
+                text: 'You have requested to borrow this item'
+            })
+        }
+
     }, [itemIdNum]);
 
     const handleChange = (e) => {
