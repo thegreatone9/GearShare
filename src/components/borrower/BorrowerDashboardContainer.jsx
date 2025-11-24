@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useMemo, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS} from "../util/Util.js";
+import {DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS, ROLE} from "../util/Util.js";
 import {supabase} from "../../server/supabaseClient.js";
 import {AuthContext} from "../../App.jsx";
 import BorrowerDashboardPresenter from "./BorrowerDashboardPresenter.jsx";
@@ -152,7 +152,7 @@ export default function BorrowerDashboardContainer() {
     };
 
     const openItemDetailsModal = (item) => {
-        setModalPayload({ category: MODAL_CATEGORY.ITEM, data: {item} });
+        setModalPayload({ category: MODAL_CATEGORY.ITEM, data: {item, role: ROLE.BORROWER} });
         setIsModalOpen(true);
     }
 
@@ -175,7 +175,7 @@ export default function BorrowerDashboardContainer() {
             maxWidth: "max-w-xl",
             props: {
                 item: modalPayload?.data?.item,
-                userId: modalPayload?.data?.lenderId
+                role: modalPayload?.data?.role
             }
         },
         [MODAL_CATEGORY.LENDER]: {

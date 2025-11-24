@@ -44,7 +44,7 @@ export default function LenderDashboardContainer() {
     };
 
     const openItemDetailsModal = (item) => {
-        setModalPayload({ category: MODAL_CATEGORY.ITEM, data: {item} });
+        setModalPayload({ category: MODAL_CATEGORY.ITEM, data: {item, role: ROLE.LENDER} });
         setIsModalOpen(true);
     }
 
@@ -153,6 +153,7 @@ export default function LenderDashboardContainer() {
             maxWidth: "max-w-xl",
             props: {
                 item: modalPayload?.data?.item,
+                role: modalPayload?.data?.role
             }
         },
         [MODAL_CATEGORY.BORROWER]: {
