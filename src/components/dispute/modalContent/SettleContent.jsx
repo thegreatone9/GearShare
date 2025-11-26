@@ -1,21 +1,20 @@
 import React from 'react';
 import {DollarSign} from 'lucide-react';
-import {DISPUTE_STATUS} from "../../util/Util.js";
+import {DISPUTE_STATUS, LISTING_STATUS, RENTAL_STATUS} from "../../util/Util.js";
 import {supabase} from "../../../server/supabaseClient.js";
 
 export default function SettleContent({ dispute, onClose, setAppData }) {
     const handleSettle = async (disputeId) => {
-        const updateData = {
-            status: DISPUTE_STATUS.COMPLETED,
-            end_date: new Date().toISOString()
-        };
-
-        const { data: updatedDispute, error } = await supabase
-            .from('disputes')
-            .update(updateData)
-            .eq('id', disputeId)
-            .select()
-            .single();
+        const { data: updatedDispute, error } = await supabase.rpc(
+            "resolve_dispute_and_update_listing",
+            {
+                dispute_id: disputeId,
+                rental_id: dispute.rental_id,
+                rental_status: RENTAL_STATUS.COMPLETED,
+                dispute_status: DISPUTE_STATUS.COMPLETED,
+                listing_status: LISTING_STATUS.AVAILABLE
+            }
+        );
 
         if (error) {
             console.error("Error settling rental:", error);

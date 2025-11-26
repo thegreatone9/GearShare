@@ -2,6 +2,7 @@ import ItemCard from "./ItemCard.jsx";
 import SearchAndFilter from "./SearchAndFilter.jsx";
 import React, {useEffect, useState} from "react";
 import {supabase} from "../../server/supabaseClient.js";
+import {LISTING_STATUS} from "../util/Util.js";
 
 export default function ItemListPage() {
     const HOTTEST_LIST_SIZE = 8;
@@ -14,6 +15,7 @@ export default function ItemListPage() {
         const { data: listingData, error: listingError } = await supabase
             .from('listings')
             .select('*')
+            .eq('status', LISTING_STATUS.AVAILABLE)
             .limit(HOTTEST_LIST_SIZE);
 
         if (listingError) {

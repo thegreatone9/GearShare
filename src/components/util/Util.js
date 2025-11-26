@@ -9,10 +9,16 @@ export const ROLE = {
     ADMIN: 'admin'
 }
 
+export const LISTING_STATUS = {
+    AVAILABLE: 'available',
+    RENTED: 'rented'
+}
+
 export const RENTAL_STATUS = {
     PENDING_BORROW: 'pendingBorrow',
     PENDING_LEND: 'pendingLend',
     ACTIVE: 'active',
+    RETURNED: 'returned',
     COMPLETED: 'completed'
 }
 

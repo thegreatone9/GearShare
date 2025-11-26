@@ -164,7 +164,7 @@ export default function ItemForm() {
                     location: item.location || '',
                     category: item.category || '',
                     condition: item.condition || '',
-                    unit: item.unit || 'day',
+                    unit: item.time_unit || 'day',
                     image_url: item.image_url // Ensure snake_case matches DB
                 });
             }
@@ -326,7 +326,7 @@ export default function ItemForm() {
             condition: itemState.condition,
             price: priceNum,
             replacement_value: valueNum,
-            unit: itemState.unit,
+            unit: itemState.time_unit,
             image_url: itemState.image_url
         };
 
@@ -531,7 +531,7 @@ export default function ItemForm() {
                                 />
                             ) : (
                                 <p id="price" className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
-                                    ${itemState.price} / {itemState.unit}
+                                    ${itemState.price} / {itemState.time_unit}
                                 </p>
                             )}
                         </div>

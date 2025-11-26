@@ -33,7 +33,7 @@ export default function ItemCard({item}) {
                 <div className="flex justify-between items-start">
                     <h2 className="text-lg font-semibold text-gray-800 truncate">{item.title}</h2>
                     <span className="text-sm font-bold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-full">
-          ${item.price}/{item.unit.slice(0, 3)}
+          ${item.price}/{item.time_unit.slice(0, 3)}
         </span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">{item.location}</p>

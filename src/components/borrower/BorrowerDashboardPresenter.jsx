@@ -3,6 +3,7 @@ import {Package, ShieldAlert, Zap} from 'lucide-react';
 import {getDisputeDisplay} from "./BorrowerUtil.js";
 import ActionModal from "../common/ActionModal.jsx";
 import DashboardListSection from "../common/DashboardListSection.jsx";
+import {REQUEST_STATUS} from "../util/Util.js";
 
 export default function BorrowerDashboardPresenter({
                                                        itemDetailsModalActive,
@@ -12,7 +13,6 @@ export default function BorrowerDashboardPresenter({
                                                        modalProps,
 
                                                        activeRentals,
-                                                       pendingRentals,
                                                        disputedRentals,
                                                        pastRentals,
                                                        requests,
@@ -25,6 +25,8 @@ export default function BorrowerDashboardPresenter({
                                                        handleViewDispute,
                                                        cancelRequest
                                                    }) {
+
+    const pendingRequests = requests.filter(req => req.status === REQUEST_STATUS.ACTIVE);
 
     const getItemAndRequest = (rental) => {
         const correspondingRequest = requests.find(req => req.id === rental.request_id);
@@ -62,6 +64,7 @@ export default function BorrowerDashboardPresenter({
         );
     };
 
+    // 2. Requested Rentals
     const renderRequestedRental = (req) => {
         const item = listings.find(listing => listing.id === req.listing_id);
 
@@ -91,7 +94,7 @@ export default function BorrowerDashboardPresenter({
         );
     };
 
-    // 2. Disputed Rentals Item Renderer
+    // 3. Disputed Rentals Item Renderer
     const renderDisputedRental = (rental) => {
         const { item, dispute } = getItemAndRequest(rental);
         if (!item || !dispute) return null; // Safety check
@@ -118,7 +121,7 @@ export default function BorrowerDashboardPresenter({
         );
     };
 
-    // 3. Past Rentals Item Renderer
+    // 4. Past Rentals Item Renderer
     const renderPastRental = (rental) => {
         const { item, dispute } = getItemAndRequest(rental);
         if (!item) return null;
@@ -171,10 +174,10 @@ export default function BorrowerDashboardPresenter({
 
                 {/* 2. Pending Rentals */}
                 <DashboardListSection
-                    title={`Requested Rentals (${requests.length})`}
+                    title={`Requested Rentals (${pendingRequests.length})`}
                     Icon={Zap}
                     iconColor="text-indigo-500"
-                    list={requests}
+                    list={pendingRequests}
                     renderItem={renderRequestedRental}
                     emptyMessage="No requests for rentals are made."
                 />

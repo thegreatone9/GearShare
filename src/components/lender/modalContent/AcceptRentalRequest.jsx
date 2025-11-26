@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Calendar, DollarSign, Package, Star, User} from 'lucide-react';
-import {RENTAL_STATUS} from "../../util/Util.js";
+import {LISTING_STATUS, RENTAL_STATUS, REQUEST_STATUS} from "../../util/Util.js";
 import {supabase} from "../../../server/supabaseClient.js";
 
 /**
@@ -45,41 +45,21 @@ export default function AcceptRentalRequest({ request, onClose, setRequests, set
     }, [request]);
 
     const confirmAcceptance = async () => {
-        const newRental = {
-            id: Date.now(),
-            request_id: id,
-            listing_id: listingId,
-            borrower_id: borrowerId,
-            lender_id: lenderId,
-            return_date: null,
-            status: RENTAL_STATUS.ACTIVE
-        };
+        const { data: rentalResult, error: rpcError } = await supabase.rpc(
+            'confirm_rental_acceptance',
+            {
+                request_id: id,
+                listing_id: listingId,
+                borrower_id: borrowerId,
+                lender_id: lenderId,
+                listing_status: LISTING_STATUS.RENTED,
+                rental_status: RENTAL_STATUS.ACTIVE,
+                request_status: REQUEST_STATUS.COMPLETED
+            }
+        ).single();
 
-        const { data: rentalResult, error: rentalError } = await supabase
-            .from('rentals')
-            .insert([newRental])
-            .single();
-
-        if (rentalError) {
-            return console.error("Error inserting new rental:", rentalError);
-        }
-
-        const { error: listingError } = await supabase
-            .from('listings')
-            .update({ listing_status: RENTAL_STATUS.ACTIVE })
-            .eq('id', listingId);
-
-        if (listingError) {
-            return console.error("Error updating listing status:", listingError);
-        }
-
-        const { error: requestError } = await supabase
-            .from('requests')
-            .delete()
-            .eq('id', id);
-
-        if (requestError) {
-            return console.error("Error deleting request:", requestError);
+        if (rpcError) {
+            throw new Error(`Rental Request Acceptance Transaction failed: ${rpcError.message}`);
         }
 
         setRequests(prevRequests => prevRequests.filter(req => req.id !== id));
@@ -103,7 +83,7 @@ export default function AcceptRentalRequest({ request, onClose, setRequests, set
                     Item: {item.title}
                 </p>
                 <p className="text-sm text-gray-600">
-                    Price: ${item.price}/{item.unit} | Deposit Hold: ${item.replacement_value}
+                    Price: ${item.price}/{item.time_unit} | Deposit Hold: ${item.replacement_value}
                 </p>
             </div>
 

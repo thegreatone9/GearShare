@@ -105,7 +105,7 @@ export default function BorrowerDashboardContainer() {
 
         const updatedRentalData = {
             return_date: returnDate,
-            status: RENTAL_STATUS.COMPLETED,
+            status: RENTAL_STATUS.RETURNED,
             dispute_id: disputeResult.id
         };
 
