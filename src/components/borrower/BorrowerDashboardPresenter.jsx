@@ -75,8 +75,7 @@ export default function BorrowerDashboardPresenter({
                     <img src={item.image_url} alt={item.title} className="w-12 h-12 rounded-lg object-cover"/>
                     <div className="flex flex-col justify-center items-center">
                         <p className="text-sm text-gray-700 mb-1">
-                            <a href="#" className="font-bold text-indigo-900 hover:underline" onClick={(event) => openLenderDetailsModal(event, req.lender_id)}>Lender</a> wants
-                            to lend <span className="text-indigo-600 font-bold">{item.title}</span>.
+                            Requested <span className="text-indigo-600 font-bold">{item.title}</span> from <a href="#" className="font-bold text-indigo-900 hover:underline" onClick={(event) => openLenderDetailsModal(event, req.lender_id)}>Lender</a>
                         </p>
                         <p className="text-xs text-gray-600">
                             Request Date: {req.date || 'N/A'} | Deposit: ${item.replacement_value || 'N/A'}

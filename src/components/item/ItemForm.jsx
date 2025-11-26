@@ -283,7 +283,7 @@ export default function ItemForm() {
             }
 
             setTimeout(() => {
-                navigate(`/item/${itemIdNum}`);
+                navigate(`/item/${itemIdNum}?role=${role}`);
             }, 100);
 
         } catch (error) {
