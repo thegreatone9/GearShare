@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {supabase} from '../../server/supabaseClient.js';
-import {LISTING_CATEGORY} from "../util/Util.js";
+import {LISTING_CATEGORY, LISTING_STATUS} from "../util/Util.js";
 
 export default function SearchAndFilter({ setListings, setLoading }) {
     const [searchTerm, setSearchTerm] = useState('');
@@ -22,7 +22,10 @@ export default function SearchAndFilter({ setListings, setLoading }) {
         setLoading(true);
 
         try {
-            let query = supabase.from('listings').select('*');
+            let query = supabase
+                .from('listings')
+                .select('*')
+                .eq('status', LISTING_STATUS.AVAILABLE);
 
             if (hasSearchTerm) {
                 query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);

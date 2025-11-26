@@ -85,8 +85,7 @@ export default function ItemForm() {
                 ];
             }
 
-        } else if (role === ROLE.BORROWER && canRequestBorrow) {
-            // Only show the request button in 'view' mode for an existing item
+        } else if (role === ROLE.BORROWER) {
             buttonProps = [
                 {
                     label: "Back",
@@ -96,14 +95,16 @@ export default function ItemForm() {
                         event.preventDefault();
                         navigate('/marketplace');
                     }
-                },
-                {
+                }];
+
+            if (canRequestBorrow) {
+                buttonProps.push({
                     label: "Request Borrow",
                     action: BORROWER_ITEM_ACTIONS.REQUEST_BORROW,
                     classes: `${commonClasses} bg-green-600 hover:bg-green-700 text-white focus:ring-green-500`,
                     onClick: (event) => handleBorrowRequest(event)
-                }
-            ];
+                })
+            }
         }
 
         return buttonProps?.map(prop => (
@@ -131,6 +132,7 @@ export default function ItemForm() {
             setLoading(true);
             setEditMode(false);
             setCanRequestBorrow(false);
+            setStatusMessage({ type: '', field: '', text: '' });
 
             const {data: item, error} = await supabase
                 .from('listings')
@@ -186,7 +188,7 @@ export default function ItemForm() {
                     throw new Error("Error checking request existence for borrower!");
                 }
 
-                setCanRequestBorrow(!request);
+                setCanRequestBorrow(request === null || request === undefined);
 
                 if (role === ROLE.BORROWER) {
                     const {data: lenderData, error: lenderFetchError} = await supabase
@@ -208,15 +210,22 @@ export default function ItemForm() {
 
         fetchItem();
 
-        if (role === ROLE.BORROWER && !canRequestBorrow) {
-            setStatusMessage({
-                type: 'warning',
-                field: '',
-                text: 'You have requested to borrow this item'
-            })
+    }, [itemIdNum]);
+
+    useEffect(() => {
+        setStatusMessage({ type: '', field: '', text: '' });
+
+        if (role === ROLE.LENDER || canRequestBorrow) {
+            return;
         }
 
-    }, [itemIdNum]);
+        setStatusMessage({
+            type: 'warning',
+            field: '',
+            text: 'You have requested to borrow this item'
+        });
+
+    }, [canRequestBorrow]);
 
     const handleChange = (e) => {
         const {id, value} = e.target;
