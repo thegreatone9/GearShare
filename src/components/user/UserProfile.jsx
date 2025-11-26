@@ -1,11 +1,11 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {AlertTriangle, CheckCircle, Hash, Mail, Phone, Save, User} from 'lucide-react';
-import {AuthContext} from "../../App.jsx";
 import {supabase} from "../../server/supabaseClient.js";
 import {getStatusClasses, getUserSessionData, updateUserCookie} from "../util/Util.js";
+import {useAuth} from "../AppContext.jsx";
 
 export default function UserProfile() {
-    const {authenticatedUser, setAuthenticatedUser} = useContext(AuthContext);
+    const {authenticatedUser, setAuthenticatedUser} = useAuth();
     const MIN_PASSWORD_LEN = 1;
     const MIN_PHONE_LEN = 9;
     const MAX_PHONE_LEN = 12;

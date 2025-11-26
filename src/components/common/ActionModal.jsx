@@ -10,13 +10,13 @@ export default function ActionModal({ category, modalProps, isModalOpen, setIsMo
         return null;
     }
 
-    // 3. Define the final props for the inner component
+    //Define the final props for the inner component
     const finalComponentProps = {
         ...componentSpecificProps,
         onClose: () => setIsModalOpen(false), // Always pass onClose handler
     };
 
-    // Use a smaller max-width for the Accept Request flow for better focus
+    //Use a smaller max-width for the Accept Request flow for better focus
     const modalMaxWidth = maxWidth || (category === MODAL_CATEGORY.ACCEPT_RENTAL_REQUEST ? "max-w-lg" : "max-w-xl");
     const modalTitle = title || "Action Required";
 

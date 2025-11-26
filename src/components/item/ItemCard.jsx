@@ -1,11 +1,10 @@
 import {useNavigate} from "react-router-dom";
-import {useContext} from "react";
-import {AuthContext} from "../../App.jsx";
 import {ROLE} from "../util/Util.js";
+import {useAuth} from "../AppContext.jsx";
 
 export default function ItemCard({item}) {
     const navigate = useNavigate();
-    const {authenticatedUser} = useContext(AuthContext);
+    const {authenticatedUser} = useAuth();
 
     const handleItemClick = function () {
         if (authenticatedUser) {

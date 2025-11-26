@@ -1,22 +1,25 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
 import {AlertTriangle, CalendarDays, CheckCircle, Mail, Package, Phone, Shield, User} from 'lucide-react';
 import {
     BORROWER_ITEM_ACTIONS,
     getStatusClasses,
+    isEmptyString,
     LENDER_ITEM_ACTIONS,
     LISTING_CATEGORY,
     LISTING_CONDITION,
     parseDDMMYYYY,
     RENTAL_STATUS,
     REQUEST_STATUS,
-    ROLE
+    ROLE,
+    TOAST_TYPE
 } from "../util/Util.js";
 import {supabase} from "../../server/supabaseClient.js";
-import {AuthContext} from "../../App.jsx";
+import {useAuth, useToast} from "../AppContext.jsx";
 
 export default function ItemForm() {
-    const {authenticatedUser} = useContext(AuthContext);
+    const {authenticatedUser} = useAuth();
+    const {addToast} = useToast();
     const navigate = useNavigate();
     const {id} = useParams();
 
@@ -49,6 +52,7 @@ export default function ItemForm() {
     });
     const [statusMessage, setStatusMessage] = useState({ type: '', field: '', text: '' });
     const [loading, setLoading] = useState(true);
+    const [toastMessage, setToastMessage] = useState(searchParams.get('toast'));
 
     // --- Button Mapping Function ---
     const getActionButtons = () => {
@@ -208,7 +212,12 @@ export default function ItemForm() {
             setLoading(false);
         };
 
-        fetchItem();
+        try {
+            fetchItem();
+
+        } catch (error) {
+            addToast(TOAST_TYPE.ERROR, `Error: ${error.message}`);
+        }
 
     }, [itemIdNum]);
 
@@ -283,11 +292,13 @@ export default function ItemForm() {
             }
 
             setTimeout(() => {
-                navigate(`/item/${itemIdNum}?role=${role}`);
-            }, 100);
+                const toastMessage = `You have requested to borrow: ${itemState.title}!`;
+                navigate(`/item/${itemIdNum}?role=${role}&toast=${toastMessage}`);
+
+            }, 500);
 
         } catch (error) {
-            console.error("Request to Borrow Error:", error.message);
+            addToast(TOAST_TYPE.ERROR, `Request to Borrow Error: ${error.message}`);
         }
     }
 
@@ -386,6 +397,17 @@ export default function ItemForm() {
 
     if (editMode && itemIdNum && !currentItem) {
         return <div className="py-8 text-center text-red-600">Listing not found. Invalid item ID.</div>;
+    }
+
+    if (!isEmptyString(toastMessage)) {
+        console.log('RENDER TOAST');
+
+        setTimeout(() => {
+            addToast(TOAST_TYPE.SUCCESS, toastMessage);
+
+        }, 0);
+
+        setToastMessage(null);
     }
 
     return (

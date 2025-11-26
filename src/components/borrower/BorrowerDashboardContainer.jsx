@@ -1,14 +1,15 @@
-import React, {useContext, useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS, ROLE} from "../util/Util.js";
+import {DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS, ROLE, TOAST_TYPE} from "../util/Util.js";
 import {supabase} from "../../server/supabaseClient.js";
-import {AuthContext} from "../../App.jsx";
 import BorrowerDashboardPresenter from "./BorrowerDashboardPresenter.jsx";
 import {useBorrowerDashboardDataHook} from "./useBorrowerDashboardDataHook.jsx";
+import {useAuth, useToast} from "../AppContext.jsx";
 
 export default function BorrowerDashboardContainer() {
     const navigate = useNavigate();
-    const { authenticatedUser } = useContext(AuthContext);
+    const {authenticatedUser} = useAuth();
+    const {addToast} = useToast();
     const userId = authenticatedUser.id;
 
     const [loading, setLoading] = useState(true);
@@ -28,7 +29,7 @@ export default function BorrowerDashboardContainer() {
             setLoading(true);
 
             // 1. Fetch Requests (Primary data source for Borrower)
-            const { data: requestData, error: reqError } = await supabase
+            const {data: requestData, error: reqError} = await supabase
                 .from('requests')
                 .select('*')
                 .eq('borrower_id', userId);
@@ -41,7 +42,7 @@ export default function BorrowerDashboardContainer() {
             const listingIds = fetchedRequests.map(req => req.listing_id);
 
             // 2. Fetch Rentals associated with those Requests
-            const { data: rentalData, error: rentalError } = await supabase
+            const {data: rentalData, error: rentalError} = await supabase
                 .from('rentals')
                 .select('*, request_id')
                 .in('request_id', requestIds);
@@ -51,7 +52,7 @@ export default function BorrowerDashboardContainer() {
             setBorrowerRentals(fetchedRentals);
 
             // 3. Fetch Listings needed for display titles
-            const { data: listingData, error: listingError } = await supabase
+            const {data: listingData, error: listingError} = await supabase
                 .from('listings')
                 .select('*')
                 .in('id', listingIds);
@@ -61,7 +62,7 @@ export default function BorrowerDashboardContainer() {
 
             // 4. Fetch Disputes linked to the retrieved Rentals
             const rentalIds = fetchedRentals.map(rental => rental.id);
-            const { data: disputeData, error: disputeError } = await supabase
+            const {data: disputeData, error: disputeError} = await supabase
                 .from('disputes')
                 .select('*')
                 .in('rental_id', rentalIds);
@@ -77,7 +78,7 @@ export default function BorrowerDashboardContainer() {
     }, [userId]);
 
     // --- Data Filtering (useMemo) ---
-    const { activeRentals, disputedRentals, pastRentals } = useBorrowerDashboardDataHook(borrowerRentals, disputes);
+    const {activeRentals, disputedRentals, pastRentals} = useBorrowerDashboardDataHook(borrowerRentals, disputes);
 
     // --- Handlers ---
     const handleReturn = async function (rental, event) {
@@ -136,15 +137,19 @@ export default function BorrowerDashboardContainer() {
     }
 
     const cancelRequest = async (request) => {
-        const { error } = await supabase
+        const {error} = await supabase
             .from('requests')
             .delete()
             .eq('id', request.id);
 
         if (error) {
-            console.error(`Error declining request ${request.id}:`, error);
+            addToast(TOAST_TYPE.ERROR, `Error cancelling request: ${request.id}: ${error}`);
             return;
         }
+
+        const listing = listings.find(l => l.id === request.listing_id);
+
+        addToast(TOAST_TYPE.INFO, `You have cancelled your request to borrow: ${listing.title}`);
 
         setRequests(prevRequests =>
             prevRequests.filter(req => req.id !== request.id)
@@ -152,14 +157,14 @@ export default function BorrowerDashboardContainer() {
     };
 
     const openItemDetailsModal = (item) => {
-        setModalPayload({ category: MODAL_CATEGORY.ITEM, data: {item, role: ROLE.BORROWER} });
+        setModalPayload({category: MODAL_CATEGORY.ITEM, data: {item, role: ROLE.BORROWER}});
         setIsModalOpen(true);
     }
 
     const openLenderDetailsModal = (event, userId) => {
         event.stopPropagation();
 
-        setModalPayload({ category: MODAL_CATEGORY.LENDER, data: {userId} });
+        setModalPayload({category: MODAL_CATEGORY.LENDER, data: {userId}});
         setIsModalOpen(true);
     }
 

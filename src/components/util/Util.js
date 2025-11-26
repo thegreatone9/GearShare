@@ -85,6 +85,13 @@ export const LISTING_CONDITION = {
     FIVE: '5'
 }
 
+export const TOAST_TYPE = {
+    SUCCESS: 'success',
+    ERROR: 'error',
+    WARNING: 'warning',
+    INFO: 'info'
+}
+
 export const updateUserCookie = function (user) {
     const userDataString = JSON.stringify({
         name: user.name,

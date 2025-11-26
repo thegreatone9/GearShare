@@ -1,12 +1,13 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useNavigate} from 'react-router-dom';
 import {supabase} from "../../server/supabaseClient.js";
-import {AuthContext} from "../../App.jsx";
-import {DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS, ROLE} from "../util/Util.js";
+import {DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS, ROLE, TOAST_TYPE} from "../util/Util.js";
 import LenderDashboardPresenter from "./LenderDashboardPresenter.jsx";
+import {useAuth, useToast} from "../AppContext.jsx";
 
 export default function LenderDashboardContainer() {
-    const { authenticatedUser } = useContext(AuthContext);
+    const {authenticatedUser} = useAuth();
+    const {addToast} = useToast();
     const navigate = useNavigate();
 
     const userId = authenticatedUser.id;
@@ -26,12 +27,12 @@ export default function LenderDashboardContainer() {
         navigate(`/item/${itemId}?status=${itemStatus}&role=${ROLE.LENDER}`);
     }
 
-    const handleViewDisputes = function() {
+    const handleViewDisputes = function () {
         navigate('/disputes');
     }
 
     const openAcceptModal = (request) => {
-        setModalPayload({ category: MODAL_CATEGORY.ACCEPT_RENTAL_REQUEST, data: {request} });
+        setModalPayload({category: MODAL_CATEGORY.ACCEPT_RENTAL_REQUEST, data: {request}});
         setIsModalOpen(true);
     };
 
@@ -39,12 +40,12 @@ export default function LenderDashboardContainer() {
         event.preventDefault();
         event.stopPropagation();
 
-        setModalPayload({ category: MODAL_CATEGORY.BORROWER, data: {userId} });
+        setModalPayload({category: MODAL_CATEGORY.BORROWER, data: {userId}});
         setIsModalOpen(true);
     };
 
     const openItemDetailsModal = (item) => {
-        setModalPayload({ category: MODAL_CATEGORY.ITEM, data: {item, role: ROLE.LENDER} });
+        setModalPayload({category: MODAL_CATEGORY.ITEM, data: {item, role: ROLE.LENDER}});
         setIsModalOpen(true);
     }
 
@@ -54,15 +55,17 @@ export default function LenderDashboardContainer() {
     }
 
     const declineRequest = async (request) => {
-        const { error } = await supabase
+        const {error} = await supabase
             .from('requests')
             .delete()
             .eq('id', request.id);
 
         if (error) {
-            console.error(`Error declining request ${request.id}:`, error);
+            addToast(TOAST_TYPE.ERROR, `Error declining request: ${request.id}: ${error}`);
             return;
         }
+
+        addToast(TOAST_TYPE.INFO, `You have declined a request to borrow: ${listings[request.listing_id].title}`);
 
         setRequests(prevRequests =>
             prevRequests.filter(req => req.id !== request.id)
@@ -75,7 +78,7 @@ export default function LenderDashboardContainer() {
             setLoading(true);
 
             const fetchTable = async (table, fkColumn, setState) => {
-                const { data, error } = await supabase
+                const {data, error} = await supabase
                     .from(table)
                     .select('*')
                     .eq(fkColumn, userId);
@@ -93,7 +96,7 @@ export default function LenderDashboardContainer() {
 
             const requestIds = fetchedRequests ? fetchedRequests.map(req => req.id) : [];
 
-            const { data: rentalData, error: rentalError } = await supabase
+            const {data: rentalData, error: rentalError} = await supabase
                 .from('rentals')
                 .select('*, request_id')
                 .in('request_id', requestIds);
@@ -105,7 +108,7 @@ export default function LenderDashboardContainer() {
 
             const rentalIds = lenderRentals.map(rental => rental.id);
 
-            const { data: disputeData, error: disputeError } = await supabase
+            const {data: disputeData, error: disputeError} = await supabase
                 .from('disputes')
                 .select('*')
                 .in('rental_id', rentalIds);

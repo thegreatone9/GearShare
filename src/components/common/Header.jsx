@@ -1,18 +1,18 @@
 import {Link, useLocation, useNavigate} from "react-router-dom";
 import {Briefcase, ChevronDown, Home, LogOut, Scale, User, Zap} from 'lucide-react';
 import logo from '../../assets/gear-share.svg';
-import React, {useContext, useState} from "react";
-import {AuthContext} from "../../App.jsx";
+import React, {useState} from "react";
 import Cookies from "js-cookie";
+import {useAuth} from "../AppContext.jsx";
 
 export default function Header () {
     const location = useLocation();
     const navigate = useNavigate();
-    const {authenticatedUser, setAuthenticatedUser} = useContext(AuthContext);
+    const {authenticatedUser, setAuthenticatedUser} = useAuth();
     const isAuthenticated = !!authenticatedUser;
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // NEW: Mobile menu state
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const closeMobileMenu = () => setIsMobileMenuOpen(false);
 

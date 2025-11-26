@@ -1,14 +1,14 @@
 import {CheckCheck, Handshake, Landmark, Shield,} from 'lucide-react';
-import React, {useContext, useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import DisputeActionModal from "./DisputeActionModal.jsx";
 import {processUserDisputes} from "./DisputeUtils.jsx";
 import DisputeCard from "./DisputeCard.jsx";
 import {supabase} from "../../server/supabaseClient.js";
-import {AuthContext} from "../../App.jsx";
 import {BORROWER_DISPUTE_ACTIONS, LENDER_DISPUTE_ACTIONS, ROLE} from "../util/Util.js";
+import {useAuth} from "../AppContext.jsx";
 
 export default function DisputeDashboard() {
-    const {authenticatedUser} = useContext(AuthContext);
+    const {authenticatedUser} = useAuth();
     const [loading, setLoading] = useState(true);
     const [appData, setAppData] = useState({ disputes: [], rentals: [], requests: [], listings: [], accounts: [] });
     const [modalState, setModalState] = useState({
