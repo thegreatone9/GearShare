@@ -20,29 +20,46 @@ export default function App() {
     const location = useLocation();
     const navigate = useNavigate();
     const [authenticatedUser, setAuthenticatedUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        setIsLoading(true);
+
         checkSession()
             .then(user => {
                 if (user) {
                     setAuthenticatedUser(user);
-                    navigate('/borrower');
+
+                    const currentPath = location.pathname;
+                    if (currentPath === '/' || currentPath === '/auth') {
+                        navigate('/borrower', { replace: true });
+                    }
 
                 } else {
                     navigate('/');
                 }
+
+            })
+            .finally(() => {
+                setIsLoading(false);
             });
 
     }, []);
 
-    const paddingClasses = location.pathname === '/' ? '' : 'px-4 sm:px-6 lg:px-8';
+    if (isLoading) {
+        return (
+            <div className="flex-grow flex items-center justify-center h-screen">
+                <p className="text-xl text-indigo-600">Loading...</p>
+            </div>
+        );
+    }
 
     return (
-        <AuthContext.Provider value={{authenticatedUser, setAuthenticatedUser}}>
+        <AuthContext.Provider value={{isLoading, authenticatedUser, setAuthenticatedUser}}>
             <div className="flex flex-col min-h-screen font-inter antialiased">
                 <main className="flex-grow px-4">
                     <Header />
-                    <div className={`mt-[120px] max-w-4xl mx-auto ${paddingClasses} bg-indigo-50 rounded-2xl shadow-2xl mb-12`}>
+                    <div className={`mt-[120px] max-w-4xl mx-auto ${location.pathname === '/' ? '' : 'px-4 sm:px-6 lg:px-8'} bg-indigo-50 rounded-2xl shadow-2xl mb-12`}>
                         <Routes>
                             <Route path="/" element={<LandingPage/>}/>
                             <Route path="/auth" element={<AuthPage />}/>
@@ -93,7 +110,11 @@ export default function App() {
 }
 
 const ProtectedRoute = ({children}) => {
-    const {authenticatedUser} = useContext(AuthContext);
+    const {isLoading, authenticatedUser} = useContext(AuthContext);
+
+    if (isLoading) {
+        return <div className="flex items-center justify-center h-full text-indigo-600">Verifying access...</div>;
+    }
 
     if (!authenticatedUser) {
         return <Navigate to="/auth" replace/>;
