@@ -1,8 +1,10 @@
 import React, {useState} from 'react';
 import {supabase} from '../../server/supabaseClient.js';
-import {LISTING_CATEGORY, LISTING_STATUS} from "../util/Util.js";
+import {LISTING_CATEGORY, LISTING_STATUS, TOAST_TYPE} from "../util/Util.js";
+import {useToast} from "../AppContext.jsx";
 
 export default function SearchAndFilter({ setListings, setLoading }) {
+    const {addToast} = useToast();
     const [searchTerm, setSearchTerm] = useState('');
     const [searchLocation, setSearchLocation] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('Category: All');
@@ -42,15 +44,16 @@ export default function SearchAndFilter({ setListings, setLoading }) {
             const { data, error } = await query;
 
             if (error) {
-                console.error("Error fetching filtered listings:", error);
+                addToast(TOAST_TYPE.ERROR, `Error fetching filtered listings: ${error.message}`);
                 setLoading(false);
+
                 return;
             }
 
             setListings(data);
 
         } catch (err) {
-            console.error("Search query failed:", err);
+            addToast(TOAST_TYPE.ERROR, `Search query failed: ${err.message}`);
 
         } finally {
             setLoading(false);

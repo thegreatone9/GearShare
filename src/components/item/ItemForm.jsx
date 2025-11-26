@@ -383,11 +383,10 @@ export default function ItemForm() {
         }
 
         if (dbError) {
-            console.error("Database submission error:", dbError.message);
-            setStatusMessage({type: 'error', field: '', text: `Error submitting item: ${dbError.message}`});
+            addToast(TOAST_TYPE.ERROR, `Database submission error: ${dbError.message}`);
 
         } else {
-            setTimeout(() => navigate('/lender'), 500);
+            setTimeout(() => navigate(`/lender?toast=Successfully Updated Listing: ${itemState.title}`), 500);
         }
     };
 

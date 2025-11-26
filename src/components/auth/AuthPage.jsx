@@ -1,11 +1,12 @@
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {supabase} from "../../server/supabaseClient.js";
-import {getUserSessionData, updateUserCookie} from "../util/Util.js";
-import {useAuth} from "../AppContext.jsx";
+import {getUserSessionData, TOAST_TYPE, updateUserCookie} from "../util/Util.js";
+import {useAuth, useToast} from "../AppContext.jsx";
 
 export default function AuthPage() {
     const {setAuthenticatedUser} = useAuth();
+    const {addToast} = useToast();
     const navigate = useNavigate();
     const [isSigningUp, setIsSigningUp] = useState(true);
     const [email, setEmail] = useState('');
@@ -50,7 +51,6 @@ export default function AuthPage() {
 
         updateUserCookie(user);
 
-        console.log("User successfully signed in:", user);
         return user;
     };
 
@@ -88,7 +88,9 @@ export default function AuthPage() {
 
             if (user) {
                 console.log(`Sign In successful for ${email}.`);
+
                 handleAuth(user);
+                addToast(TOAST_TYPE.SUCCESS, `Welcome ${user.name}!`);
                 navigate('/borrower');
 
             } else {

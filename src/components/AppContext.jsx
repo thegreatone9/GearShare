@@ -26,7 +26,7 @@ export default function AppContext ({ children }) {
     const [authenticatedUser, setAuthenticatedUser] = useState(null);
     const [toast, setToast] = useState(null);
 
-    const addToast = (type, message, duration = 10000) => {
+    const addToast = (type, message, duration = 7000) => {
         const id = Date.now();
         const newToast = { id, type, message };
 

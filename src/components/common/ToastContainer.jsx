@@ -1,10 +1,19 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {AlertTriangle, CheckCircle, X} from 'lucide-react';
 import {useToast} from "../AppContext.jsx";
-import {TOAST_TYPE} from "../util/Util.js";
+import {isEmptyString, TOAST_TYPE} from "../util/Util.js";
+import {useLocation, useSearchParams} from "react-router-dom";
 
 export default function ToastContainer () {
-    const { toast, removeToast } = useToast();
+    const location = useLocation();
+    const { toast, addToast, removeToast } = useToast();
+    const [searchParams] = useSearchParams();
+    const [searchParamToastMessage, setSearchParamToastMessage] = useState(null);
+
+    useEffect(() => {
+        setSearchParamToastMessage(searchParams.get('toast'));
+
+    }, [location]);
 
     const getToastStyles = (type) => {
         switch (type) {
@@ -19,6 +28,13 @@ export default function ToastContainer () {
                 return { icon: AlertTriangle, className: 'bg-blue-500' };
         }
     };
+
+    if (!isEmptyString(searchParamToastMessage)) {
+        addToast(TOAST_TYPE.INFO, searchParamToastMessage);
+        setSearchParamToastMessage(null);
+
+        return;
+    }
 
     if (toast === null || toast === undefined) {
         return;
