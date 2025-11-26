@@ -16,6 +16,7 @@ import {
 } from "../util/Util.js";
 import {supabase} from "../../server/supabaseClient.js";
 import {useAuth, useToast} from "../AppContext.jsx";
+import Loader from "../common/Loader.jsx";
 
 export default function ItemForm() {
     const {authenticatedUser} = useAuth();
@@ -391,7 +392,7 @@ export default function ItemForm() {
     };
 
     if (loading) {
-        return <div className="py-8 text-center text-indigo-600">Loading item details...</div>;
+        return <Loader show={loading} message={'Loading Item Details'}/>
     }
 
     if (editMode && itemIdNum && !currentItem) {

@@ -5,6 +5,7 @@ import {supabase} from "../../server/supabaseClient.js";
 import BorrowerDashboardPresenter from "./BorrowerDashboardPresenter.jsx";
 import {useBorrowerDashboardDataHook} from "./useBorrowerDashboardDataHook.jsx";
 import {useAuth, useToast} from "../AppContext.jsx";
+import Loader from "../common/Loader.jsx";
 
 export default function BorrowerDashboardContainer() {
     const navigate = useNavigate();
@@ -203,7 +204,7 @@ export default function BorrowerDashboardContainer() {
     const itemDetailsModalActive = currentModalConfig.title && isModalOpen;
 
     if (loading) {
-        return <div className="p-8 text-center text-indigo-600">Loading Borrower Dashboard...</div>;
+        return <Loader show={loading} message={'Loading Borrower Dashboard'}/>
     }
 
     return (

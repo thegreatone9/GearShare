@@ -6,6 +6,7 @@ import DisputeCard from "./DisputeCard.jsx";
 import {supabase} from "../../server/supabaseClient.js";
 import {BORROWER_DISPUTE_ACTIONS, LENDER_DISPUTE_ACTIONS, ROLE} from "../util/Util.js";
 import {useAuth} from "../AppContext.jsx";
+import Loader from "../common/Loader.jsx";
 
 export default function DisputeDashboard() {
     const {authenticatedUser} = useAuth();
@@ -108,7 +109,7 @@ export default function DisputeDashboard() {
     }, []);
 
     if (loading) {
-        return <div className="py-8 text-center text-indigo-600">Loading Dispute Cases...</div>;
+        return <Loader show={loading} message={'Loading Dispute Cases'}/>
     }
 
     return (

@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {supabase} from "../../server/supabaseClient.js";
+import Loader from "./Loader.jsx";
 
 export default function UserDetails({ userId, onClose }) {
     const [user, setUser] = useState();
@@ -28,7 +29,7 @@ export default function UserDetails({ userId, onClose }) {
     }, [userId]);
 
     if (loading) {
-        return <div className="p-8 text-center text-indigo-600">Loading User Details...</div>;
+        return <Loader show={loading} message={'Loading User Details'}/>
     }
 
     return (

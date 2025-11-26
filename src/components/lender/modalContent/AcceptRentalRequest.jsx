@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Calendar, DollarSign, Package, Star, User} from 'lucide-react';
 import {LISTING_STATUS, RENTAL_STATUS, REQUEST_STATUS} from "../../util/Util.js";
 import {supabase} from "../../../server/supabaseClient.js";
+import Loader from "../../common/Loader.jsx";
 
 /**
  * Content for the modal used to confirm a rental acceptance.
@@ -69,7 +70,7 @@ export default function AcceptRentalRequest({ request, onClose, setRequests, set
     };
 
     if (loading) {
-        return <div className="p-8 text-center text-indigo-600">Loading Request Details...</div>;
+        return <Loader show={loading} message={'Loading Request Details'}/>
     }
 
     return (

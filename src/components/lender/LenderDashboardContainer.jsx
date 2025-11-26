@@ -4,6 +4,7 @@ import {supabase} from "../../server/supabaseClient.js";
 import {DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS, ROLE, TOAST_TYPE} from "../util/Util.js";
 import LenderDashboardPresenter from "./LenderDashboardPresenter.jsx";
 import {useAuth, useToast} from "../AppContext.jsx";
+import Loader from "../common/Loader.jsx";
 
 export default function LenderDashboardContainer() {
     const {authenticatedUser} = useAuth();
@@ -179,7 +180,7 @@ export default function LenderDashboardContainer() {
     const itemDetailsModalActive = currentModalConfig.title && isModalOpen;
 
     if (loading) {
-        return <div className="p-8 text-center text-indigo-600">Loading Lender Dashboard...</div>;
+        return <Loader show={loading} message={'Loading Lender Dashboard'}/>
     }
 
     return (

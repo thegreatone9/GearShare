@@ -3,6 +3,7 @@ import SearchAndFilter from "./SearchAndFilter.jsx";
 import React, {useEffect, useState} from "react";
 import {supabase} from "../../server/supabaseClient.js";
 import {LISTING_STATUS} from "../util/Util.js";
+import Loader from "../common/Loader.jsx";
 
 export default function ItemListPage() {
     const HOTTEST_LIST_SIZE = 8;
@@ -32,7 +33,7 @@ export default function ItemListPage() {
     }, []);
 
     if (loading) {
-        return <div className="p-8 text-center text-indigo-600">Loading Marketplace...</div>;
+        return <Loader show={loading} message={'Loading Marketplace'}/>
     }
 
     return (
