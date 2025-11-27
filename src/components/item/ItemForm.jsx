@@ -167,12 +167,12 @@ export default function ItemForm() {
                     title: item.title || '',
                     description: item.description || '',
                     price: item.price || '',
-                    value: item.replacement_value || '', // Ensure snake_case matches DB
+                    value: item.replacement_value || '',
                     location: item.location || '',
                     category: item.category || '',
                     condition: item.condition || '',
                     unit: item.time_unit || 'day',
-                    image_url: item.image_url // Ensure snake_case matches DB
+                    image_url: item.image_url
                 });
             }
 
@@ -180,20 +180,17 @@ export default function ItemForm() {
                 setEditMode(!isNaN(itemIdNum));
 
             } else {
-                const {data: request, error: requestFetchError} = await supabase
-                    .from('requests')
-                    .select('id')
-                    .eq('listing_id', item.id)
-                    .eq('borrower_id', authenticatedUser.id)
-                    .eq('status', REQUEST_STATUS.ACTIVE)
-                    .limit(1)
-                    .maybeSingle();
+                const { data: borrowerCanRequest, error } = await supabase.rpc('can_request_borrow', {
+                    r_listing_id: item.id,
+                    r_borrower_id: authenticatedUser.id,
+                    request_status: REQUEST_STATUS.ACTIVE
+                });
 
-                if (requestFetchError) {
-                    throw new Error("Error checking request existence for borrower!");
+                if (error) {
+                    throw new Error(`Error checking request existence for borrower: ${error.message}`);
                 }
 
-                setCanRequestBorrow(request === null || request === undefined);
+                setCanRequestBorrow(borrowerCanRequest);
 
                 if (role === ROLE.BORROWER) {
                     const {data: lenderData, error: lenderFetchError} = await supabase
@@ -213,12 +210,8 @@ export default function ItemForm() {
             setLoading(false);
         };
 
-        try {
-            fetchItem();
-
-        } catch (error) {
-            addToast(TOAST_TYPE.ERROR, `Error: ${error.message}`);
-        }
+        fetchItem()
+            .catch(error => addToast(TOAST_TYPE.ERROR, `Error: ${error.message}`));
 
     }, [itemIdNum]);
 
@@ -232,7 +225,7 @@ export default function ItemForm() {
         setStatusMessage({
             type: 'warning',
             field: '',
-            text: 'You have requested to borrow this item'
+            text: 'Either this Item is yours, or you have already requested to borrow!'
         });
 
     }, [canRequestBorrow]);
