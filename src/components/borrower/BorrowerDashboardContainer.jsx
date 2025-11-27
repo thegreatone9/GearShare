@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS, ROLE, TOAST_TYPE} from "../util/Util.js";
+import {DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS, REQUEST_STATUS, ROLE, TOAST_TYPE} from "../util/Util.js";
 import {supabase} from "../../server/supabaseClient.js";
 import BorrowerDashboardPresenter from "./BorrowerDashboardPresenter.jsx";
 import {useBorrowerDashboardDataHook} from "./useBorrowerDashboardDataHook.jsx";
@@ -85,50 +85,31 @@ export default function BorrowerDashboardContainer() {
     const handleReturn = async function (rental, event) {
         event.preventDefault();
 
-        const returnDate = new Date().toISOString();
-
-        const newDisputeData = {
+        const {data: newDispute, error} = await supabase.rpc('handle_item_return_create_dispute', {
             rental_id: rental.id,
-            start_date: returnDate,
-            status: DISPUTE_STATUS.PENDING_DEPOSIT_RETURN
-        };
+            dispute_status: DISPUTE_STATUS.PENDING_DEPOSIT_RETURN,
+            rental_status: RENTAL_STATUS.RETURNED
+        });
 
-        // A. INSERT the new dispute record first
-        const {data: disputeResult, error: disputeError} = await supabase
-            .from('disputes')
-            .insert([newDisputeData])
-            .select()
-            .single();
-
-        if (disputeError) {
-            console.error("Error creating dispute record:", disputeError);
+        if (error) {
+            addToast(TOAST_TYPE.ERROR, `Error Returning Item: ${error.message}`);
             return;
         }
 
-        const updatedRentalData = {
-            return_date: returnDate,
-            status: RENTAL_STATUS.RETURNED,
-            dispute_id: disputeResult.id
-        };
-
-        // B. Update the rental status
-        const {data: rentalResult, error: rentalError} = await supabase
-            .from('rentals')
-            .update(updatedRentalData)
+        const { data: updatedRental, error: rentalError  } = await supabase.from('rentals')
+            .select('*')
             .eq('id', rental.id)
-            .select()
             .single();
 
         if (rentalError) {
-            console.error("Error updating rental status:", rentalError);
-            return;
+            addToast(TOAST_TYPE.ERROR, `Error retrieving updated rental: ${rentalError.message}`);
         }
 
         // C. Update local state
         setBorrowerRentals(prevRentals =>
-            prevRentals.map(r => r.id === rental.id ? rentalResult : r)
+            prevRentals.map(r => r.id === rental.id ? updatedRental : r)
         );
-        setDisputes(prevDisputes => [...prevDisputes, disputeResult]);
+        setDisputes(prevDisputes => [...prevDisputes, newDispute]);
 
         navigate('/disputes');
     }

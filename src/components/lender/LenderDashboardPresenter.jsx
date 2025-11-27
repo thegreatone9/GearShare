@@ -56,9 +56,9 @@ export default function LenderDashboardPresenter({
                     <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700`}>
                       Rented
                     </span>
-                    <button className="text-sm ml-2 text-white bg-indigo-600 px-3 py-1 rounded-lg hover:bg-indigo-700 transition"
-                            onClick={() => editItem(item.id, RENTAL_STATUS.ACTIVE)}>
-                        Manage Item
+                    <button className="text-sm ml-2 text-white bg-amber-500 px-3 py-1 rounded-lg hover:bg-orange-700 transition"
+                            onClick={(event) => openBorrowerModal(event, correspondingRequest.borrower_id)}>
+                        Borrower Details
                     </button>
                 </div>
             </div>
