@@ -54,44 +54,34 @@ export default function DisputeActionModal({modalState, closeModal, setAppData})
         case LENDER_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS:
             modalTitle = `Viewing Claim Details: ${dispute.item.title}`;
             modalContent = <ViewClaimDetailsContent dispute={dispute} onClose={closeModal} />;
-            return (
-                <Modal isOpen={true} onClose={closeModal} title={modalTitle} maxWidth={modalWidth}>
-                    {modalContent}
-                </Modal>
-            );
+            break;
 
         case LENDER_DISPUTE_ACTIONS.VIEW_REPORT:
         case BORROWER_DISPUTE_ACTIONS.VIEW_REPORT:
             modalTitle = `Viewing Final Report: ${dispute.item.title}`;
             modalContent = <ViewReportContent dispute={dispute} onClose={closeModal} />;
-            return (
-                <Modal isOpen={true} onClose={closeModal} title={modalTitle} maxWidth={modalWidth}>
-                    {modalContent}
-                </Modal>
-            );
+            break;
 
         case LENDER_DISPUTE_ACTIONS.VIEW_BORROWER:
             modalTitle = 'Lender Details';
         case BORROWER_DISPUTE_ACTIONS.VIEW_LENDER:
             modalTitle = modalTitle ? modalTitle : 'Borrower Details';
             modalContent = <UserDetails userId={opponentId} onClose={closeModal} />;
-            return (
-                <Modal isOpen={true} onClose={closeModal} title={modalTitle} maxWidth={modalWidth}>
-                    {modalContent}
-                </Modal>
-            );
+            break;
 
         case LENDER_DISPUTE_ACTIONS.VIEW_ITEM:
         case BORROWER_DISPUTE_ACTIONS.VIEW_ITEM:
             modalTitle = `${item.title} Details`;
             modalContent = <ModalItemDetails item={item} onClose={closeModal} />;
-            return (
-                <Modal isOpen={true} onClose={closeModal} title={modalTitle} maxWidth={modalWidth}>
-                    {modalContent}
-                </Modal>
-            );
+            break;
 
         default:
             return null;
     }
+
+    return (
+        <Modal isOpen={true} onClose={closeModal} title={modalTitle} maxWidth={modalWidth}>
+            {modalContent}
+        </Modal>
+    );
 }

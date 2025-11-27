@@ -5,11 +5,12 @@ import {processUserDisputes} from "./DisputeUtils.jsx";
 import DisputeCard from "./DisputeCard.jsx";
 import {supabase} from "../../server/supabaseClient.js";
 import {BORROWER_DISPUTE_ACTIONS, LENDER_DISPUTE_ACTIONS, ROLE} from "../util/Util.js";
-import {useAuth} from "../AppContext.jsx";
+import {useAuth, useToast} from "../AppContext.jsx";
 import Loader from "../common/Loader.jsx";
 
 export default function DisputeDashboard() {
     const {authenticatedUser} = useAuth();
+    const {addToast} = useToast();
     const [loading, setLoading] = useState(true);
     const [appData, setAppData] = useState({ disputes: [], rentals: [], requests: [], listings: [], accounts: [] });
     const [modalState, setModalState] = useState({
@@ -56,7 +57,7 @@ export default function DisputeDashboard() {
                 .or(`borrower_id.eq.${authenticatedUser.id},lender_id.eq.${authenticatedUser.id}`);
 
             if (reqError) {
-                console.error("Error fetching requests:", reqError);
+                addToast(`Error fetching requests: ${reqError.message}`);
                 setLoading(false);
                 return;
             }
@@ -75,7 +76,9 @@ export default function DisputeDashboard() {
                 .in('request_id', requestIds);
 
             if (rentalError) {
-                console.error("Error fetching rentals:", rentalError);
+                addToast(`Error fetching rentals: ${rentalError.message}`);
+                setLoading(false);
+                return;
             }
 
             const rentalIds = rentalData ? rentalData.map(r => r.id) : [];
@@ -86,7 +89,11 @@ export default function DisputeDashboard() {
                 .select('*')
                 .in('rental_id', rentalIds);
 
-            if (disputeError) console.error("Error fetching disputes:", disputeError);
+            if (disputeError) {
+                addToast(`Error fetching disputes: ${disputeError.message}`);
+                setLoading(false);
+                return;
+            }
 
             // 4. Fetch Listings
             const [{ data: listingsData }, { data: accountsData }] = await Promise.all([
