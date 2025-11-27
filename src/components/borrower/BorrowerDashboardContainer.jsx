@@ -144,7 +144,7 @@ export default function BorrowerDashboardContainer() {
             .eq('id', request.id);
 
         if (error) {
-            addToast(TOAST_TYPE.ERROR, `Error cancelling request: ${request.id}: ${error}`);
+            addToast(TOAST_TYPE.ERROR, `Error cancelling request: ${request.id}: ${error.message}`);
             return;
         }
 

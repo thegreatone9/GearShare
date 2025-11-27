@@ -62,7 +62,7 @@ export default function LenderDashboardContainer() {
             .eq('id', request.id);
 
         if (error) {
-            addToast(TOAST_TYPE.ERROR, `Error declining request: ${request.id}: ${error}`);
+            addToast(TOAST_TYPE.ERROR, `Error declining request: ${request.id}: ${error.message}`);
             return;
         }
 
