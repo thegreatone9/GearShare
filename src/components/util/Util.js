@@ -3,6 +3,8 @@ import AcceptRentalRequest from "../lender/modalContent/AcceptRentalRequest.jsx"
 import ModalItemDetails from "../common/ModalItemDetails.jsx";
 import UserDetails from "../common/UserDetails.jsx";
 
+export const IMG_NOT_FOUND_URL = 'https://tmuiycpixqjawkspqpiu.supabase.co/storage/v1/object/public/GearShare%20Assets/img-not-found.png';
+
 export const ROLE = {
     LENDER: 'lender',
     BORROWER: 'borrower',

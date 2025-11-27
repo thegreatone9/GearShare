@@ -198,7 +198,7 @@ export default function ItemForm() {
                 if (role === ROLE.BORROWER) {
                     const {data: lenderData, error: lenderFetchError} = await supabase
                         .from('accounts')
-                        .select('id, name, email')
+                        .select('id, name, email, image_url')
                         .eq('id', item.owner_id)
                         .single();
 
@@ -627,6 +627,10 @@ export default function ItemForm() {
                     role === ROLE.BORROWER && lender &&
                     <div className="space-y-4 pb-6 mx-auto flex flex-col items-center">
                         <h4 className="text-xl font-semibold text-indigo-700">4. Lender Details</h4>
+
+                        <div className="flex flex-col items-center w-full">
+                            <img src={lender.image_url} alt={lender.name} className="w-fit h-25 m-auto object-cover rounded-lg"/>
+                        </div>
 
                         <div className="flex flex-col items-center w-full">
                             <label className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">

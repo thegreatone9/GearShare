@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import {AlertTriangle, CheckCircle, Hash, Mail, Phone, Save, User} from 'lucide-react';
+import {AlertTriangle, CheckCircle, Hash, Image, Mail, Phone, Save, User} from 'lucide-react';
 import {supabase} from "../../server/supabaseClient.js";
-import {getStatusClasses, getUserSessionData, TOAST_TYPE, updateUserCookie} from "../util/Util.js";
+import {getStatusClasses, getUserSessionData, IMG_NOT_FOUND_URL, TOAST_TYPE, updateUserCookie} from "../util/Util.js";
 import {useAuth} from "../AppContext.jsx";
 
 export default function UserProfile() {
@@ -12,13 +12,15 @@ export default function UserProfile() {
     const MAX_PHONE_LEN = 12;
     const PHONE_REGEX = /^[0-9]{9,12}$/;
     const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const URL_REGEX = /^https:\/\/[^\s/$.?#].[^\s]*$/i;
 
     const [initialUserData, setInitialUserData] = useState();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         password: '',
-        phone: ''
+        phone: '',
+        image_url: ''
     });
 
     const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
@@ -45,7 +47,8 @@ export default function UserProfile() {
                     name: user.name,
                     email: user.email,
                     password: user.password,
-                    phone: user.phone || ''
+                    phone: user.phone || '',
+                    image_url: user.image_url || ''
                 };
 
                 setInitialUserData(userData);
@@ -73,11 +76,15 @@ export default function UserProfile() {
             }
 
             if (!PHONE_REGEX.test(formData.phone)) {
-                throw new Error(`Phone must be ${MIN_PHONE_LEN} to ${MAX_PHONE_LEN} digits.`);
+                throw new Error(`Phone must be ${MIN_PHONE_LEN} to ${MAX_PHONE_LEN} digits!`);
             }
 
             if (formData.password.length < MIN_PASSWORD_LEN) {
-                throw new Error(`Password must be at least ${MIN_PASSWORD_LEN} characters long.`);
+                throw new Error(`Password must be at least ${MIN_PASSWORD_LEN} characters long!`);
+            }
+
+            if (!URL_REGEX.test(formData.image_url)) {
+                throw new Error(`Photo URL must be a valid HTTPS link!`);
             }
 
             const { error: accountError } = await supabase
@@ -120,8 +127,18 @@ export default function UserProfile() {
             <form onSubmit={handleSave} className="max-w-xl mx-auto bg-white p-8 md:p-10 rounded-2xl shadow-2xl border-t-4 border-indigo-600 space-y-6">
 
                 <div className="text-center border-b pb-4">
-                    <div className="w-20 h-20 mx-auto bg-indigo-100 rounded-full flex items-center justify-center mb-3">
-                        <User className="w-10 h-10 text-indigo-600" />
+                    <div className="w-30 h-30 mx-auto bg-indigo-100 rounded-full flex items-center justify-center mb-3">
+                        {
+                            formData.image_url
+                                ? <img src={formData.image_url}
+                                       alt={formData.name}
+                                       onError={(e) => {
+                                           e.target.onerror = null; // prevents infinite loop if fallback fails
+                                           e.target.src = IMG_NOT_FOUND_URL; // your fallback image
+                                       }}
+                                       className="w-full h-full rounded-full border-3 border-indigo-700 object-cover"/>
+                                : <User className="w-20 h-20 text-indigo-600" />
+                        }
                     </div>
                     <h1 className="font-extrabold text-gray-900">Profile</h1>
                 </div>
@@ -190,6 +207,21 @@ export default function UserProfile() {
                             type="phone"
                             placeholder={`${MIN_PHONE_LEN} to ${MAX_PHONE_LEN} Digits`}
                             value={formData.phone || ''}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition autofill-fix"
+                        />
+                    </div>
+
+                    {/* Image URL */}
+                    <div>
+                        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                            <Image className="w-4 h-4 mr-2 text-indigo-600" /> Photo
+                        </label>
+                        <input
+                            id="image_url"
+                            type="text"
+                            placeholder={`Link to your Photo`}
+                            value={formData.image_url || ''}
                             onChange={handleChange}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition autofill-fix"
                         />
