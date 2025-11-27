@@ -1,6 +1,6 @@
 import {CheckCheck, Clock, Landmark, Package, ShieldAlert, Wrench, Zap} from 'lucide-react';
 import {Link} from 'react-router-dom';
-import {RENTAL_STATUS, ROLE} from "../util/Util.js";
+import {RENTAL_STATUS, REQUEST_STATUS, ROLE} from "../util/Util.js";
 import ActionModal from "../common/ActionModal.jsx";
 import DashboardListSection from "../common/DashboardListSection.jsx";
 import React from 'react';
@@ -16,6 +16,7 @@ export default function LenderDashboardPresenter({
                                                      activeRentals,
                                                      pendingRentalListings,
                                                      disputedRentals,
+                                                     disputes,
                                                      pastRentals,
                                                      requests,
                                                      listings,
@@ -28,12 +29,14 @@ export default function LenderDashboardPresenter({
                                                      openBorrowerModal
                                                  }) {
 
+    const pendingRequests = requests.filter(req => req.status === REQUEST_STATUS.ACTIVE);
+
     // 1. Active Rentals Item Renderer
     const renderActiveRental = (rental) => {
-        const correspondingRequest = requests.find(request => request.id === rental.request_id);
+        const correspondingRequest = requests.filter(req => req.status === REQUEST_STATUS.COMPLETED).find(request => request.id === rental.request_id);
         const item = listings.find(listing => listing.id === correspondingRequest.listing_id);
 
-        const returnDate = correspondingRequest?.rent_end_date ? correspondingRequest.rent_end_date : 'N/A';
+        const returnDate = correspondingRequest?.end_date ? correspondingRequest.end_date : 'N/A';
 
         return (
             <div key={rental.id}
@@ -45,7 +48,7 @@ export default function LenderDashboardPresenter({
                     <div>
                         <p className="font-medium text-lg text-gray-900">{item.title}</p>
                         <p className="text-sm text-gray-600">Due: <span
-                            className="font-bold text-indigo-700">{returnDate}</span></p>
+                            className="font-bold text-red-500">{returnDate}</span></p>
                     </div>
                 </div>
 
@@ -127,7 +130,7 @@ export default function LenderDashboardPresenter({
     const renderDisputedRental = (rental) => {
         const correspondingRequest = requests.find(request => request.id === rental.request_id);
         const item = listings.find(listing => listing.id === correspondingRequest.listing_id);
-        const dispute = disputedRentals.find(d => d.rental_id === rental.id);
+        const dispute = disputes.find(d => d.rental_id === rental.id);
         const display = getDisputeDisplay(dispute);
 
         return (
@@ -216,10 +219,10 @@ export default function LenderDashboardPresenter({
 
                 {/* II. Pending Borrower Requests (High-Priority Action) */}
                 <DashboardListSection
-                    title={`Pending Requests (${requests.length})`}
+                    title={`Pending Requests (${pendingRequests.length})`}
                     Icon={Clock}
                     iconColor="text-yellow-500"
-                    list={requests}
+                    list={pendingRequests}
                     renderItem={renderPendingRequest}
                     emptyMessage="No pending requests right now."
                 />

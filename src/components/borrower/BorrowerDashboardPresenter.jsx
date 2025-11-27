@@ -41,7 +41,7 @@ export default function BorrowerDashboardPresenter({
         const { item, correspondingRequest } = getItemAndRequest(rental);
         if (!item || !correspondingRequest) return null; // Safety check
 
-        const returnDate = correspondingRequest?.rent_end_date || 'N/A';
+        const returnDate = correspondingRequest?.end_date || 'N/A';
 
         return (
             <div key={rental.id}
@@ -51,7 +51,7 @@ export default function BorrowerDashboardPresenter({
                          className="w-12 h-12 rounded-lg object-cover"/>
                     <div>
                         <p className="font-medium text-gray-900">{item.title}</p>
-                        <p className="text-sm text-gray-500">Due: <span className="font-bold text-indigo-700">{returnDate}</span></p>
+                        <p className="text-sm text-gray-500">Due: <span className="font-bold text-red-500">{returnDate}</span></p>
                     </div>
                 </div>
                 <div className="sm:text-right">

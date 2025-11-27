@@ -71,7 +71,7 @@ export default function ItemForm() {
                     },
                 ];
 
-                if ([RENTAL_STATUS.PENDING_BORROW, RENTAL_STATUS.PENDING_LEND].includes(itemStatusForLender)) {
+                if ([RENTAL_STATUS.PENDING_BORROW].includes(itemStatusForLender)) {
                     buttonProps.push({
                         label: "Delete Listing",
                         action: LENDER_ITEM_ACTIONS.DELETE,
@@ -312,7 +312,7 @@ export default function ItemForm() {
                 .from('requests')
                 .delete()
                 .eq('listing_id', itemIdNum)
-                .neq('status', REQUEST_STATUS.ACTIVE);
+                .eq('status', REQUEST_STATUS.ACTIVE);
 
             // 2. Delete the main listing record.
             const {error: listingError} = await supabase

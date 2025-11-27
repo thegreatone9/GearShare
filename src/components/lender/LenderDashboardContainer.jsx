@@ -1,7 +1,15 @@
 import React, {useEffect, useState} from "react";
 import {useNavigate} from 'react-router-dom';
 import {supabase} from "../../server/supabaseClient.js";
-import {DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS, REQUEST_STATUS, ROLE, TOAST_TYPE} from "../util/Util.js";
+import {
+    DISPUTE_STATUS,
+    LISTING_STATUS,
+    MODAL_CATEGORY,
+    RENTAL_STATUS,
+    REQUEST_STATUS,
+    ROLE,
+    TOAST_TYPE
+} from "../util/Util.js";
 import LenderDashboardPresenter from "./LenderDashboardPresenter.jsx";
 import {useAuth, useToast} from "../AppContext.jsx";
 import Loader from "../common/Loader.jsx";
@@ -78,21 +86,27 @@ export default function LenderDashboardContainer() {
         const fetchLenderData = async () => {
             setLoading(true);
 
-            const fetchTable = async (table, fkColumn, setState) => {
-                const {data, error} = await supabase
-                    .from(table)
-                    .select('*')
-                    .eq(fkColumn, userId);
+            const fetchTable = async (table, filters = {}, setState) => {
+                let query = supabase.from(table).select('*');
+                Object.entries(filters).forEach(([key, value]) => {
+                    query = query.eq(key, value);
+                });
 
-                if (error) console.error(`Error fetching ${table}:`, error);
-                if (data) setState(data);
+                const { data, error } = await query;
+
+                if (error) {
+                    addToast(TOAST_TYPE.ERROR, `Error fetching ${table}: ${error.message}`);
+
+                } else if (data) {
+                    setState(data);
+                }
 
                 return data;
             };
 
             const [fetchedListings, fetchedRequests] = await Promise.all([
-                fetchTable('listings', 'owner_id', setListings),
-                fetchTable('requests', 'lender_id', setRequests),
+                fetchTable('listings', {'owner_id': userId}, setListings),
+                fetchTable('requests', {'lender_id': userId}, setRequests)
             ]);
 
             const requestIds = fetchedRequests ? fetchedRequests.map(req => req.id) : [];
@@ -102,7 +116,9 @@ export default function LenderDashboardContainer() {
                 .select('*, request_id')
                 .in('request_id', requestIds);
 
-            if (rentalError) console.error("Error fetching rentals:", rentalError);
+            if (rentalError) {
+                addToast(TOAST_TYPE.ERROR, `Error fetching rentals: ${rentalError.message}`);
+            }
 
             const lenderRentals = rentalData || [];
             setLenderRentals(lenderRentals);
@@ -114,7 +130,9 @@ export default function LenderDashboardContainer() {
                 .select('*')
                 .in('rental_id', rentalIds);
 
-            if (disputeError) console.error("Error fetching disputes:", disputeError);
+            if (disputeError) {
+                addToast(TOAST_TYPE.ERROR, `Error fetching disputes: ${disputeError.message}`);
+            }
 
             setDisputes(disputeData || []);
             setLoading(false);
@@ -126,17 +144,19 @@ export default function LenderDashboardContainer() {
 
     // --- DATA FILTERING (Moved from component body) ---
     const activeRentals = lenderRentals.filter(rental => rental.status === RENTAL_STATUS.ACTIVE);
-    const pendingRentalListings = listings.filter(item => !activeRentals.map(aR => aR.listing_id).includes(item.id));
+    const pendingRentalListings = listings.filter(item => item.status === LISTING_STATUS.AVAILABLE);
     const disputedRentals = lenderRentals.filter(rental => {
-        if (rental.status !== RENTAL_STATUS.COMPLETED) return false;
+        if (rental.status !== RENTAL_STATUS.RETURNED) return false;
 
         const dispute = disputes.find(d => d.rental_id === rental.id);
+
         return dispute && dispute.status !== DISPUTE_STATUS.COMPLETED;
     });
     const pastRentals = lenderRentals.filter(rental => {
         if (rental.status !== RENTAL_STATUS.COMPLETED) return false;
 
         const dispute = disputes.find(d => d.rental_id === rental.id);
+
         return !dispute || dispute.status === DISPUTE_STATUS.COMPLETED;
     });
 
@@ -196,6 +216,7 @@ export default function LenderDashboardContainer() {
             activeRentals={activeRentals}
             pendingRentalListings={pendingRentalListings}
             disputedRentals={disputedRentals}
+            disputes={disputes}
             pastRentals={pastRentals}
             requests={requests}
             listings={listings}

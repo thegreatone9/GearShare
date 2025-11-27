@@ -16,7 +16,6 @@ export const LISTING_STATUS = {
 
 export const RENTAL_STATUS = {
     PENDING_BORROW: 'pendingBorrow',
-    PENDING_LEND: 'pendingLend',
     ACTIVE: 'active',
     RETURNED: 'returned',
     COMPLETED: 'completed'
