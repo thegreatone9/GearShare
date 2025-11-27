@@ -300,21 +300,14 @@ export default function ItemForm() {
         event.preventDefault();
 
         try {
-            // 1. Delete pending requests associated with the listing.
-            await supabase
-                .from('requests')
-                .delete()
-                .eq('listing_id', itemIdNum)
-                .eq('status', REQUEST_STATUS.ACTIVE);
+            //Delete pending requests associated with the listing.
+            const { deleteError } = await supabase.rpc('delete_listing_and_requests', {
+                r_listing_id: itemIdNum,
+                active_status: REQUEST_STATUS.ACTIVE
+            });
 
-            // 2. Delete the main listing record.
-            const {error: listingError} = await supabase
-                .from('listings')
-                .delete()
-                .eq('id', itemIdNum);
-
-            if (listingError) {
-                throw new Error(`Failed to delete listing: ${listingError.message}`);
+            if (deleteError) {
+                throw new Error(`Failed to delete listing: ${deleteError.message}`);
             }
 
             setTimeout(() => {
@@ -322,7 +315,7 @@ export default function ItemForm() {
             }, 100);
 
         } catch (error) {
-            console.error("Deletion Error:", error.message);
+            addToast(TOAST_TYPE.ERROR, `Deletion Error: ${error.message}`)
         }
     };
 

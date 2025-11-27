@@ -74,7 +74,7 @@ export default function LenderDashboardContainer() {
             return;
         }
 
-        addToast(TOAST_TYPE.INFO, `You have declined a request to borrow: ${listings[request.listing_id].title}`);
+        addToast(TOAST_TYPE.INFO, `You have declined a request to borrow: ${listings.find(item => item.id === request.listing_id).title}`);
 
         setRequests(prevRequests =>
             prevRequests.filter(req => req.id !== request.id)
