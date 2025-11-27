@@ -51,8 +51,6 @@ export default function AcceptRentalRequest({ request, onClose, setRequests, set
             {
                 request_id: id,
                 listing_id: listingId,
-                borrower_id: borrowerId,
-                lender_id: lenderId,
                 listing_status: LISTING_STATUS.RENTED,
                 rental_status: RENTAL_STATUS.ACTIVE,
                 request_status: REQUEST_STATUS.COMPLETED
