@@ -24,7 +24,8 @@ export const RENTAL_STATUS = {
 
 export const REQUEST_STATUS = {
     ACTIVE: 'active',
-    COMPLETED: 'completed'
+    COMPLETED: 'completed',
+    DECLINED: 'declined'
 }
 
 export const DISPUTE_STATUS = {

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {useNavigate} from 'react-router-dom';
 import {supabase} from "../../server/supabaseClient.js";
-import {DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS, ROLE, TOAST_TYPE} from "../util/Util.js";
+import {DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS, REQUEST_STATUS, ROLE, TOAST_TYPE} from "../util/Util.js";
 import LenderDashboardPresenter from "./LenderDashboardPresenter.jsx";
 import {useAuth, useToast} from "../AppContext.jsx";
 import Loader from "../common/Loader.jsx";
@@ -56,9 +56,9 @@ export default function LenderDashboardContainer() {
     }
 
     const declineRequest = async (request) => {
-        const {error} = await supabase
+        const { error } = await supabase
             .from('requests')
-            .delete()
+            .update({ status: REQUEST_STATUS.DECLINED })
             .eq('id', request.id);
 
         if (error) {
