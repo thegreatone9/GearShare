@@ -67,7 +67,7 @@ export default function DisputeCard({disputeData, openActionModal, openOpponentD
     }
 
     return (
-        <div key={disputeData.id}
+        <div key={disputeData.dispute.id}
              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-8 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
             <div className="flex items-center space-x-3 cursor-pointer"
                  onClick={() => openItemDetails(disputeData)}>
@@ -81,7 +81,7 @@ export default function DisputeCard({disputeData, openActionModal, openOpponentD
                     </p>
                 </div>
             </div>
-            {disputeData.showAction && (
+            {disputeData.actions.length !== 0 && (
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     {
                         disputeData.actions.map(actionKey => {

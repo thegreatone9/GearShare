@@ -6,7 +6,7 @@ import {useToast} from "../../AppContext.jsx";
 
 export default function SettleContent({ disputeData, onClose, setAppData }) {
     const {addToast} = useToast();
-    const disputeId = disputeData.id;
+    const disputeId = disputeData.dispute.id;
     const item = disputeData.item;
 
     const handleSettle = async (event) => {

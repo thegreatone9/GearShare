@@ -9,7 +9,7 @@ export default function FileClaimContent({ disputeData, onClose, setAppData }) {
 
     const handleConfirm = () => {
         if (isFormValid) {
-            handleFileClaim(disputeData.id);
+            handleFileClaim(disputeData.dispute.id);
 
         } else {
             alert("Please provide a detailed description of the damage.");
@@ -19,7 +19,7 @@ export default function FileClaimContent({ disputeData, onClose, setAppData }) {
     const handleFileClaim = async function (disputeId) {
         const updateData = {
             status: DISPUTE_STATUS.CLAIM_FILED,
-            lender_claim_description: damageDescription
+            lender_claim_details: damageDescription
         };
 
         const { data: updatedDispute, error } = await supabase

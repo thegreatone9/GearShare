@@ -2,7 +2,7 @@ export default function ViewReportContent ({ disputeData, onClose }) {
     return (
         <div className="p-6 space-y-4">
             <h4 className="text-lg font-bold text-green-700 flex items-center">
-                Final Settlement Report (Case #{disputeData.id})
+                Final Settlement Report (Case #{disputeData.dispute.id})
             </h4>
             <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-sm space-y-2 max-h-96 overflow-y-auto">
                 <p className="font-semibold">Platform Ruling Date:</p>

@@ -10,7 +10,7 @@ export default function SubmitEvidenceContent ({ disputeData, onClose, setAppDat
         const updateData = {
             // We use the same 'active' status but add metadata (optional columns)
             status: DISPUTE_STATUS.BORROWER_EVIDENCE_SUBMITTED,
-            borrower_defense_description: description // Assuming a column for defense description
+            borrower_defense_details: description // Assuming a column for defense description
             // If you had a status for 'Evidence Submitted', you would set it here:
             // status: DISPUTE_STATUS.PENDING_ADMIN_REVIEW
         };
@@ -43,7 +43,7 @@ export default function SubmitEvidenceContent ({ disputeData, onClose, setAppDat
 
     const handleConfirm = () => {
         if (defenseDescription.length > 10) {
-            submitEvidence(disputeData.id, defenseDescription);
+            submitEvidence(disputeData.dispute.id, defenseDescription);
 
         } else {
             alert("Please provide a detailed defense statement (minimum 10 characters).");

@@ -142,7 +142,7 @@ export default function DisputeDashboard() {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {disputedLentItems.map(disputeData => <DisputeCard key={disputeData.id}
+                            {disputedLentItems.map(disputeData => <DisputeCard key={disputeData.dispute.id}
                                                                                     disputeData={disputeData}
                                                                                     openItemDetails={openItemDetails}
                                                                                     openActionModal={openActionModal}
@@ -166,7 +166,7 @@ export default function DisputeDashboard() {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {disputedBorrowedItems.map(disputeData => <DisputeCard key={disputeData.id}
+                            {disputedBorrowedItems.map(disputeData => <DisputeCard key={disputeData.dispute.id}
                                                                                         disputeData={disputeData}
                                                                                         openItemDetails={openItemDetails}
                                                                                         openActionModal={openActionModal}

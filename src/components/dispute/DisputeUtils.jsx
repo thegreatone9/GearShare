@@ -26,10 +26,10 @@ export const processUserDisputes = (appData, userId) => {
             const userRole = isLender ? ROLE.LENDER : ROLE.BORROWER;
 
             // 5. Get Status Details using the external helper function
-            const statusDetails = getStatusDetails(dispute.status, userRole);
+            const statusDetails = getStatusDetails(dispute, userRole);
 
             return {
-                id: dispute.id,
+                dispute: dispute,
                 item: listing,
                 request: request,
                 rental: rental,
@@ -58,22 +58,22 @@ export const ACTION_ICONS = {
     [BORROWER_DISPUTE_ACTIONS.PAY_DAMAGES]: DollarSign
 };
 
-const getStatusDetails = (status, userRole) => {
+const getStatusDetails = (dispute, userRole) => {
+    const status = dispute.status;
+
     if (status === DISPUTE_STATUS.PENDING_DEPOSIT_RETURN) {
         if (userRole === ROLE.LENDER) {
             return {
                 label: 'Awaiting Your Review',
                 color: 'bg-red-100 text-red-700',
-                actions: [LENDER_DISPUTE_ACTIONS.SETTLE, LENDER_DISPUTE_ACTIONS.FILE_CLAIM],
-                showAction: true
+                actions: [LENDER_DISPUTE_ACTIONS.SETTLE, LENDER_DISPUTE_ACTIONS.FILE_CLAIM]
             };
         }
         // Borrower's view (passive)
         return {
             label: 'Awaiting Lender Review',
             color: 'bg-yellow-100 text-yellow-700',
-            actions: [],
-            showAction: true
+            actions: []
         };
     }
 
@@ -82,16 +82,30 @@ const getStatusDetails = (status, userRole) => {
             return {
                 label: 'Lender Claim Filed: Action Required',
                 color: 'bg-red-100 text-red-700',
-                actions: [BORROWER_DISPUTE_ACTIONS.SUBMIT_EVIDENCE], // Consistent use of actions array
-                showAction: true
+                actions: [BORROWER_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS, BORROWER_DISPUTE_ACTIONS.SUBMIT_EVIDENCE], // Consistent use of actions array
             };
         }
         // Lender's view (passive—waiting for borrower's evidence)
         return {
             label: 'Awaiting Borrower Evidence',
             color: 'bg-blue-100 text-blue-700',
-            actions: [LENDER_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS],
-            showAction: true
+            actions: [LENDER_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS]
+        };
+    }
+
+    if (status === DISPUTE_STATUS.JUDGED) {
+        if (userRole === ROLE.BORROWER) {
+            return {
+                label: 'Judgement Pronounced: Action Required',
+                color: 'bg-red-100 text-red-700',
+                actions: [BORROWER_DISPUTE_ACTIONS.PAY_DAMAGES, BORROWER_DISPUTE_ACTIONS.VIEW_REPORT], // Consistent use of actions array
+            };
+        }
+        // Lender's view (passive—waiting for borrower's evidence)
+        return {
+            label: 'Judgement Pronounced: Awaiting Borrower Damages',
+            color: 'bg-indigo-100 text-indigo-700',
+            actions: [LENDER_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS, LENDER_DISPUTE_ACTIONS.VIEW_REPORT]
         };
     }
 
@@ -99,36 +113,26 @@ const getStatusDetails = (status, userRole) => {
         // Assuming a final resolution requires both parties to view the report
         const actions = [];
 
-        if (userRole === ROLE.BORROWER) {
-            actions.push(BORROWER_DISPUTE_ACTIONS.VIEW_REPORT);
+        if (dispute.judgement_details) {
+            if (userRole === ROLE.BORROWER) {
+                actions.push(BORROWER_DISPUTE_ACTIONS.VIEW_REPORT);
 
-        } else if (userRole === ROLE.LENDER) {
-            actions.push(LENDER_DISPUTE_ACTIONS.VIEW_REPORT);
+            } else if (userRole === ROLE.LENDER) {
+                actions.push(LENDER_DISPUTE_ACTIONS.VIEW_REPORT);
+            }
         }
 
         return {
             label: 'Case Settled',
             color: 'bg-green-100 text-green-700',
             // Borrower should also be able to view the final report
-            actions: actions,
-            showAction: true
+            actions: actions
         };
     }
 
-    const actions = [];
-
-    if (userRole === ROLE.BORROWER) {
-        actions.push(BORROWER_DISPUTE_ACTIONS.VIEW_REPORT);
-
-    } else if (userRole === ROLE.LENDER) {
-        actions.push(LENDER_DISPUTE_ACTIONS.VIEW_REPORT);
-    }
-
-    // Default case is simplified to use the consistent 'actions' array pattern
     return {
         label: status,
         color: 'bg-gray-100 text-gray-700',
-        actions: actions,
-        showAction: true
+        actions: []
     };
 };
