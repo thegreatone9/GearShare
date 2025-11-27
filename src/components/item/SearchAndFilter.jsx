@@ -1,13 +1,27 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {supabase} from '../../server/supabaseClient.js';
 import {isEmptyString, LISTING_CATEGORY, LISTING_STATUS, TOAST_TYPE} from "../util/Util.js";
 import {useToast} from "../AppContext.jsx";
+import {clearAllSessionVariables, retrieveSessionVariable, saveSessionVariable} from "../util/SessionUtil.js";
 
 function SearchAndFilter({ setListings, setLoading }) {
     const {addToast} = useToast();
-    const [searchTerm, setSearchTerm] = useState('');
-    const [searchLocation, setSearchLocation] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('');
+    const [searchTerm, setSearchTerm] = useState(
+        retrieveSessionVariable('searchTerm') || ''
+    );
+    const [searchLocation, setSearchLocation] = useState(
+        retrieveSessionVariable('searchLocation') || ''
+    );
+    const [selectedCategory, setSelectedCategory] = useState(
+        retrieveSessionVariable('selectedCategory') || ''
+    );
+
+    useEffect(() => {
+        window.addEventListener('beforeunload', clearAllSessionVariables);
+
+        return () => window.removeEventListener('beforeunload', clearAllSessionVariables);
+
+    }, []);
 
     const handleSearchSubmit = async (e) => {
         e.preventDefault();
@@ -61,19 +75,28 @@ function SearchAndFilter({ setListings, setLoading }) {
                 type="search"
                 placeholder="Item..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    saveSessionVariable('searchTerm', e.target.value);
+                }}
                 className="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 w-full md:w-1/2"
             />
             <input
                 type="search"
                 placeholder="Location..."
                 value={searchLocation}
-                onChange={(e) => setSearchLocation(e.target.value)}
+                onChange={(e) => {
+                    setSearchLocation(e.target.value);
+                    saveSessionVariable('searchLocation', e.target.value);
+                }}
                 className="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 w-full md:w-1/2"
             />
             <select
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+                onChange={(e) => {
+                    setSelectedCategory(e.target.value);
+                    saveSessionVariable('selectedCategory', e.target.value);
+                }}
                 className="bg-white p-3 border border-gray-300 rounded-lg w-full md:w-auto text-gray-700"
             >
                 {
