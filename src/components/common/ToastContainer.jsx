@@ -30,8 +30,11 @@ export default function ToastContainer () {
     };
 
     if (!isEmptyString(searchParamToastMessage)) {
-        addToast(TOAST_TYPE.INFO, searchParamToastMessage);
         setSearchParamToastMessage(null);
+        setTimeout(() => {
+            addToast(TOAST_TYPE.INFO, searchParamToastMessage);
+
+        }, 500);
 
         return;
     }

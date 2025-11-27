@@ -51,7 +51,7 @@ export default function ItemForm() {
         start_date: '',
         end_date: ''
     });
-    const [statusMessage, setStatusMessage] = useState({ type: '', field: '', text: '' });
+    const [statusMessage, setStatusMessage] = useState({type: '', field: '', text: ''});
     const [loading, setLoading] = useState(true);
     const [toastMessage, setToastMessage] = useState(searchParams.get('toast'));
 
@@ -137,7 +137,7 @@ export default function ItemForm() {
             setLoading(true);
             setEditMode(false);
             setCanRequestBorrow(false);
-            setStatusMessage({ type: '', field: '', text: '' });
+            setStatusMessage({type: '', field: '', text: ''});
 
             const {data: item, error} = await supabase
                 .from('listings')
@@ -180,7 +180,7 @@ export default function ItemForm() {
                 setEditMode(!isNaN(itemIdNum));
 
             } else {
-                const { data: borrowerCanRequest, error } = await supabase.rpc('can_request_borrow', {
+                const {data: borrowerCanRequest, error} = await supabase.rpc('can_request_borrow', {
                     r_listing_id: item.id,
                     r_borrower_id: authenticatedUser.id,
                     request_status: REQUEST_STATUS.ACTIVE
@@ -216,7 +216,7 @@ export default function ItemForm() {
     }, [itemIdNum]);
 
     useEffect(() => {
-        setStatusMessage({ type: '', field: '', text: '' });
+        setStatusMessage({type: '', field: '', text: ''});
 
         if (role === ROLE.LENDER || canRequestBorrow) {
             return;
@@ -248,13 +248,17 @@ export default function ItemForm() {
     const handleBorrowRequest = async function (event) {
         event.preventDefault();
 
-        setStatusMessage({ type: '', field: '', text: '' });
+        setStatusMessage({type: '', field: '', text: ''});
 
         const rentStartDate = requestDates.start_date;
         const rentEndDate = requestDates.end_date;
 
         if (!rentStartDate || !rentEndDate) {
-            setStatusMessage({ type: 'error', field: 'rent_dates', text: 'Both Start Date and End Date must be provided.' });
+            setStatusMessage({
+                type: 'error',
+                field: 'rent_dates',
+                text: 'Both Start Date and End Date must be provided.'
+            });
             return;
         }
 
@@ -262,7 +266,7 @@ export default function ItemForm() {
         const endDateObj = parseDDMMYYYY(rentEndDate);
 
         if (startDateObj.getTime() >= endDateObj.getTime()) {
-            setStatusMessage({ type: 'error', field: 'rent_dates', text: 'Start Date must be before End Date.' });
+            setStatusMessage({type: 'error', field: 'rent_dates', text: 'Start Date must be before End Date.'});
             return;
         }
 
@@ -287,7 +291,8 @@ export default function ItemForm() {
 
             setTimeout(() => {
                 const toastMessage = `You have requested to borrow: ${itemState.title}!`;
-                navigate(`/item/${itemIdNum}?role=${role}&toast=${toastMessage}`);
+                navigate(`/item/${itemIdNum}?role=${role}&toast=${toastMessage}`, {replace: true});
+                window.location.reload();
 
             }, 500);
 
@@ -301,7 +306,7 @@ export default function ItemForm() {
 
         try {
             //Delete pending requests associated with the listing.
-            const { deleteError } = await supabase.rpc('delete_listing_and_requests', {
+            const {deleteError} = await supabase.rpc('delete_listing_and_requests', {
                 r_listing_id: itemIdNum,
                 active_status: REQUEST_STATUS.ACTIVE
             });
@@ -359,7 +364,7 @@ export default function ItemForm() {
 
             } catch (error) {
                 console.error("Save Error:", error);
-                setStatusMessage({ type: 'error', text: `Failed to save Item: ${error.message}` });
+                setStatusMessage({type: 'error', text: `Failed to save Item: ${error.message}`});
             }
 
             const {error} = await supabase
@@ -404,8 +409,10 @@ export default function ItemForm() {
 
             <form onSubmit={handleSubmit} className="bg-white p-6 md:p-10 rounded-2xl shadow-2xl space-y-6">
                 {statusMessage.text && (
-                    <div className={`p-4 rounded-lg border-l-4 font-medium ${getStatusClasses(statusMessage.type)} flex items-center`}>
-                        {statusMessage.type === 'success' ? <CheckCircle className="w-5 h-5 mr-3" /> : <AlertTriangle className="w-5 h-5 mr-3" />}
+                    <div
+                        className={`p-4 rounded-lg border-l-4 font-medium ${getStatusClasses(statusMessage.type)} flex items-center`}>
+                        {statusMessage.type === 'success' ? <CheckCircle className="w-5 h-5 mr-3"/> :
+                            <AlertTriangle className="w-5 h-5 mr-3"/>}
                         {statusMessage.text}
                     </div>
                 )}
@@ -427,7 +434,8 @@ export default function ItemForm() {
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
                             />
                         ) : (
-                            <p id="title" className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
+                            <p id="title"
+                               className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
                                 {itemState.title}
                             </p>
                         )}
@@ -448,7 +456,8 @@ export default function ItemForm() {
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
                             />
                         ) : (
-                            <p id="location" className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
+                            <p id="location"
+                               className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
                                 {itemState.location}
                             </p>
                         )}
@@ -501,7 +510,8 @@ export default function ItemForm() {
                                     }
                                 </select>
                             ) : (
-                                <p id="location" className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
+                                <p id="location"
+                                   className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
                                     {itemState.condition}
                                 </p>
                             )}
@@ -523,7 +533,8 @@ export default function ItemForm() {
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
                             ></textarea>
                         ) : (
-                            <p id="description" className="w-full px-4 py-3 bg-white text-gray-700 rounded-lg border border-gray-200 whitespace-pre-wrap">
+                            <p id="description"
+                               className="w-full px-4 py-3 bg-white text-gray-700 rounded-lg border border-gray-200 whitespace-pre-wrap">
                                 <i>{itemState.description ? itemState.description : 'No description provided for this item'}</i>
                             </p>
                         )}
@@ -547,7 +558,8 @@ export default function ItemForm() {
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
                                 />
                             ) : (
-                                <p id="price" className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
+                                <p id="price"
+                                   className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
                                     ${itemState.price} / {itemState.time_unit}
                                 </p>
                             )}
@@ -570,7 +582,8 @@ export default function ItemForm() {
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
                                 />
                             ) : (
-                                <p id="value" className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
+                                <p id="value"
+                                   className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
                                     ${itemState.value}
                                 </p>
                             )}
@@ -615,7 +628,8 @@ export default function ItemForm() {
                         <h4 className="text-xl font-semibold text-indigo-700">4. Lender Details</h4>
 
                         <div className="flex flex-col items-center w-full">
-                            <img src={lender.image_url} alt={lender.name} className="w-fit h-25 m-auto object-cover rounded-lg"/>
+                            <img src={lender.image_url} alt={lender.name}
+                                 className="w-fit h-25 m-auto object-cover rounded-lg"/>
                         </div>
 
                         <div className="flex flex-col items-center w-full">
@@ -662,8 +676,9 @@ export default function ItemForm() {
                         }
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
-                                    <CalendarDays className="w-4 h-4 mr-2 text-indigo-600" /> Start Date
+                                <label
+                                    className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
+                                    <CalendarDays className="w-4 h-4 mr-2 text-indigo-600"/> Start Date
                                 </label>
 
                                 <input
@@ -680,8 +695,9 @@ export default function ItemForm() {
                             </div>
 
                             <div>
-                                <label className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
-                                    <CalendarDays className="w-4 h-4 mr-2 text-indigo-600" /> End Date
+                                <label
+                                    className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
+                                    <CalendarDays className="w-4 h-4 mr-2 text-indigo-600"/> End Date
                                 </label>
 
                                 <input
