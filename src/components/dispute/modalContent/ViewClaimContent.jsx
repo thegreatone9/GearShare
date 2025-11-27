@@ -1,8 +1,8 @@
-export default function ViewClaimDetailsContent ({ dispute, onClose }) {
+export default function ViewClaimDetailsContent ({ disputeData, onClose }) {
     return (
         <div className="p-6 space-y-4">
             <h4 className="text-lg font-bold text-indigo-700 flex items-center">
-                Claim Filed by Lender (Case #{dispute.id})
+                Claim Filed by Lender (Case #{disputeData.id})
             </h4>
             <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-sm space-y-2 max-h-96 overflow-y-auto">
                 <p className="font-semibold">Description:</p>

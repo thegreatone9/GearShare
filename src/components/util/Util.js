@@ -30,8 +30,9 @@ export const REQUEST_STATUS = {
 }
 
 export const DISPUTE_STATUS = {
-    ACTIVE: 'active',
     PENDING_DEPOSIT_RETURN: 'pendingDepositReturn',
+    CLAIM_FILED: 'claimFiled',
+    BORROWER_EVIDENCE_SUBMITTED: 'borrowerEvidenceSubmitted',
     COMPLETED: 'completed'
 }
 

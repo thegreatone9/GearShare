@@ -77,7 +77,7 @@ const getStatusDetails = (status, userRole) => {
         };
     }
 
-    if (status === DISPUTE_STATUS.ACTIVE) {
+    if (status === DISPUTE_STATUS.CLAIM_FILED) {
         if (userRole === ROLE.BORROWER) {
             return {
                 label: 'Lender Claim Filed: Action Required',
@@ -97,20 +97,38 @@ const getStatusDetails = (status, userRole) => {
 
     if (status === DISPUTE_STATUS.COMPLETED) {
         // Assuming a final resolution requires both parties to view the report
+        const actions = [];
+
+        if (userRole === ROLE.BORROWER) {
+            actions.push(BORROWER_DISPUTE_ACTIONS.VIEW_REPORT);
+
+        } else if (userRole === ROLE.LENDER) {
+            actions.push(LENDER_DISPUTE_ACTIONS.VIEW_REPORT);
+        }
+
         return {
             label: 'Case Settled',
             color: 'bg-green-100 text-green-700',
             // Borrower should also be able to view the final report
-            actions: [LENDER_DISPUTE_ACTIONS.VIEW_REPORT],
+            actions: actions,
             showAction: true
         };
+    }
+
+    const actions = [];
+
+    if (userRole === ROLE.BORROWER) {
+        actions.push(BORROWER_DISPUTE_ACTIONS.VIEW_REPORT);
+
+    } else if (userRole === ROLE.LENDER) {
+        actions.push(LENDER_DISPUTE_ACTIONS.VIEW_REPORT);
     }
 
     // Default case is simplified to use the consistent 'actions' array pattern
     return {
         label: status,
         color: 'bg-gray-100 text-gray-700',
-        actions: [LENDER_DISPUTE_ACTIONS.VIEW_REPORT],
+        actions: actions,
         showAction: true
     };
 };

@@ -8,8 +8,10 @@ export const getDisputeDisplay = (dispute) => {
     switch (dispute.status) {
         case DISPUTE_STATUS.PENDING_DEPOSIT_RETURN:
             return { label: 'Awaiting Lender Review', color: 'bg-yellow-100 text-yellow-700' };
-        case DISPUTE_STATUS.ACTIVE:
+        case DISPUTE_STATUS.CLAIM_FILED:
             return { label: 'Lender Claim Filed', color: 'bg-red-100 text-red-700' };
+        case DISPUTE_STATUS.BORROWER_EVIDENCE_SUBMITTED:
+            return { label: 'Borrower Evidence Submitted', color: 'bg-blue-100 text-blue-700' };
         default:
             return { label: dispute.status, color: 'bg-gray-100 text-gray-700' };
     }

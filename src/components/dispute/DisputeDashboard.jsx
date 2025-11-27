@@ -16,29 +16,27 @@ export default function DisputeDashboard() {
     const [modalState, setModalState] = useState({
         isOpen: false,
         action: '',
-        dispute: null,
-        opponentId: null,
-        item: null
+        disputeData: null
     });
 
     const closeModal = () => {
-        setModalState({ isOpen: false, action: '', dispute: null, item: null, opponentId: null });
+        setModalState({ isOpen: false, action: '', disputeData: null });
     };
-    const openActionModal = (actionType, dispute) => {
-        setModalState({ isOpen: true, action: actionType, dispute: dispute, item: null, opponentId: null });
+    const openActionModal = (actionType, disputeData) => {
+        setModalState({ isOpen: true, action: actionType, disputeData: disputeData });
     };
-    const openOpponentDetails = (event, role, opponentId) => {
+    const openOpponentDetails = (event, disputeData) => {
         event.preventDefault();
         event.stopPropagation();
 
-        const actionType = ROLE.LENDER === role ? LENDER_DISPUTE_ACTIONS.VIEW_BORROWER : BORROWER_DISPUTE_ACTIONS.VIEW_LENDER;
+        const actionType = ROLE.LENDER === disputeData.userRole ? LENDER_DISPUTE_ACTIONS.VIEW_BORROWER : BORROWER_DISPUTE_ACTIONS.VIEW_LENDER;
 
-        setModalState({ isOpen: true, action: actionType, dispute: null, item: null, opponentId: opponentId });
+        setModalState({ isOpen: true, action: actionType, disputeData: disputeData });
     };
-    const openItemDetails = (role, item) => {
-        const actionType = ROLE.LENDER === role ? LENDER_DISPUTE_ACTIONS.VIEW_ITEM : BORROWER_DISPUTE_ACTIONS.VIEW_ITEM;
+    const openItemDetails = (disputeData) => {
+        const actionType = ROLE.LENDER === disputeData.userRole ? LENDER_DISPUTE_ACTIONS.VIEW_ITEM : BORROWER_DISPUTE_ACTIONS.VIEW_ITEM;
 
-        setModalState({ isOpen: true, action: actionType, dispute: null, opponentId: null, item: item });
+        setModalState({ isOpen: true, action: actionType, disputeData: disputeData });
     };
 
     const { disputedLentItems, disputedBorrowedItems } = useMemo(() => {
@@ -144,11 +142,11 @@ export default function DisputeDashboard() {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {disputedLentItems.map(dispute => <DisputeCard key={dispute.id}
-                                                                           dispute={dispute}
-                                                                           openItemDetails={openItemDetails}
-                                                                           openActionModal={openActionModal}
-                                                                           openOpponentDetails={openOpponentDetails} />)}
+                            {disputedLentItems.map(disputeData => <DisputeCard key={disputeData.id}
+                                                                                    disputeData={disputeData}
+                                                                                    openItemDetails={openItemDetails}
+                                                                                    openActionModal={openActionModal}
+                                                                                    openOpponentDetails={openOpponentDetails} />)}
                         </div>
                     )}
                 </section>
@@ -168,11 +166,11 @@ export default function DisputeDashboard() {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {disputedBorrowedItems.map(dispute => <DisputeCard key={dispute.id}
-                                                                               dispute={dispute}
-                                                                               openItemDetails={openItemDetails}
-                                                                               openActionModal={openActionModal}
-                                                                               openOpponentDetails={openOpponentDetails} />)}
+                            {disputedBorrowedItems.map(disputeData => <DisputeCard key={disputeData.id}
+                                                                                        disputeData={disputeData}
+                                                                                        openItemDetails={openItemDetails}
+                                                                                        openActionModal={openActionModal}
+                                                                                        openOpponentDetails={openOpponentDetails} />)}
                         </div>
                     )}
                 </section>

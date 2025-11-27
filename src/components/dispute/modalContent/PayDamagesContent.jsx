@@ -2,7 +2,7 @@ import React from 'react';
 import {DISPUTE_STATUS} from "../../util/Util.js";
 import {supabase} from "../../../server/supabaseClient.js";
 
-export default function PayDamagesContent ({ dispute, onClose, setAppData }) {
+export default function PayDamagesContent ({ disputeData, onClose, setAppData }) {
     const payDamages = async (dispute) => {
         const disputeId = dispute.id;
         const damageAmount = dispute.damage_amount;
@@ -41,9 +41,9 @@ export default function PayDamagesContent ({ dispute, onClose, setAppData }) {
     return (
         <div className="p-6 space-y-4">
             <p className="text-gray-700">
-                The platform has ruled in favor of the lender. Pay the required damages for **{dispute.itemTitle}** to close the case.
+                The platform has ruled in favor of the lender. Pay the required damages for **{disputeData.item.title}** to close the case.
             </p>
-            <div className="text-lg font-bold text-red-600">Damage Amount Due: {dispute.damage_amount}</div>
+            <div className="text-lg font-bold text-red-600">Damage Amount Due: {disputeData.damage_amount}</div>
 
             <p className="text-sm text-gray-500">
                 *Note: Payment will release the deposit hold and clear your account for future rentals.*
@@ -52,7 +52,7 @@ export default function PayDamagesContent ({ dispute, onClose, setAppData }) {
             <div className="flex justify-end pt-4 border-t">
                 <button onClick={onClose} className="mr-3 text-gray-600 hover:text-gray-800">Cancel</button>
                 <button
-                    onClick={() => payDamages(dispute)}
+                    onClick={() => payDamages(disputeData)}
                     className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
                 >
                     Confirm Payment

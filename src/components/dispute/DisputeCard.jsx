@@ -2,8 +2,8 @@ import React from "react";
 import {BORROWER_DISPUTE_ACTIONS, LENDER_DISPUTE_ACTIONS, ROLE} from "../util/Util.js";
 import {ACTION_ICONS} from "./DisputeUtils.jsx";
 
-export default function DisputeCard({dispute, openActionModal, openOpponentDetails, openItemDetails}) {
-    const isLender = dispute.userRole === ROLE.LENDER;
+export default function DisputeCard({disputeData, openActionModal, openOpponentDetails, openItemDetails}) {
+    const isLender = disputeData.userRole === ROLE.LENDER;
 
     const LENDER_ACTION_CARD = {
         [LENDER_DISPUTE_ACTIONS.SETTLE]: {
@@ -67,24 +67,24 @@ export default function DisputeCard({dispute, openActionModal, openOpponentDetai
     }
 
     return (
-        <div key={dispute.id}
+        <div key={disputeData.id}
              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-8 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
             <div className="flex items-center space-x-3 cursor-pointer"
-                 onClick={() => openItemDetails(dispute.userRole, dispute.item)}>
-                <img src={dispute.item.image_url} alt={dispute.item.title}
+                 onClick={() => openItemDetails(disputeData)}>
+                <img src={disputeData.item.image_url} alt={disputeData.item.title}
                      className="w-12 h-12 rounded-lg object-cover"/>
                 <div>
-                    <p className="text-md text-gray-900">{dispute.item.title}</p>
-                    <a className="text-sm text-indigo-900 hover:underline" href="#" onClick={(event) => openOpponentDetails(event, dispute.userRole, dispute.opponentId)}>{isLender ? 'Borrower' : 'Lender'} Details</a>
-                    <p className={`my-1 px-2 py-1 text-xs font-medium rounded-full ${dispute.color} shadow-sm`}>
-                        {dispute.label}
+                    <p className="text-md text-gray-900">{disputeData.item.title}</p>
+                    <a className="text-sm text-indigo-900 hover:underline" href="#" onClick={(event) => openOpponentDetails(event, disputeData)}>{isLender ? 'Borrower' : 'Lender'} Details</a>
+                    <p className={`my-1 px-2 py-1 text-xs font-medium rounded-full ${disputeData.color} shadow-sm`}>
+                        {disputeData.label}
                     </p>
                 </div>
             </div>
-            {dispute.showAction && (
+            {disputeData.showAction && (
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     {
-                        dispute.actions.map(actionKey => {
+                        disputeData.actions.map(actionKey => {
                             const actionProps = isLender ? LENDER_ACTION_CARD[actionKey] : BORROWER_ACTION_CARD[actionKey];
 
                             if (!actionProps) return null; // Safety check
@@ -93,7 +93,7 @@ export default function DisputeCard({dispute, openActionModal, openOpponentDetai
                             return (
                                 <button
                                     key={actionKey}
-                                    onClick={() => openActionModal(actionKey, dispute)}
+                                    onClick={() => openActionModal(actionKey, disputeData)}
                                     className={`text-sm text-white px-4 py-2 rounded-lg transition flex items-center justify-center font-medium shadow-md ${actionProps.className}`}>
                                     <ActionIcon className="w-4 h-4"/>
                                     {actionProps.label}

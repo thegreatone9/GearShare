@@ -2,14 +2,14 @@ import React, {useState} from 'react';
 import {DISPUTE_STATUS} from "../../util/Util.js";
 import {supabase} from "../../../server/supabaseClient.js";
 
-export default function FileClaimContent({ dispute, onClose, setAppData }) {
+export default function FileClaimContent({ disputeData, onClose, setAppData }) {
     const [damageDescription, setDamageDescription] = useState('');
 
     const isFormValid = damageDescription.length > 10;
 
     const handleConfirm = () => {
         if (isFormValid) {
-            handleFileClaim(dispute.id);
+            handleFileClaim(disputeData.id);
 
         } else {
             alert("Please provide a detailed description of the damage.");
@@ -18,8 +18,7 @@ export default function FileClaimContent({ dispute, onClose, setAppData }) {
 
     const handleFileClaim = async function (disputeId) {
         const updateData = {
-            status: DISPUTE_STATUS.ACTIVE,
-            end_date: new Date().toISOString(),
+            status: DISPUTE_STATUS.CLAIM_FILED,
             lender_claim_description: damageDescription
         };
 
@@ -51,7 +50,7 @@ export default function FileClaimContent({ dispute, onClose, setAppData }) {
     return (
         <div className="p-6 space-y-4">
             <p className="text-gray-700">
-                Filing a claim **retains the security deposit** for **{dispute.itemTitle}**. You must provide evidence below to proceed.
+                Filing a claim <span className="font-bold">retains the security deposit</span> for <span className="font-bold">{disputeData.item.title}</span>. You must provide evidence below to proceed.
             </p>
 
             <label htmlFor="damage-description" className="block text-sm font-medium text-gray-700">

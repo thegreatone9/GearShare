@@ -1,15 +1,16 @@
 import React, {useState} from 'react';
 import {supabase} from "../../../server/supabaseClient.js";
+import {DISPUTE_STATUS} from "../../util/Util.js";
 
-export default function SubmitEvidenceContent ({ dispute, onClose, setAppData }) {
+export default function SubmitEvidenceContent ({ disputeData, onClose, setAppData }) {
     const [defenseDescription, setDefenseDescription] = useState('');
 
     const submitEvidence = async (disputeId, description) => {
         // 1. Prepare data for update
         const updateData = {
             // We use the same 'active' status but add metadata (optional columns)
-            borrower_defense_description: description, // Assuming a column for defense description
-            last_action_date: new Date().toISOString(),
+            status: DISPUTE_STATUS.BORROWER_EVIDENCE_SUBMITTED,
+            borrower_defense_description: description // Assuming a column for defense description
             // If you had a status for 'Evidence Submitted', you would set it here:
             // status: DISPUTE_STATUS.PENDING_ADMIN_REVIEW
         };
@@ -42,7 +43,7 @@ export default function SubmitEvidenceContent ({ dispute, onClose, setAppData })
 
     const handleConfirm = () => {
         if (defenseDescription.length > 10) {
-            submitEvidence(dispute.id, defenseDescription);
+            submitEvidence(disputeData.id, defenseDescription);
 
         } else {
             alert("Please provide a detailed defense statement (minimum 10 characters).");
@@ -52,7 +53,7 @@ export default function SubmitEvidenceContent ({ dispute, onClose, setAppData })
     return (
         <div className="p-6 space-y-4">
             <p className="text-gray-700">
-                The lender has filed a claim. Upload evidence below to dispute the damage claim for **{dispute.itemTitle}**.
+                The lender has filed a claim. Upload evidence below to dispute the damage claim for **{disputeData.item.title}**.
             </p>
             <label htmlFor="defense-description" className="block text-sm font-medium text-gray-700">
                 Your Defense Statement

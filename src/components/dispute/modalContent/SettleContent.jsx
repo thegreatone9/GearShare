@@ -4,17 +4,19 @@ import {DISPUTE_STATUS, LISTING_STATUS, RENTAL_STATUS, TOAST_TYPE} from "../../u
 import {supabase} from "../../../server/supabaseClient.js";
 import {useToast} from "../../AppContext.jsx";
 
-export default function SettleContent({ dispute, onClose, setAppData }) {
+export default function SettleContent({ disputeData, onClose, setAppData }) {
     const {addToast} = useToast();
+    const disputeId = disputeData.id;
+    const item = disputeData.item;
 
-    const handleSettle = async (disputeId) => {
+    const handleSettle = async (event) => {
         event.preventDefault();
 
         const { data: updatedDispute, error } = await supabase.rpc(
             "resolve_dispute_and_update_listing",
             {
                 dispute_id: disputeId,
-                rental_id: dispute.rental_id,
+                rental_id: disputeData.rental.id,
                 rental_status: RENTAL_STATUS.COMPLETED,
                 dispute_status: DISPUTE_STATUS.COMPLETED,
                 listing_status: LISTING_STATUS.AVAILABLE
@@ -43,7 +45,7 @@ export default function SettleContent({ dispute, onClose, setAppData }) {
     return (
         <div className="p-6 space-y-4">
             <p className="text-gray-700">
-                You are about to <span className="font-bold text-red-500">release the full security deposit</span> for the rental of <span className="font-bold">{dispute.itemTitle}</span> back to the borrower.
+                You are about to <span className="font-bold text-red-500">release the full security deposit</span> for the rental of <span className="font-bold">{item.title}</span> back to the borrower.
                 This action confirms there is <span className="font-bold text-red-500">no damage</span> and will close the case.
             </p>
             <p className="text-sm font-semibold text-green-600 flex items-center">
@@ -53,7 +55,7 @@ export default function SettleContent({ dispute, onClose, setAppData }) {
             <div className="flex justify-center pt-4 border-t">
                 <button onClick={onClose} className="mr-3 text-gray-600 bg-gray-300 hover:text-gray-800">Cancel</button>
                 <button
-                    onClick={(event) => handleSettle(event, dispute.id)}
+                    onClick={(event) => handleSettle(event)}
                     className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
                 >
                     Confirm & Settle Deposit

@@ -20,10 +20,7 @@ export default function DisputeActionModal({modalState, closeModal, setAppData})
         return null;
     }
 
-    const dispute= modalState.dispute;
-    const opponentId = modalState.opponentId;
-    const item = modalState.item;
-
+    const disputeData = modalState.disputeData;
     let modalTitle = "";
     let modalContent = null;
     let modalWidth = 'max-w-xl';
@@ -31,48 +28,48 @@ export default function DisputeActionModal({modalState, closeModal, setAppData})
     switch (selectedAction) {
         case LENDER_DISPUTE_ACTIONS.SETTLE:
             modalTitle = "Confirm Deposit Release";
-            modalContent = <SettleContent dispute={dispute} onClose={closeModal} setAppData={setAppData} />;
+            modalContent = <SettleContent disputeData={disputeData} onClose={closeModal} setAppData={setAppData} />;
             modalWidth = 'max-w-md';
             break;
 
         case LENDER_DISPUTE_ACTIONS.FILE_CLAIM:
             modalTitle = "File Claim & Retain Deposit";
-            modalContent = <FileClaimContent dispute={dispute} onClose={closeModal} setAppData={setAppData} />;
+            modalContent = <FileClaimContent disputeData={disputeData} onClose={closeModal} setAppData={setAppData} />;
             break;
 
         case BORROWER_DISPUTE_ACTIONS.SUBMIT_EVIDENCE:
-            modalTitle = `Submit Defense Evidence: ${dispute.item.title}`;
-            modalContent = <SubmitEvidenceContent dispute={dispute} onClose={closeModal} setAppData={setAppData} />;
+            modalTitle = `Submit Defense Evidence: ${disputeData.item.title}`;
+            modalContent = <SubmitEvidenceContent disputeData={disputeData} onClose={closeModal} setAppData={setAppData} />;
             break;
 
         case BORROWER_DISPUTE_ACTIONS.PAY_DAMAGES:
-            modalTitle = `Payment Required: ${dispute.item.title}`;
-            modalContent = <PayDamagesContent dispute={dispute} onClose={closeModal} setAppData={setAppData} />;
+            modalTitle = `Payment Required: ${disputeData.item.title}`;
+            modalContent = <PayDamagesContent disputeData={disputeData} onClose={closeModal} setAppData={setAppData} />;
             modalWidth = 'max-w-sm';
             break;
 
         case LENDER_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS:
-            modalTitle = `Viewing Claim Details: ${dispute.item.title}`;
-            modalContent = <ViewClaimDetailsContent dispute={dispute} onClose={closeModal} />;
+            modalTitle = `Viewing Claim Details: ${disputeData.item.title}`;
+            modalContent = <ViewClaimDetailsContent disputeData={disputeData} onClose={closeModal} />;
             break;
 
         case LENDER_DISPUTE_ACTIONS.VIEW_REPORT:
         case BORROWER_DISPUTE_ACTIONS.VIEW_REPORT:
-            modalTitle = `Viewing Final Report: ${dispute.item.title}`;
-            modalContent = <ViewReportContent dispute={dispute} onClose={closeModal} />;
+            modalTitle = `Viewing Final Report: ${disputeData.item.title}`;
+            modalContent = <ViewReportContent disputeData={disputeData} onClose={closeModal} />;
             break;
 
         case LENDER_DISPUTE_ACTIONS.VIEW_BORROWER:
             modalTitle = 'Lender Details';
         case BORROWER_DISPUTE_ACTIONS.VIEW_LENDER:
             modalTitle = modalTitle ? modalTitle : 'Borrower Details';
-            modalContent = <UserDetails userId={opponentId} onClose={closeModal} />;
+            modalContent = <UserDetails userId={disputeData.opponentId} onClose={closeModal} />;
             break;
 
         case LENDER_DISPUTE_ACTIONS.VIEW_ITEM:
         case BORROWER_DISPUTE_ACTIONS.VIEW_ITEM:
-            modalTitle = `${item.title} Details`;
-            modalContent = <ModalItemDetails item={item} onClose={closeModal} />;
+            modalTitle = `${disputeData.item.title} Details`;
+            modalContent = <ModalItemDetails item={disputeData.item} onClose={closeModal} />;
             break;
 
         default:
