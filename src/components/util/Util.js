@@ -66,6 +66,7 @@ export const TIME_UNIT = {
 }
 
 export const LISTING_CATEGORY = {
+    ANY: 'Category: Any',
     ELECTRONICS: 'Electronics',
     SPORTS: 'Sports',
     TRAVEL: 'Travel',

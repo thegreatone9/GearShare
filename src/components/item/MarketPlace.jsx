@@ -1,9 +1,10 @@
-import ItemListPage from "./ItemListPage.jsx";
 import React, {useEffect, useState} from "react";
 import Loader from "../common/Loader.jsx";
 import {supabase} from "../../server/supabaseClient.js";
 import {LISTING_STATUS, TOAST_TYPE} from "../util/Util.js";
 import {useToast} from "../AppContext.jsx";
+import SearchAndFilter from "./SearchAndFilter.jsx";
+import ItemCard from "./ItemCard.jsx";
 
 export default function MarketplaceContent () {
     const HOTTEST_LIST_SIZE = 8;
@@ -42,7 +43,12 @@ export default function MarketplaceContent () {
             <h3 className="text-3xl font-bold text-gray-800 mb-4">Discover Gear Near You</h3>
             <p className="text-gray-800">Start browsing thousands of items available for rent in your community.</p>
             <br/>
-            <ItemListPage setLoading={setLoading} listings={listings} setListings={setListings}/>
+            <div className="bg-indigo-circles font-inter antialiased p-5 rounded-xl">
+                <SearchAndFilter setListings={setListings} setLoading={setLoading}/>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {listings.map(item => <ItemCard key={item.id} item={item}/>)}
+                </div>
+            </div>
         </div>
     );
 }

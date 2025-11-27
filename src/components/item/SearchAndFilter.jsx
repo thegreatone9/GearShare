@@ -1,25 +1,20 @@
 import React, {useState} from 'react';
 import {supabase} from '../../server/supabaseClient.js';
-import {LISTING_CATEGORY, LISTING_STATUS, TOAST_TYPE} from "../util/Util.js";
+import {isEmptyString, LISTING_CATEGORY, LISTING_STATUS, TOAST_TYPE} from "../util/Util.js";
 import {useToast} from "../AppContext.jsx";
 
-export default function SearchAndFilter({ setListings, setLoading }) {
+function SearchAndFilter({ setListings, setLoading }) {
     const {addToast} = useToast();
     const [searchTerm, setSearchTerm] = useState('');
     const [searchLocation, setSearchLocation] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('Category: All');
+    const [selectedCategory, setSelectedCategory] = useState('');
 
     const handleSearchSubmit = async (e) => {
         e.preventDefault();
 
         const hasSearchTerm = searchTerm.trim().length > 3;
         const hasLocation = searchLocation.trim().length > 3;
-        const hasCategory = selectedCategory !== 'Category: All';
-
-        if (!hasSearchTerm && !hasLocation && !hasCategory) {
-            console.log("No search criteria provided. Skipping database query.");
-            return;
-        }
+        const hasCategory = !isEmptyString(selectedCategory) && selectedCategory !== LISTING_CATEGORY.ANY;
 
         setLoading(true);
 
@@ -81,7 +76,6 @@ export default function SearchAndFilter({ setListings, setLoading }) {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="bg-white p-3 border border-gray-300 rounded-lg w-full md:w-auto text-gray-700"
             >
-                <option>Category: All</option>
                 {
                     Object.values(LISTING_CATEGORY).map(category => {
                         return <option key={category}>{category}</option>
@@ -96,3 +90,5 @@ export default function SearchAndFilter({ setListings, setLoading }) {
         </form>
     );
 }
+
+export default React.memo(SearchAndFilter);
