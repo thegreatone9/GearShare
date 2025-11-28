@@ -1,0 +1,18 @@
+TODO and THOUGHTS:
+
+1) When dispute goes to GearShare, display message (e.g. via view report) to both lender and borrower for that item on the Dashboard saying that:
+"Dispute is currently being judged by GearShare Admin. You will receive a decision right here in maximum 1 week"
+2) REAL LIFE EXPERIMENT: lend out an item to a friend by keeping security deposit, and see how the return works.
+3) You should facilitate paying for the rent in advance + security deposit. That way, lenders are safe.
+4) Borrowers should feel safe because GearShare's escrow system would guarantee return of their security deposit.
+5) If Borrower wants to return in advance, the escrow system would refund them for the days not used. Make borrower feel safe,
+by enabling them to see their money any time, and even get it back by returning the item.
+6) REAL LIFE EXPERIMENT: BUY the scooters and lend them out via Facebook group. Your experience will guide you in building the app.
+7) In a way GearShare is a safety/security-wrapper of a kind of 'trust-shield' around lenders' items. Lenders alone are
+not safe to lend out their items. Borrowers' payment in advance to GearShare's escrow insures the lender. The fact that
+it's escrow, also insures the borrower because if they don't want to use the gear, they can return it and be refunded.
+8) It's the borrower's responsibility to inspect the gear before borrowing it. Hence, if they borrow but want to cancel lease
+too early, they might have to pay small fine, as the lender could have lent it to someone else.
+9) Store snapshot of item and lease details as a BLOB in the request record.
+10) As well as GearShare, the lender must provide a policy document with each item on GearShare. This will enumerate all the
+rules, warnings and damages that the borrower and lender are liable to.
