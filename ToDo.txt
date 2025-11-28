@@ -15,4 +15,11 @@ it's escrow, also insures the borrower because if they don't want to use the gea
 too early, they might have to pay small fine, as the lender could have lent it to someone else.
 9) Store snapshot of item and lease details as a BLOB in the request record.
 10) As well as GearShare, the lender must provide a policy document with each item on GearShare. This will enumerate all the
-rules, warnings and damages that the borrower and lender are liable to.
+rules, warnings and damages that the borrower and lender are liable to, as well as the rent payment details structured out
+(e.g., "Rental Fee: $50, Service Fee: $5, Total: $55").
+11) Allow marketplace search by distance and price.
+12) Enable datepicker via real availability calendar e.g. so lenders can show item is available for e.g. Fri, Sat, not Sun, not Mon, then again Tuesday, etc.
+Borrower could see calendar dates marked green, red and gray, like airlines booking.
+13) With ESCROW, collect borrower payment details as soon as they make request. This provides to lender that the borrower
+is serious, the digital equivalent of showing up with cash in hand.
+14)
