@@ -45,7 +45,21 @@ export const processUserDisputes = (appData, userId) => {
     const disputedLentItems = allRelevantDisputes.filter(d => d.isLent);
     const disputedBorrowedItems = allRelevantDisputes.filter(d => !d.isLent);
 
-    return { disputedLentItems, disputedBorrowedItems };
+    const pastDisputedBorrowedItems = disputedBorrowedItems.filter(
+        d => d.dispute.status === DISPUTE_STATUS.COMPLETED
+    );
+    const currentDisputedBorrowedItems = disputedBorrowedItems.filter(
+        d => d.dispute.status !== DISPUTE_STATUS.COMPLETED
+    );
+
+    const pastDisputedLentItems = disputedLentItems.filter(
+        d => d.dispute.status === DISPUTE_STATUS.COMPLETED
+    );
+    const currentDisputedLentItems = disputedLentItems.filter(
+        d => d.dispute.status !== DISPUTE_STATUS.COMPLETED
+    );
+
+    return { pastDisputedBorrowedItems, currentDisputedBorrowedItems, pastDisputedLentItems, currentDisputedLentItems };
 };
 
 export const ACTION_ICONS = {

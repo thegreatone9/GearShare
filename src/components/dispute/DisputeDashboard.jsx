@@ -1,4 +1,4 @@
-import {CheckCheck, Handshake, Landmark, Shield,} from 'lucide-react';
+import {Album, CheckCheck, ClockAlert, Handshake, Landmark, Shield} from 'lucide-react';
 import React, {useEffect, useMemo, useState} from 'react';
 import DisputeActionModal from "./DisputeActionModal.jsx";
 import {processUserDisputes} from "./DisputeUtils.jsx";
@@ -12,7 +12,7 @@ export default function DisputeDashboard() {
     const {authenticatedUser} = useAuth();
     const {addToast} = useToast();
     const [loading, setLoading] = useState(true);
-    const [appData, setAppData] = useState({ disputes: [], rentals: [], requests: [], listings: [], accounts: [] });
+    const [appData, setAppData] = useState({disputes: [], rentals: [], requests: [], listings: [], accounts: []});
     const [modalState, setModalState] = useState({
         isOpen: false,
         action: '',
@@ -20,10 +20,10 @@ export default function DisputeDashboard() {
     });
 
     const closeModal = () => {
-        setModalState({ isOpen: false, action: '', disputeData: null });
+        setModalState({isOpen: false, action: '', disputeData: null});
     };
     const openActionModal = (actionType, disputeData) => {
-        setModalState({ isOpen: true, action: actionType, disputeData: disputeData });
+        setModalState({isOpen: true, action: actionType, disputeData: disputeData});
     };
     const openOpponentDetails = (event, disputeData) => {
         event.preventDefault();
@@ -31,15 +31,20 @@ export default function DisputeDashboard() {
 
         const actionType = ROLE.LENDER === disputeData.userRole ? LENDER_DISPUTE_ACTIONS.VIEW_BORROWER : BORROWER_DISPUTE_ACTIONS.VIEW_LENDER;
 
-        setModalState({ isOpen: true, action: actionType, disputeData: disputeData });
+        setModalState({isOpen: true, action: actionType, disputeData: disputeData});
     };
     const openItemDetails = (disputeData) => {
         const actionType = ROLE.LENDER === disputeData.userRole ? LENDER_DISPUTE_ACTIONS.VIEW_ITEM : BORROWER_DISPUTE_ACTIONS.VIEW_ITEM;
 
-        setModalState({ isOpen: true, action: actionType, disputeData: disputeData });
+        setModalState({isOpen: true, action: actionType, disputeData: disputeData});
     };
 
-    const { disputedLentItems, disputedBorrowedItems } = useMemo(() => {
+    const {
+        pastDisputedBorrowedItems,
+        currentDisputedBorrowedItems,
+        pastDisputedLentItems,
+        currentDisputedLentItems
+    } = useMemo(() => {
         return processUserDisputes(appData, authenticatedUser.id);
 
     }, [appData.disputes, appData.rentals, appData.requests, appData.listings, authenticatedUser.id]);
@@ -49,7 +54,7 @@ export default function DisputeDashboard() {
             setLoading(true);
 
             // 1. Fetch ALL Requests involving the user (Lender OR Borrower)
-            const { data: allRequests, error: reqError } = await supabase
+            const {data: allRequests, error: reqError} = await supabase
                 .from('requests')
                 .select('*')
                 .or(`borrower_id.eq.${authenticatedUser.id},lender_id.eq.${authenticatedUser.id}`);
@@ -68,7 +73,7 @@ export default function DisputeDashboard() {
             ])];
 
             // 2. Fetch Rentals associated with those requests
-            const { data: rentalData, error: rentalError } = await supabase
+            const {data: rentalData, error: rentalError} = await supabase
                 .from('rentals')
                 .select('*')
                 .in('request_id', requestIds);
@@ -82,7 +87,7 @@ export default function DisputeDashboard() {
             const rentalIds = rentalData ? rentalData.map(r => r.id) : [];
 
             // 3. Fetch Disputes linked to those Rentals
-            const { data: disputeData, error: disputeError } = await supabase
+            const {data: disputeData, error: disputeError} = await supabase
                 .from('disputes')
                 .select('*')
                 .in('rental_id', rentalIds);
@@ -94,7 +99,7 @@ export default function DisputeDashboard() {
             }
 
             // 4. Fetch Listings
-            const [{ data: listingsData }, { data: accountsData }] = await Promise.all([
+            const [{data: listingsData}, {data: accountsData}] = await Promise.all([
                 supabase.from('listings').select('*').in('id', listingIds),
                 supabase.from('accounts').select('id, name, email').in('id', uniqueAccountIds),
             ]);
@@ -133,44 +138,90 @@ export default function DisputeDashboard() {
                 <section>
                     <h4 className="text-2xl font-semibold text-gray-800 mb-4 border-b pb-3 flex items-center">
                         <Landmark className="w-6 h-6 mr-2 text-indigo-500"/>
-                        Disputes on Your Lent Items ({disputedLentItems.length})
+                        Disputes on Lent Items
                     </h4>
-                    {disputedLentItems.length === 0 ? (
-                        <div className="text-center py-6 text-gray-500 border rounded-xl bg-gray-50">
-                            <CheckCheck className="w-8 h-8 mx-auto mb-3 text-green-500"/>
-                            <p className="font-medium">No disputes currently active for your listings.</p>
+                    <h6 className="text-lg font-semibold text-gray-800 mb-2 pb-2 flex items-center">
+                        <ClockAlert className="w-5 h-5 mr-2 text-indigo-700"/>
+                        Current Lent Items ({currentDisputedLentItems.length})
+                    </h6>
+                    {currentDisputedLentItems.length === 0 ? (
+                        <div className="text-center py-2 text-gray-500 border rounded-xl bg-gray-50">
+                            <CheckCheck className="w-6 h-6 mx-auto text-green-500"/>
+                            <span className="font-medium">No active disputes for your lent items.</span>
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {disputedLentItems.map(disputeData => <DisputeCard key={disputeData.dispute.id}
-                                                                                    disputeData={disputeData}
-                                                                                    openItemDetails={openItemDetails}
-                                                                                    openActionModal={openActionModal}
-                                                                                    openOpponentDetails={openOpponentDetails} />)}
+                            {currentDisputedLentItems.map(disputeData => <DisputeCard key={disputeData.dispute.id}
+                                                                                      disputeData={disputeData}
+                                                                                      openItemDetails={openItemDetails}
+                                                                                      openActionModal={openActionModal}
+                                                                                      openOpponentDetails={openOpponentDetails}/>)}
+                        </div>
+                    )}
+
+                    <h6 className="text-lg font-semibold text-gray-500 mt-4 mb-2 pb-2 flex items-center">
+                        <Album className="w-5 h-5 mr-2 text-indigo-700"/>
+                        Past Lent Items ({pastDisputedLentItems.length})
+                    </h6>
+                    {pastDisputedLentItems.length === 0 ? (
+                        <div className="text-center py-2 text-gray-500 border rounded-xl bg-gray-50">
+                            <CheckCheck className="w-6 h-6 mx-auto text-green-500"/>
+                            <p className="font-medium">No past disputes for your lent items.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {pastDisputedLentItems.map(disputeData => <DisputeCard key={disputeData.dispute.id}
+                                                                                   disputeData={disputeData}
+                                                                                   openItemDetails={openItemDetails}
+                                                                                   openActionModal={openActionModal}
+                                                                                   openOpponentDetails={openOpponentDetails}/>)}
                         </div>
                     )}
                 </section>
 
-                <hr className="border-t border-gray-200"/>
+                <hr className="border-t border-b mt-10 border-gray-200"/>
 
                 {/* 2. Disputed Borrowed Items (Borrower Role) */}
                 <section>
                     <h4 className="text-2xl font-semibold text-gray-800 mb-4 border-b pb-3 flex items-center">
                         <Handshake className="w-6 h-6 mr-2 text-red-500"/>
-                        Disputes on Your Borrowed Items ({disputedBorrowedItems.length})
+                        Disputes on Your Borrowed Items
                     </h4>
-                    {disputedBorrowedItems.length === 0 ? (
-                        <div className="text-center py-6 text-gray-500 border rounded-xl bg-gray-50">
-                            <CheckCheck className="w-8 h-8 mx-auto mb-3 text-green-500"/>
-                            <p className="font-medium">No deposit claims currently filed against you.</p>
+                    <h6 className="text-lg font-semibold text-gray-800 mb-2 pb-2 flex items-center">
+                        <ClockAlert className="w-5 h-5 mr-2 text-indigo-700"/>
+                        Current Borrowed Items ({currentDisputedBorrowedItems.length})
+                    </h6>
+                    {currentDisputedBorrowedItems.length === 0 ? (
+                        <div className="text-center py-2 text-gray-500 border rounded-xl bg-gray-50">
+                            <CheckCheck className="w-6 h-6 mx-auto text-green-500"/>
+                            <p className="font-medium">No active disputes for your borrowed items.</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {disputedBorrowedItems.map(disputeData => <DisputeCard key={disputeData.dispute.id}
-                                                                                        disputeData={disputeData}
-                                                                                        openItemDetails={openItemDetails}
-                                                                                        openActionModal={openActionModal}
-                                                                                        openOpponentDetails={openOpponentDetails} />)}
+                            {currentDisputedBorrowedItems.map(disputeData => <DisputeCard key={disputeData.dispute.id}
+                                                                                          disputeData={disputeData}
+                                                                                          openItemDetails={openItemDetails}
+                                                                                          openActionModal={openActionModal}
+                                                                                          openOpponentDetails={openOpponentDetails}/>)}
+                        </div>
+                    )}
+
+                    <h6 className="text-lg font-semibold text-gray-500 mt-4 mb-2 pb-2 flex items-center">
+                        <Album className="w-5 h-5 mr-2 text-indigo-700"/>
+                        Past Borrowed Items ({pastDisputedBorrowedItems.length})
+                    </h6>
+                    {pastDisputedBorrowedItems.length === 0 ? (
+                        <div className="text-center py-2 text-gray-500 border rounded-xl bg-gray-50">
+                            <CheckCheck className="w-6 h-6 mx-auto text-green-500"/>
+                            <p className="font-medium">No past disputes for your borrowed items.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {pastDisputedBorrowedItems.map(disputeData => <DisputeCard key={disputeData.dispute.id}
+                                                                                       disputeData={disputeData}
+                                                                                       openItemDetails={openItemDetails}
+                                                                                       openActionModal={openActionModal}
+                                                                                       openOpponentDetails={openOpponentDetails}/>)}
                         </div>
                     )}
                 </section>
