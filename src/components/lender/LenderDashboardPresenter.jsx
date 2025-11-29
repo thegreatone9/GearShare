@@ -175,6 +175,10 @@ export default function LenderDashboardPresenter({
                     <span className={`px-3 py-1 text-xs font-semibold rounded-full ${display.color}`}>
                         {display.label}
                     </span>
+                    <button className="text-sm ml-2 text-white bg-amber-500 px-3 py-1 rounded-lg hover:bg-orange-700 transition"
+                            onClick={(event) => openBorrowerModal(event, correspondingRequest.borrower_id)}>
+                        Borrower Details
+                    </button>
                 </div>
             </div>
         );
