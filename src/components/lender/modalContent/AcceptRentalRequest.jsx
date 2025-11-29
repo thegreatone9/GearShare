@@ -50,10 +50,12 @@ export default function AcceptRentalRequest({ request, onClose, setRequests, set
             'confirm_rental_acceptance',
             {
                 request_id: id,
-                listing_id: listingId,
+                r_listing_id: listingId,
                 listing_status: LISTING_STATUS.RENTED,
                 rental_status: RENTAL_STATUS.ACTIVE,
-                request_status: REQUEST_STATUS.COMPLETED
+                request_status: REQUEST_STATUS.COMPLETED,
+                other_request_status: REQUEST_STATUS.DECLINED,
+                active_request_status: REQUEST_STATUS.ACTIVE
             }
         ).single();
 
@@ -61,10 +63,8 @@ export default function AcceptRentalRequest({ request, onClose, setRequests, set
             throw new Error(`Rental Request Acceptance Transaction failed: ${rpcError.message}`);
         }
 
-        setRequests(prevRequests => prevRequests.filter(req => req.id !== id));
-        setLenderRentals(prevRentals => [...prevRentals, rentalResult]);
-
         closeAllModals();
+        window.location.reload();
     };
 
     if (loading) {

@@ -70,10 +70,12 @@ $$;
 CREATE
 OR REPLACE FUNCTION confirm_rental_acceptance(
     request_id int4,
-    listing_id int4,
+    r_listing_id int4,
     rental_status text,
     listing_status text,
-    request_status text
+    request_status text,
+    other_request_status text,
+    active_request_status text
 )
 RETURNS SETOF rentals -- Returns the inserted rental record on success
 LANGUAGE plpgsql
@@ -99,11 +101,11 @@ END IF;
 SELECT TRUE
 INTO list_exists
 FROM listings
-WHERE id = listing_id;
+WHERE id = r_listing_id;
 
 IF
 NOT list_exists THEN
-        RAISE EXCEPTION 'Listing with ID % does not exist.', listing_id;
+        RAISE EXCEPTION 'Listing with ID % does not exist.', r_listing_id;
 END IF;
 
     -- 1. Start a transaction block (Postgres uses implicit transactions within functions)
@@ -114,12 +116,18 @@ INTO inserted_rental;
 -- 2. UPDATE the listing status
 UPDATE listings
 SET status = listing_status
-WHERE id = listing_id;
+WHERE id = r_listing_id;
 
 -- 3. UPDATE the request status (Changed from DELETE to UPDATE status as per previous code fix)
 UPDATE requests
 SET status = request_status -- Use a terminal status instead of deleting
 WHERE id = request_id;
+
+-- 4. DECLINE all other requests to the same Listing
+UPDATE requests
+SET status = other_request_status -- Use a terminal status instead of deleting
+WHERE listing_id = r_listing_id
+  AND id != request_id AND status = active_request_status;
 
 -- If all steps succeed, the transaction is implicitly committed.
 RETURN
