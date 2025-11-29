@@ -59,6 +59,10 @@ export default function BorrowerDashboardPresenter({
                     <button className="text-xs text-white bg-indigo-600 px-3 py-1 rounded-lg hover:bg-indigo-700 transition"
                             onClick={(event) => handleReturn(rental, event)}>Pay & Return Item Now
                     </button>
+                    <button className="text-sm ml-2 text-white bg-amber-500 px-3 py-1 rounded-lg hover:bg-orange-700 transition"
+                            onClick={(event) => openLenderDetailsModal(event, item.owner_id)}>
+                        Lender Details
+                    </button>
                 </div>
             </div>
         );
@@ -141,6 +145,10 @@ export default function BorrowerDashboardPresenter({
                     <span className={`px-3 py-1 text-xs font-semibold rounded-full ${display.color}`}>
                         {display.label}
                     </span>
+                    <button className="text-sm ml-2 text-white bg-amber-500 px-3 py-1 rounded-lg hover:bg-orange-700 transition"
+                            onClick={(event) => openLenderDetailsModal(event, item.owner_id)}>
+                        Lender Details
+                    </button>
                 </div>
             </div>
         );
