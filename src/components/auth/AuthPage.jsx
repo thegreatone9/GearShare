@@ -49,8 +49,6 @@ export default function AuthPage() {
             throw new Error(accountError.message);
         }
 
-        updateUserCookie(user);
-
         return user;
     };
 
@@ -80,7 +78,10 @@ export default function AuthPage() {
             newUser = await addAccount(newUser);
 
             console.log(`Sign Up successful for ${newUser}. New account added.`);
+
+            updateUserCookie(newUser);
             handleAuth(newUser);
+            addToast(TOAST_TYPE.SUCCESS, `Welcome ${newUser.name}!`);
             navigate('/borrower');
 
         } else {
@@ -89,6 +90,7 @@ export default function AuthPage() {
             if (user) {
                 console.log(`Sign In successful for ${email}.`);
 
+                updateUserCookie(user);
                 handleAuth(user);
                 addToast(TOAST_TYPE.SUCCESS, `Welcome ${user.name}!`);
                 navigate('/borrower');
