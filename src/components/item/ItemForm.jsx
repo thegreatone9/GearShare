@@ -311,6 +311,24 @@ export default function ItemForm() {
                     }
 
                     setLender(lenderData);
+
+                    if (currentItem && currentItem.owner_id !== authenticatedUser.id) {
+                        const {data: requestDates, error: requestDatesError} = await supabase
+                            .from('requests')
+                            .select('start_date, end_date')
+                            .eq('listing_id', itemIdNum)
+                            .eq('borrower_id', authenticatedUser.id)
+                            .single();
+
+                        if (requestDatesError) {
+                            throw new Error(`There was an error fetching Request Dates!`);
+                        }
+
+                        setRequestDates({
+                            start_date: requestDates.start_date,
+                            end_date: requestDates.end_date
+                        });
+                    }
                 }
             }
 
@@ -325,17 +343,21 @@ export default function ItemForm() {
     useEffect(() => {
         setStatusMessage({type: '', field: '', text: ''});
 
-        if (role === ROLE.LENDER || canRequestBorrow) {
+        if (!currentItem || role === ROLE.LENDER || canRequestBorrow) {
             return;
         }
+
+        const statusMessageText = currentItem.owner_id === authenticatedUser.id
+            ? 'You have listed this Item for Rent as Owner'
+            : 'You have already Requested to Borrow this Item';
 
         setStatusMessage({
             type: 'warning',
             field: '',
-            text: 'Either this Item is yours, or you have already requested to borrow!'
+            text: statusMessageText
         });
 
-    }, [canRequestBorrow]);
+    }, [canRequestBorrow, currentItem]);
 
     const handleChange = (e) => {
         const {id, value} = e.target;
@@ -793,7 +815,7 @@ export default function ItemForm() {
                 }
 
                 {
-                    role === ROLE.BORROWER && canRequestBorrow &&
+                    role === ROLE.BORROWER && authenticatedUser.id !== currentItem.owner_id &&
                     <div className="space-y-4 pb-6 mx-auto flex flex-col">
                         <h4 className="text-xl font-semibold text-indigo-700 text-center">
                             5. Request Rent Dates
@@ -819,29 +841,32 @@ export default function ItemForm() {
                             </div>
                         </div>
 
-                        <div className="flex justify-center">
-                            <DayPicker
-                                required={editMode}
-                                mode="range"
-                                selected={selectedRangeForBorrower}
-                                onSelect={handleDayClickForBorrower}
-                                disabled={disabledDaysForBorrower}
-                                defaultMonth={overallAvailableDates.from}
-                                classNames={classNames}
-                                showOutsideDays={false}
-                                hideNavigation={true}
-                                startMonth={new Date(
-                                    overallAvailableDates.from.getFullYear(),
-                                    overallAvailableDates.from.getMonth(),
-                                    1
-                                )}
-                                endMonth={new Date(
-                                    overallAvailableDates.to.getFullYear(),
-                                    overallAvailableDates.to.getMonth(),
-                                    1
-                                )}
-                            />
-                        </div>
+                        {
+                            canRequestBorrow &&
+                            <div className="flex justify-center">
+                                <DayPicker
+                                    required={editMode}
+                                    mode="range"
+                                    selected={selectedRangeForBorrower}
+                                    onSelect={handleDayClickForBorrower}
+                                    disabled={disabledDaysForBorrower}
+                                    defaultMonth={overallAvailableDates.from}
+                                    classNames={classNames}
+                                    showOutsideDays={false}
+                                    hideNavigation={true}
+                                    startMonth={new Date(
+                                        overallAvailableDates.from.getFullYear(),
+                                        overallAvailableDates.from.getMonth(),
+                                        1
+                                    )}
+                                    endMonth={new Date(
+                                        overallAvailableDates.to.getFullYear(),
+                                        overallAvailableDates.to.getMonth(),
+                                        1
+                                    )}
+                                />
+                            </div>
+                        }
                     </div>
                 }
 
