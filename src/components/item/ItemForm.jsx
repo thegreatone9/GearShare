@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
-import {AlertTriangle, CalendarDays, CheckCircle, Mail, Package, Phone, Shield, User} from 'lucide-react';
+import {AlertTriangle, CheckCircle, Mail, Package, Phone, Shield, User} from 'lucide-react';
 import {
     BORROWER_ITEM_ACTIONS,
     formatDateStr,
@@ -8,11 +8,13 @@ import {
     isEmptyString,
     LENDER_ITEM_ACTIONS,
     LISTING_CATEGORY,
-    LISTING_CONDITION, LISTING_STATUS,
+    LISTING_CONDITION,
+    LISTING_STATUS,
     parseDDMMYYYY,
     RENTAL_STATUS,
     REQUEST_STATUS,
-    ROLE, TIME_UNIT,
+    ROLE,
+    TIME_UNIT,
     TOAST_TYPE
 } from "../util/Util.js";
 import {supabase} from "../../server/supabaseClient.js";
@@ -802,44 +804,43 @@ export default function ItemForm() {
                                 Invalid: {statusMessage.text}
                             </p>
                         }
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label
-                                    className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
-                                    <CalendarDays className="w-4 h-4 mr-2 text-indigo-600"/> Start Date
-                                </label>
 
-                                <input
-                                    type="date"
-                                    value={requestDates.start_date}
-                                    onChange={(e) =>
-                                        setRequestDates({
-                                            ...requestDates,
-                                            start_date: e.target.value
-                                        })
-                                    }
-                                    className="w-3/5 border border-gray-300 rounded-md px-3 py-2"
-                                />
+                        {/* Display selected range */}
+                        <div className="text-gray-700 text-center">
+                            <div className="text-gray-700 text-center">
+                                {requestDates.start_date && requestDates.end_date ? (
+                                    <>
+                                        <span className="font-bold">{formatDateStr(requestDates.start_date)}</span> to{' '}
+                                        <span className="font-bold">{formatDateStr(requestDates.end_date)}</span>
+                                    </>
+                                ) : (
+                                    editMode && <span>Please select a date range.</span>
+                                )}
                             </div>
+                        </div>
 
-                            <div>
-                                <label
-                                    className="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
-                                    <CalendarDays className="w-4 h-4 mr-2 text-indigo-600"/> End Date
-                                </label>
-
-                                <input
-                                    type="date"
-                                    value={requestDates.end_date}
-                                    onChange={(e) =>
-                                        setRequestDates({
-                                            ...requestDates,
-                                            end_date: e.target.value
-                                        })
-                                    }
-                                    className="w-3/5 border border-gray-300 rounded-md px-3 py-2"
-                                />
-                            </div>
+                        <div className="flex justify-center">
+                            <DayPicker
+                                required={editMode}
+                                mode="range"
+                                selected={selectedRangeForBorrower}
+                                onSelect={handleDayClickForBorrower}
+                                disabled={disabledDaysForBorrower}
+                                defaultMonth={overallAvailableDates.from}
+                                classNames={classNames}
+                                showOutsideDays={false}
+                                hideNavigation={true}
+                                startMonth={new Date(
+                                    overallAvailableDates.from.getFullYear(),
+                                    overallAvailableDates.from.getMonth(),
+                                    1
+                                )}
+                                endMonth={new Date(
+                                    overallAvailableDates.to.getFullYear(),
+                                    overallAvailableDates.to.getMonth(),
+                                    1
+                                )}
+                            />
                         </div>
                     </div>
                 }
