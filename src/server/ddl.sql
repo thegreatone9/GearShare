@@ -60,3 +60,17 @@ CREATE TABLE disputes
 
 ALTER TABLE rentals
     ADD CONSTRAINT fk_dispute FOREIGN KEY (dispute_id) REFERENCES disputes (id);
+
+CREATE TABLE listings_available_dates
+(
+    -- Foreign key to the listings table
+    listing_id              INT REFERENCES listings (id) ON DELETE CASCADE NOT NULL UNIQUE,
+
+    -- Column to hold a JSONB array of unavailable date ranges
+    -- Example: '[{"from": "2023-11-16", "to": "2023-11-17"}, {"from": "2023-12-01", "to": "2023-12-05"}]'
+    unavailable_ranges      JSONB DEFAULT '[]'::jsonb NOT NULL,
+
+    -- Column to hold a JSONB object for the overall available date range
+    -- Example: '{"from": "2023-11-01", "to": "2024-01-31"}'
+    overall_available_range JSONB DEFAULT '{}'::jsonb NOT NULL
+);

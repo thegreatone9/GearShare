@@ -3,20 +3,24 @@ import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
 import {AlertTriangle, CalendarDays, CheckCircle, Mail, Package, Phone, Shield, User} from 'lucide-react';
 import {
     BORROWER_ITEM_ACTIONS,
+    formatDateStr,
     getStatusClasses,
     isEmptyString,
     LENDER_ITEM_ACTIONS,
     LISTING_CATEGORY,
-    LISTING_CONDITION,
+    LISTING_CONDITION, LISTING_STATUS,
     parseDDMMYYYY,
     RENTAL_STATUS,
     REQUEST_STATUS,
-    ROLE,
+    ROLE, TIME_UNIT,
     TOAST_TYPE
 } from "../util/Util.js";
 import {supabase} from "../../server/supabaseClient.js";
 import {useAuth, useToast} from "../AppContext.jsx";
 import Loader from "../common/Loader.jsx";
+import {format, isAfter, isBefore, isSameDay, isWithinInterval} from "date-fns";
+import {DayPicker} from "react-day-picker";
+import classNames from "react-day-picker/style.module.css";
 
 export default function ItemForm() {
     const {authenticatedUser} = useAuth();
@@ -40,8 +44,9 @@ export default function ItemForm() {
         condition: '',
         price: '',
         value: '',
-        unit: '',
-        image_url: ''
+        time_unit: '',
+        image_url: '',
+        status: ''
     });
     const [lender, setLender] = useState(null);
 
@@ -51,6 +56,90 @@ export default function ItemForm() {
         start_date: '',
         end_date: ''
     });
+
+    const [overallAvailableDates, setOverallAvailableDates] = useState({
+        from: null,
+        to: null
+    });
+
+    const [unavailableRanges, setUnavailableRanges] = useState([]);
+
+    const selectedRangeForLender = {
+        from: overallAvailableDates.from ? new Date(overallAvailableDates.from) : undefined,
+        to: overallAvailableDates.to ? new Date(overallAvailableDates.to) : undefined,
+    };
+
+    const selectedRangeForBorrower = {
+        from: requestDates.start_date ? new Date(requestDates.start_date) : undefined,
+        to: requestDates.end_date ? new Date(requestDates.end_date) : undefined,
+    };
+
+    const handleDayClickForLender = (range) => {
+        const newStartDate = range?.from ? format(range.from, 'yyyy-MM-dd') : '';
+        const newEndDate = range?.to ? format(range.to, 'yyyy-MM-dd') : '';
+
+        setOverallAvailableDates({
+            from: newStartDate,
+            to: newEndDate
+        });
+    };
+
+    const handleDayClickForBorrower = (range) => {
+        const newStartDate = range?.from ? format(range.from, 'yyyy-MM-dd') : '';
+        const newEndDate = range?.to ? format(range.to, 'yyyy-MM-dd') : '';
+
+        setRequestDates({
+            start_date: newStartDate,
+            end_date: newEndDate,
+        });
+    };
+
+    const disabledDaysForLender = (day) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Rule 1: Disable past days (excluding today)
+        if (isBefore(day, today) && !isSameDay(day, today)) {
+            return true;
+        }
+
+        // Rule 2: Disable days that fall within any of the specifically UNAVAILABLE ranges
+        for (const range of unavailableRanges) {
+            if (isWithinInterval(day, { start: range.from, end: range.to })) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    const disabledDaysForBorrower = (day) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Rule 1: Disable past days (excluding today)
+        if (isBefore(day, today) && !isSameDay(day, today)) {
+            return true;
+        }
+
+        // Rule 2: Disable days outside the overall availability window (if defined)
+        if (overallAvailableDates.from && isBefore(day, overallAvailableDates.from)) {
+            return true;
+        }
+        if (overallAvailableDates.to && isAfter(day, overallAvailableDates.to)) {
+            return true;
+        }
+
+        // Rule 3: Disable days that fall within any of the specifically UNAVAILABLE ranges
+        for (const range of unavailableRanges) {
+            if (isWithinInterval(day, { start: range.from, end: range.to })) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
     const [statusMessage, setStatusMessage] = useState({type: '', field: '', text: ''});
     const [loading, setLoading] = useState(true);
     const [toastMessage, setToastMessage] = useState(searchParams.get('toast'));
@@ -156,8 +245,8 @@ export default function ItemForm() {
                     condition: '',
                     price: '',
                     value: '',
-                    unit: 'day',
-                    image_url: "https://placehold.co/100x70/6366f1/ffffff?text=NEW"
+                    time_unit: '',
+                    image_url: `https://placehold.co/100x70/6366f1/ffffff?text=${itemState.title}`
                 });
 
             } else {
@@ -171,9 +260,25 @@ export default function ItemForm() {
                     location: item.location || '',
                     category: item.category || '',
                     condition: item.condition || '',
-                    unit: item.time_unit || 'day',
-                    image_url: item.image_url
+                    time_unit: item.time_unit,
+                    image_url: item.image_url || `https://placehold.co/100x70/6366f1/ffffff?text=${itemState.title}`
                 });
+
+                const {data: listingsAvailableRanges, error} = await supabase
+                    .from('listings_available_dates')
+                    .select('unavailable_ranges, overall_available_range')
+                    .eq('listing_id', itemIdNum)
+                    .single();
+
+                setOverallAvailableDates({
+                    from: new Date(listingsAvailableRanges.overall_available_range.from),
+                    to: new Date(listingsAvailableRanges.overall_available_range.to)
+                });
+
+                setUnavailableRanges(listingsAvailableRanges.unavailable_ranges.map(range => ({
+                    from: new Date(range.from),
+                    to: new Date(range.to),
+                })));
             }
 
             if (role === ROLE.LENDER) {
@@ -338,47 +443,29 @@ export default function ItemForm() {
             condition: itemState.condition,
             price: priceNum,
             replacement_value: valueNum,
-            unit: itemState.time_unit,
-            image_url: itemState.image_url
+            time_unit: itemState.time_unit || TIME_UNIT.DAY,
+            image_url: itemState.image_url || `https://placehold.co/100x70/6366f1/ffffff?text=${itemState.title}`,
+            status: itemState.status || LISTING_STATUS.AVAILABLE,
         };
 
-        let dbError;
+        try {
+            const { data: updatedListing, error: dbError } = await supabase.rpc('upsert_listing_with_availability', {
+                p_owner_id: authenticatedUser.id,
+                p_listing_id: itemIdNum,
+                p_listing_data: itemData,
+                p_overall_available_range: overallAvailableDates,
+                p_unavailable_ranges: unavailableRanges
+            });
 
-        if (editMode) {
-            const {error} = await supabase
-                .from('listings')
-                .update(itemData)
-                .eq('id', itemIdNum);
+            if (dbError) {
+                addToast(TOAST_TYPE.ERROR, `Database submission error: ${dbError.message}`);
 
-            dbError = error;
-
-        } else {
-            // --- NEW ITEM LOGIC (INSERT) ---
-            const newItemData = {
-                ...itemData,
-                owner_id: authenticatedUser.id, // DB column: snake_case
-            };
-
-            try {
-                //Add Form Validations
-
-            } catch (error) {
-                console.error("Save Error:", error);
-                setStatusMessage({type: 'error', text: `Failed to save Item: ${error.message}`});
+            } else {
+                setTimeout(() => navigate(`/lender?toast=Successfully Updated Listing: ${itemState.title}`), 500);
             }
 
-            const {error} = await supabase
-                .from('listings')
-                .insert([newItemData]);
-
-            dbError = error;
-        }
-
-        if (dbError) {
-            addToast(TOAST_TYPE.ERROR, `Database submission error: ${dbError.message}`);
-
-        } else {
-            setTimeout(() => navigate(`/lender?toast=Successfully Updated Listing: ${itemState.title}`), 500);
+        } catch (err) {
+            console.error('RPC call failed:', err.message);
         }
     };
 
@@ -620,6 +707,47 @@ export default function ItemForm() {
                         </div>
                     )}
                 </div>
+
+                {
+                    role === ROLE.LENDER &&
+                    <div className="space-y-4 pb-6 mx-auto flex flex-col">
+                        <h4 className="text-xl font-semibold text-indigo-700 text-center">4. Available Dates</h4>
+
+                        {
+                            statusMessage.type === 'error' && statusMessage.field === 'rent_dates' &&
+                            <p className="font-medium text-red-500 mb-2 flex items-center justify-center">
+                                Invalid: {statusMessage.text}
+                            </p>
+                        }
+
+                        {/* Display selected range */}
+                        <div className="text-gray-700 text-center">
+                            <div className="text-gray-700 text-center">
+                                {overallAvailableDates.from && overallAvailableDates.to ? (
+                                    <>
+                                        <span className="font-bold">{formatDateStr(overallAvailableDates.from)}</span> to{' '}
+                                        <span className="font-bold">{formatDateStr(overallAvailableDates.to)}</span>
+                                    </>
+                                ) : (
+                                    editMode && <span>Please select a date range.</span>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="flex justify-center">
+                            <DayPicker
+                                required={editMode}
+                                mode="range"
+                                selected={selectedRangeForLender}
+                                onSelect={handleDayClickForLender}
+                                disabled={disabledDaysForLender}
+                                defaultMonth={overallAvailableDates.from || new Date()}
+                                classNames={classNames}
+                                showOutsideDays={false}
+                            />
+                        </div>
+                    </div>
+                }
 
                 {/* Lender Details */}
                 {

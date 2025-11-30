@@ -245,3 +245,121 @@ EXCEPTION
         RAISE; -- Re-raise the exception to be caught by the client.
 END;
 $$;
+
+-- Create or Update Listings
+CREATE
+OR REPLACE FUNCTION upsert_listing_with_availability(
+    p_owner_id INT,
+    p_listing_id INT,
+    p_listing_data JSONB,
+    p_overall_available_range JSONB,
+    p_unavailable_ranges JSONB DEFAULT '[]'::jsonb -- Optional, can be empty array
+)
+RETURNS listings -- Returns the (inserted or updated) listing object
+LANGUAGE plpgsql
+AS $$
+DECLARE
+v_listing_id INT;
+    v_existing_owner_id
+INT;
+    v_updated_listing
+listings;
+BEGIN
+    -- Handle INSERT or UPDATE for the 'listings' table
+    IF
+p_listing_id IS NULL THEN
+        -- *** INSERT NEW LISTING ***
+        INSERT INTO listings (
+            owner_id,
+            title,
+            description,
+            location,
+            category,
+            condition,
+            price,
+            replacement_value,
+            time_unit,
+            status
+        )
+        VALUES (
+            p_owner_id,
+            (p_listing_data->>'title')::TEXT,
+            (p_listing_data->>'description')::TEXT,
+            (p_listing_data->>'location')::TEXT,
+            (p_listing_data->>'category')::TEXT,
+            (p_listing_data->>'condition')::DECIMAL,
+            (p_listing_data->>'price')::DECIMAL,
+            (p_listing_data->>'replacement_value')::DECIMAL,
+            (p_listing_data->>'time_unit')::TEXT,
+            (p_listing_data->>'status')::TEXT
+        )
+        RETURNING * INTO v_updated_listing;
+
+        v_listing_id
+:= v_updated_listing.id;
+
+        -- Insert initial availability for the new listing
+INSERT INTO listings_available_dates (listing_id,
+                                      unavailable_ranges,
+                                      overall_available_range)
+VALUES (v_listing_id,
+        COALESCE(p_unavailable_ranges, '[]'::jsonb),
+        p_overall_available_range);
+
+ELSE
+        -- *** UPDATE EXISTING LISTING ***
+        -- First, check ownership for security
+SELECT owner_id
+INTO v_existing_owner_id
+FROM listings
+WHERE id = p_listing_id;
+
+IF
+NOT FOUND THEN
+            RAISE EXCEPTION 'Listing with ID % not found.', p_listing_id;
+END IF;
+
+        IF
+v_existing_owner_id IS DISTINCT FROM p_owner_id THEN
+            RAISE EXCEPTION 'Unauthorized: User is not the owner of listing %.', p_listing_id;
+END IF;
+
+        -- Update the listings table
+UPDATE listings
+SET title             = COALESCE((p_listing_data ->>'title')::TEXT, title),
+    description       = COALESCE((p_listing_data ->>'description')::TEXT, description),
+    location          = COALESCE((p_listing_data ->>'location')::TEXT, location),
+    category          = COALESCE((p_listing_data ->>'category')::TEXT, category),
+    condition         = COALESCE((p_listing_data ->>'condition')::DECIMAL, condition),
+    price             = COALESCE((p_listing_data ->>'price')::DECIMAL, price),
+    replacement_value = COALESCE((p_listing_data ->>'replacement_value') ::DECIMAL, replacement_value),
+    time_unit         = COALESCE((p_listing_data ->>'time_unit')::TEXT, time_unit),
+    status            = COALESCE((p_listing_data ->>'status')::TEXT, status)
+WHERE id = p_listing_id RETURNING *
+INTO v_updated_listing;
+
+v_listing_id
+:= v_updated_listing.id;
+
+        -- Update the associated availability record in the join table
+UPDATE listings_available_dates
+SET unavailable_ranges      = COALESCE(p_unavailable_ranges, unavailable_ranges),
+    overall_available_range = COALESCE(p_overall_available_range, overall_available_range)
+WHERE listing_id = v_listing_id;
+
+-- If no availability record existed, create one (e.g., if a listing was old and didn't have one)
+IF
+NOT FOUND THEN
+            INSERT INTO listings_available_dates (listing_id, unavailable_ranges, overall_available_range)
+            VALUES (v_listing_id, COALESCE(p_unavailable_ranges, '[]'::jsonb), p_overall_available_range);
+END IF;
+
+END IF;
+
+RETURN v_updated_listing;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE;
+END;
+$$;
