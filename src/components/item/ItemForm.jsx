@@ -20,7 +20,7 @@ import {
 import {supabase} from "../../server/supabaseClient.js";
 import {useAuth, useToast} from "../AppContext.jsx";
 import Loader from "../common/Loader.jsx";
-import {format, isAfter, isBefore, isSameDay, isWithinInterval} from "date-fns";
+import {endOfDay, format, isAfter, isBefore, isSameDay, isWithinInterval, startOfDay} from "date-fns";
 import {DayPicker} from "react-day-picker";
 import classNames from "react-day-picker/style.module.css";
 
@@ -116,8 +116,7 @@ export default function ItemForm() {
     };
 
     const disabledDaysForBorrower = (day) => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const today = startOfDay(new Date());
 
         // Rule 1: Disable past days (excluding today)
         if (isBefore(day, today) && !isSameDay(day, today)) {
@@ -125,16 +124,22 @@ export default function ItemForm() {
         }
 
         // Rule 2: Disable days outside the overall availability window (if defined)
-        if (overallAvailableDates.from && isBefore(day, overallAvailableDates.from)) {
+        const overallAvailableFrom = startOfDay(new Date(overallAvailableDates.from));
+        const overallAvailableTo = startOfDay(new Date(overallAvailableDates.to));
+
+        if (overallAvailableFrom && isBefore(day, overallAvailableFrom)) {
             return true;
         }
-        if (overallAvailableDates.to && isAfter(day, overallAvailableDates.to)) {
+        if (overallAvailableTo && isAfter(day, overallAvailableTo)) {
             return true;
         }
 
         // Rule 3: Disable days that fall within any of the specifically UNAVAILABLE ranges
         for (const range of unavailableRanges) {
-            if (isWithinInterval(day, { start: range.from, end: range.to })) {
+            const start = startOfDay(new Date(range.from));
+            const end = endOfDay(new Date(range.to));
+
+            if (isWithinInterval(day, { start: start, end: end })) {
                 return true;
             }
         }
@@ -236,6 +241,8 @@ export default function ItemForm() {
                 .eq('id', itemIdNum)
                 .single();
 
+            let itemUnavailableRanges = [];
+
             if (error || !item) {
                 console.error(`Error fetching item ${itemIdNum}:`, error);
 
@@ -279,56 +286,59 @@ export default function ItemForm() {
 
                 setUnavailableRanges(listingsAvailableRanges.unavailable_ranges.map(range => ({
                     from: new Date(range.from),
-                    to: new Date(range.to),
+                    to: new Date(range.to)
                 })));
+
+                itemUnavailableRanges = listingsAvailableRanges.unavailable_ranges;
             }
 
             if (role === ROLE.LENDER) {
                 setEditMode(!isNaN(itemIdNum));
 
-            } else {
-                const {data: borrowerCanRequest, error} = await supabase.rpc('can_request_borrow', {
+            } else if (role === ROLE.BORROWER) {
+                const {data: available, error} = await supabase.rpc('is_item_available', {
                     r_listing_id: item.id,
-                    r_borrower_id: authenticatedUser.id,
-                    request_status: REQUEST_STATUS.ACTIVE
+                    r_borrower_id: authenticatedUser.id
                 });
 
                 if (error) {
                     throw new Error(`Error checking request existence for borrower: ${error.message}`);
                 }
 
-                setCanRequestBorrow(borrowerCanRequest);
+                setCanRequestBorrow(available);
 
-                if (role === ROLE.BORROWER) {
-                    const {data: lenderData, error: lenderFetchError} = await supabase
-                        .from('accounts')
-                        .select('id, name, email, image_url')
-                        .eq('id', item.owner_id)
-                        .single();
+                const {data: lenderData, error: lenderFetchError} = await supabase
+                    .from('accounts')
+                    .select('id, name, email, image_url')
+                    .eq('id', item.owner_id)
+                    .single();
 
-                    if (lenderFetchError) {
-                        throw new Error("There was an error fetching Lender Details!");
+                if (lenderFetchError) {
+                    throw new Error("There was an error fetching Lender Details!");
+                }
+
+                setLender(lenderData);
+
+                if (item && item.owner_id !== authenticatedUser.id) {
+                    const {data: requestDates, error: requestDatesError} = await supabase
+                        .from('requests')
+                        .select('start_date, end_date')
+                        .eq('listing_id', itemIdNum)
+                        .eq('borrower_id', authenticatedUser.id)
+                        .eq('status', REQUEST_STATUS.ACTIVE);
+
+                    if (requestDatesError) {
+                        throw new Error(`There was an error fetching Request Dates!`);
                     }
 
-                    setLender(lenderData);
+                    itemUnavailableRanges.push(
+                        ...requestDates.map(date => ({
+                            to: date.end_date,
+                            from: date.start_date
+                        }))
+                    );
 
-                    if (currentItem && currentItem.owner_id !== authenticatedUser.id) {
-                        const {data: requestDates, error: requestDatesError} = await supabase
-                            .from('requests')
-                            .select('start_date, end_date')
-                            .eq('listing_id', itemIdNum)
-                            .eq('borrower_id', authenticatedUser.id)
-                            .single();
-
-                        if (requestDatesError) {
-                            throw new Error(`There was an error fetching Request Dates!`);
-                        }
-
-                        setRequestDates({
-                            start_date: requestDates.start_date,
-                            end_date: requestDates.end_date
-                        });
-                    }
+                    setUnavailableRanges(itemUnavailableRanges);
                 }
             }
 
@@ -349,7 +359,7 @@ export default function ItemForm() {
 
         const statusMessageText = currentItem.owner_id === authenticatedUser.id
             ? 'You have listed this Item for Rent as Owner'
-            : 'You have already Requested to Borrow this Item';
+            : 'No Dates Available to borrow this Item';
 
         setStatusMessage({
             type: 'warning',
@@ -469,7 +479,7 @@ export default function ItemForm() {
             replacement_value: valueNum,
             time_unit: itemState.time_unit || TIME_UNIT.DAY,
             image_url: itemState.image_url || `https://placehold.co/100x70/6366f1/ffffff?text=${itemState.title}`,
-            status: itemState.status || LISTING_STATUS.AVAILABLE,
+            status: itemState.status || LISTING_STATUS.ACTIVE,
         };
 
         try {
@@ -766,8 +776,8 @@ export default function ItemForm() {
                                 onSelect={handleDayClickForLender}
                                 disabled={disabledDaysForLender}
                                 defaultMonth={overallAvailableDates.from || new Date()}
-                                classNames={classNames}
                                 showOutsideDays={false}
+                                classNames={classNames}
                             />
                         </div>
                     </div>
@@ -853,7 +863,6 @@ export default function ItemForm() {
                                     defaultMonth={overallAvailableDates.from}
                                     classNames={classNames}
                                     showOutsideDays={false}
-                                    hideNavigation={true}
                                     startMonth={new Date(
                                         overallAvailableDates.from.getFullYear(),
                                         overallAvailableDates.from.getMonth(),

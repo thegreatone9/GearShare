@@ -1,21 +1,63 @@
--- Update Listing Status
-CREATE
-OR REPLACE FUNCTION update_listing_status(
-    rental_id int4,
-    listing_status text
+CREATE OR REPLACE FUNCTION update_listing_status(
+    p_rental_id int4
 )
 RETURNS void AS $$
+DECLARE
+v_listing_id INT;
+    v_request_start_date DATE;
+    v_request_end_date DATE;
+    v_range_to_remove JSONB;
 BEGIN
-UPDATE listings
-SET status = listing_status
-WHERE id = (SELECT listing_id
-            FROM requests
-            WHERE id = (SELECT request_id
-                        FROM rentals
-                        WHERE id = rental_id));
+    -- 1. Derive listing_id and the associated request's start/end dates
+SELECT
+    r.listing_id,
+    req.start_date,
+    req.end_date
+INTO
+    v_listing_id,
+    v_request_start_date,
+    v_request_end_date
+FROM
+    rentals rent
+        JOIN
+    requests req ON rent.request_id = req.id
+WHERE
+    rent.id = p_rental_id;
+
+-- Construct the JSON object representing the range to remove
+v_range_to_remove := jsonb_build_object(
+        'from', v_request_start_date::TEXT,
+        'to', v_request_end_date::TEXT
+    );
+
+    -- 2. Remove the specific date range from the unavailable_ranges array
+    -- We need to reconstruct the array by filtering out the matching object.
+UPDATE listings_available_dates
+SET
+    unavailable_ranges = (
+        SELECT
+            jsonb_agg(elem)
+        FROM
+            jsonb_array_elements(unavailable_ranges) AS elem
+        WHERE
+            -- Keep elements where 'from' or 'to' do NOT match v_range_to_remove
+            -- This assumes exact match for both 'from' and 'to' to remove.
+            NOT (elem->>'from' = v_range_to_remove->>'from' AND elem->>'to' = v_range_to_remove->>'to')
+    )
+WHERE
+    listing_id = v_listing_id;
+
+-- If the unavailable_ranges array becomes empty, you might want to consider
+-- setting it to an empty JSONB array '[]' explicitly if it's currently NULL.
+-- The jsonb_agg(elem) will return NULL if no elements remain, so a COALESCE might be useful
+-- to ensure it's always an array.
+UPDATE listings_available_dates
+SET unavailable_ranges = COALESCE(unavailable_ranges, '[]'::jsonb)
+WHERE listing_id = v_listing_id; -- This ensures it's an empty array if all elements were removed
+-- (though jsonb_agg already handles this by returning NULL if empty)
+
 END;
-$$
-LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 -- Update Rental Status
 CREATE
@@ -33,13 +75,12 @@ $$
 LANGUAGE plpgsql;
 
 --Resolve Dispute and Update Listing
-CREATE
-OR REPLACE FUNCTION resolve_dispute_and_update_listing(
+--Resolve Dispute and Update Listing
+CREATE OR REPLACE FUNCTION resolve_dispute_and_update_listing(
     dispute_id int4,
     rental_id int4,
     rental_status text,
-    dispute_status text,
-    listing_status text
+    dispute_status text
 )
 RETURNS disputes AS $$
 DECLARE
@@ -47,32 +88,28 @@ updated_dispute disputes%ROWTYPE;
 BEGIN
     -- Step 1: Update dispute
 UPDATE disputes
-SET status   = dispute_status,
+SET status = dispute_status,
     end_date = NOW()
-WHERE id = dispute_id RETURNING *
-INTO updated_dispute;
+WHERE id = dispute_id
+    RETURNING * INTO updated_dispute;
 
 -- Step 2: Update listing via our reusable function
-PERFORM
-update_listing_status(rental_id, listing_status);
+PERFORM update_listing_status(rental_id);
 
     -- Step 3: Update rentals via our reusable function
-    PERFORM
-update_rental_status(rental_id, rental_status);
+    PERFORM update_rental_status(rental_id, rental_status);
 
     -- Step 3: Return the updated dispute
 RETURN updated_dispute;
 END;
-$$;
+$$ LANGUAGE plpgsql;
 
 
 -- Confirm Rental Acceptance
-CREATE
-OR REPLACE FUNCTION confirm_rental_acceptance(
+CREATE OR REPLACE FUNCTION confirm_rental_acceptance(
     request_id int4,
     r_listing_id int4,
     rental_status text,
-    listing_status text,
     request_status text,
     other_request_status text,
     active_request_status text
@@ -82,56 +119,70 @@ LANGUAGE plpgsql
 AS $$
 DECLARE
 inserted_rental rentals;
-    req_exists
-BOOLEAN;
-    list_exists
-BOOLEAN;
+    req_exists BOOLEAN;
+    list_exists BOOLEAN;
+    v_accepted_request_start_date DATE;
+    v_accepted_request_end_date DATE;
+    v_new_unavailable_range JSONB;
 BEGIN
     --0. Check db
-SELECT TRUE
-INTO req_exists
+SELECT TRUE INTO req_exists
 FROM requests
 WHERE id = request_id;
 
-IF
-NOT req_exists THEN
+IF NOT req_exists THEN
         RAISE EXCEPTION 'Request with ID % does not exist.', request_id;
 END IF;
 
-SELECT TRUE
-INTO list_exists
+SELECT TRUE INTO list_exists
 FROM listings
 WHERE id = r_listing_id;
 
-IF
-NOT list_exists THEN
+IF NOT list_exists THEN
         RAISE EXCEPTION 'Listing with ID % does not exist.', r_listing_id;
 END IF;
 
+    -- Store the accepted request's dates BEFORE updating its status
+SELECT start_date, end_date
+INTO v_accepted_request_start_date, v_accepted_request_end_date
+FROM requests
+WHERE id = request_id;
+
+-- Construct the JSON for the new unavailable range
+v_new_unavailable_range := jsonb_build_object(
+        'from', v_accepted_request_start_date::TEXT,
+        'to', v_accepted_request_end_date::TEXT
+    );
+
     -- 1. Start a transaction block (Postgres uses implicit transactions within functions)
 INSERT INTO rentals (request_id, status)
-VALUES (request_id, rental_status) RETURNING *
-INTO inserted_rental;
+VALUES (request_id, rental_status)
+    RETURNING * INTO inserted_rental;
 
--- 2. UPDATE the listing status
-UPDATE listings
-SET status = listing_status
-WHERE id = r_listing_id;
-
--- 3. UPDATE the request status (Changed from DELETE to UPDATE status as per previous code fix)
+-- 2. UPDATE the request status (Changed from DELETE to UPDATE status as per previous code fix)
 UPDATE requests
 SET status = request_status -- Use a terminal status instead of deleting
 WHERE id = request_id;
 
--- 4. DECLINE all other requests to the same Listing
+-- 3. DECLINE only other requests to the same Listing whose dates overlap
 UPDATE requests
 SET status = other_request_status -- Use a terminal status instead of deleting
-WHERE listing_id = r_listing_id
-  AND id != request_id AND status = active_request_status;
+WHERE
+    listing_id = r_listing_id
+  AND id != request_id
+        AND status = active_request_status
+        AND (
+            -- Check for overlap: (start1 <= end2) AND (end1 >= start2)
+            (start_date <= v_accepted_request_end_date AND end_date >= v_accepted_request_start_date)
+        );
+
+-- 4. Add accepted request dates to listings_available_dates
+UPDATE listings_available_dates
+SET unavailable_ranges = unavailable_ranges || v_new_unavailable_range
+WHERE listing_id = r_listing_id;
 
 -- If all steps succeed, the transaction is implicitly committed.
-RETURN
-NEXT inserted_rental;
+RETURN NEXT inserted_rental;
 
 EXCEPTION
     WHEN OTHERS THEN

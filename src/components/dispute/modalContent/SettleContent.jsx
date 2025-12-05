@@ -18,8 +18,7 @@ export default function SettleContent({ disputeData, onClose, setAppData }) {
                 dispute_id: disputeId,
                 rental_id: disputeData.rental.id,
                 rental_status: RENTAL_STATUS.COMPLETED,
-                dispute_status: DISPUTE_STATUS.COMPLETED,
-                listing_status: LISTING_STATUS.AVAILABLE
+                dispute_status: DISPUTE_STATUS.COMPLETED
             }
         );
 

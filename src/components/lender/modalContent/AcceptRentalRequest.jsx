@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Calendar, DollarSign, Package, Star, User} from 'lucide-react';
-import {LISTING_STATUS, RENTAL_STATUS, REQUEST_STATUS} from "../../util/Util.js";
+import {RENTAL_STATUS, REQUEST_STATUS} from "../../util/Util.js";
 import {supabase} from "../../../server/supabaseClient.js";
 import Loader from "../../common/Loader.jsx";
 
@@ -14,7 +14,7 @@ export default function AcceptRentalRequest({ request, onClose, setRequests, set
     );
 
     const [borrower, setBorrower] = useState(null);
-    const [item, setItem] = useState(null);
+    const [itemWithAvailability, setItemWithAvailability] = useState(null);
     const [loading, setLoading] = useState(true);
 
     const { id, listing_id: listingId, borrower_id: borrowerId, lender_id: lenderId } = request;
@@ -22,13 +22,13 @@ export default function AcceptRentalRequest({ request, onClose, setRequests, set
     useEffect(() => {
         const fetchData = async function () {
             const { data: itemData, error: itemError } = await supabase
-                .from('listings')
+                .from('listings_with_availability')
                 .select('*')
                 .eq('id', listingId)
                 .single();
 
             if (itemError) console.error("Error fetching item:", itemError);
-            setItem(itemData);
+            setItemWithAvailability(itemData);
 
             const { data: borrowerData, error: borrowerError } = await supabase
                 .from('accounts')
@@ -51,7 +51,6 @@ export default function AcceptRentalRequest({ request, onClose, setRequests, set
             {
                 request_id: id,
                 r_listing_id: listingId,
-                listing_status: LISTING_STATUS.RENTED,
                 rental_status: RENTAL_STATUS.ACTIVE,
                 request_status: REQUEST_STATUS.COMPLETED,
                 other_request_status: REQUEST_STATUS.DECLINED,
@@ -79,10 +78,10 @@ export default function AcceptRentalRequest({ request, onClose, setRequests, set
             <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
                 <p className="font-semibold text-gray-800 flex items-center mb-1">
                     <Package className="w-4 h-4 mr-2" />
-                    Item: {item.title}
+                    Item: {itemWithAvailability.title}
                 </p>
                 <p className="text-sm text-gray-600">
-                    Price: ${item.price}/{item.time_unit} | Deposit Hold: ${item.replacement_value}
+                    Price: ${itemWithAvailability.price}/{itemWithAvailability.time_unit} | Deposit Hold: ${itemWithAvailability.replacement_value}
                 </p>
             </div>
 
@@ -102,11 +101,11 @@ export default function AcceptRentalRequest({ request, onClose, setRequests, set
                 </div>
                 <div className="flex text-sm text-gray-600">
                     <DollarSign className="w-4 h-4 mr-2 flex-shrink-0" />
-                    <p>Total Rental Value: <span className="font-medium">${item.price} (Total)</span></p>
+                    <p>Total Rental Value: <span className="font-medium">${itemWithAvailability.price} (Total)</span></p>
                 </div>
                 <div className="flex text-sm text-gray-600">
                     <Star className="w-4 h-4 mr-2 flex-shrink-0 text-yellow-500"  />
-                    <p>Rating: {item.condition}</p>
+                    <p>Rating: {itemWithAvailability.condition}</p>
                 </div>
             </div>
 

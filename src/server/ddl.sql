@@ -74,3 +74,13 @@ CREATE TABLE listings_available_dates
     -- Example: '{"from": "2023-11-01", "to": "2024-01-31"}'
     overall_available_range JSONB DEFAULT '{}'::jsonb NOT NULL
 );
+
+CREATE VIEW public.listings_with_availability AS
+SELECT
+    l.*, -- All columns from listings
+    lad.overall_available_range,
+    lad.unavailable_ranges
+FROM
+    listings l
+        LEFT JOIN
+    listings_available_dates lad ON l.id = lad.listing_id;

@@ -105,7 +105,7 @@ export default function LenderDashboardContainer() {
             };
 
             const [fetchedListings, fetchedRequests] = await Promise.all([
-                fetchTable('listings', {'owner_id': userId}, setListings),
+                fetchTable('listings_with_availability', {'owner_id': userId}, setListings),
                 fetchTable('requests', {'lender_id': userId}, setRequests)
             ]);
 
@@ -144,7 +144,7 @@ export default function LenderDashboardContainer() {
 
     // --- DATA FILTERING (Moved from component body) ---
     const activeRentals = lenderRentals.filter(rental => rental.status === RENTAL_STATUS.ACTIVE);
-    const pendingRentalListings = listings.filter(item => item.status === LISTING_STATUS.AVAILABLE);
+    const pendingRentalListings = listings.filter(item => item.available && item.status === LISTING_STATUS.ACTIVE);
     const disputedRentals = lenderRentals.filter(rental => {
         if (rental.status !== RENTAL_STATUS.RETURNED) return false;
 

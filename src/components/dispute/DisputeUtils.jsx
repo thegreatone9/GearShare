@@ -6,8 +6,7 @@ export const processUserDisputes = (appData, userId) => {
 
     const allRelevantDisputes = disputes
         .map(dispute => {
-            // 1. Link Dispute to Rental
-            const rental = rentals.find(r => r.dispute_id === dispute.id);
+            const rental = rentals.find(r => r.id === dispute.rental_id);
             if (!rental) return null;
 
             // 2. Link Rental to Request

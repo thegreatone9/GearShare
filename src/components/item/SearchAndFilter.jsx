@@ -34,9 +34,9 @@ function SearchAndFilter({ setListings, setLoading }) {
 
         try {
             let query = supabase
-                .from('listings')
+                .from('listings_with_availability')
                 .select('*')
-                .eq('status', LISTING_STATUS.AVAILABLE);
+                .eq('status', LISTING_STATUS.ACTIVE);
 
             if (hasSearchTerm) {
                 query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);

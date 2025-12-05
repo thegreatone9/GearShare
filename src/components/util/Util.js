@@ -13,8 +13,8 @@ export const ROLE = {
 }
 
 export const LISTING_STATUS = {
-    AVAILABLE: 'available',
-    RENTED: 'rented'
+    ACTIVE: 'ACTIVE',
+    INACTIVE: 'INACTIVE'
 }
 
 export const RENTAL_STATUS = {

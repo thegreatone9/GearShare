@@ -16,9 +16,10 @@ export default function MarketplaceContent () {
         setLoading(true);
 
         const {data: listingData, error: listingError} = await supabase
-            .from('listings')
+            .from('listings_with_availability')
             .select('*')
-            .eq('status', LISTING_STATUS.AVAILABLE)
+            .eq('status', LISTING_STATUS.ACTIVE)
+            .eq('available', true)
             .limit(HOTTEST_LIST_SIZE);
 
         if (listingError) {
