@@ -22,4 +22,6 @@ rules, warnings and damages that the borrower and lender are liable to, as well 
 Borrower could see calendar dates marked green, red and gray, like airlines booking.
 13) With ESCROW, collect borrower payment details as soon as they make request. This provides to lender that the borrower
 is serious, the digital equivalent of showing up with cash in hand.
-14)
+14) Platforms use Terms of Service (TOS) and Card Holds. When a user signs up, they agree that they are liable for the
+full replacement value. The platform often places a "silent" authorization hold on their card for a higher amount, or
+simply retains the legal right to charge the card for the remaining balance later.

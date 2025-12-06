@@ -84,3 +84,27 @@ FROM
     listings l
         LEFT JOIN
     listings_available_dates lad ON l.id = lad.listing_id;
+
+create table payment_intents
+(
+    id          SERIAL PRIMARY KEY,
+    created_at  timestamp default now()      not null,
+    updated_at  timestamp default now()      not null,
+    rental_id   int references rentals (id)  not null,
+    payer_id    int references accounts (id) not null,
+    amount      decimal(10, 2)               not null check (amount > 0),
+    status      text                         not null,
+    description text
+);
+
+create table transactions
+(
+    id                SERIAL PRIMARY KEY,
+    created_at        timestamp default now() not null,
+    payment_intent_id uuid references payment_intents (id),
+    payer_id          int references accounts (id),
+    payee_id          int references accounts (id),
+    amount            decimal(10, 2)          not null check (amount > 0),
+    type              text                    not null,
+    description       text
+);
