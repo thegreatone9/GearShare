@@ -42,6 +42,7 @@ export async function endpointWrapper(req, res, fn) {
         res.status(200).json(result);
 
     } catch (err) {
-        res.status(500).json({ error: err });
+        const errorBody = err instanceof Error ? { message: err.message } : err;
+        res.status(500).json({ error: errorBody });
     }
 }

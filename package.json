@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "NODE_ENV=development concurrently -n \"EXP,VITE\" -c \"yellow,cyan\" \"npm:express-dev\" \"vite\"",
+    "dev": "NODE_ENV=development concurrently -n \"EXP,VITE\" -c \"yellow,cyan\" \"npm:api-server\" \"vite\"",
     "build": "vite build",
     "preview": "vite preview",
-    "express-dev": "nodemon devServer.js"
+    "api-server": "vercel dev --listen 5000 --yes"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.81.1",

@@ -1,7 +1,7 @@
 import {endpointWrapper} from "./util/transaction.js";
 
 export default async function marketplace(req, res) {
-    await endpointWrapper(req, res, async (req, tx) => {
+    const marketplaceQuery = async (req, tx) => {
         const { status, available } = req.query;
 
         const result = await tx.query(
@@ -11,8 +11,8 @@ export default async function marketplace(req, res) {
             [status, available]
         );
 
-        return {
-            listingData: result.rows
-        };
-    });
+        return result.rows;
+    };
+
+    await endpointWrapper(req, res, marketplaceQuery);
 }

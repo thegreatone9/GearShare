@@ -22,13 +22,13 @@ export const useAuth = () => {
     return context;
 };
 
-export default function AppContext ({ children }) {
+export default function AppContext({children}) {
     const [authenticatedUser, setAuthenticatedUser] = useState(null);
     const [toast, setToast] = useState(null);
 
     const addToast = (type, message, duration = 4000) => {
         const id = Date.now();
-        const newToast = { id, type, message };
+        const newToast = {id, type, message};
 
         if (type === TOAST_TYPE.ERROR) {
             console.error(message);
