@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from "react";
 import Loader from "../common/Loader.jsx";
-import {apiRequest, LISTING_STATUS, TOAST_TYPE} from "../util/Util.js";
+import {LISTING_STATUS, TOAST_TYPE} from "../util/Util.js";
 import {useToast} from "../AppContext.jsx";
 import SearchAndFilter from "./SearchAndFilter.jsx";
 import ItemCard from "./ItemCard.jsx";
 
-export default function MarketplaceContent () {
+export default function MarketplaceContent() {
     const HOTTEST_LIST_SIZE = 8;
     const {addToast} = useToast();
     const [loading, setLoading] = useState(true);
@@ -14,25 +14,12 @@ export default function MarketplaceContent () {
     const fetchHottestListingData = async () => {
         setLoading(true);
 
-        // const {data: listingData, error: listingError} = await supabase
-        //     .from('listings_with_availability')
-        //     .select('*')
-        //     .eq('status', LISTING_STATUS.ACTIVE)
-        //     .eq('available', true)
-        //     .limit(HOTTEST_LIST_SIZE);
-
-        const { data: listingData, error: listingError } = await apiRequest(
-            '/api/marketplace',
-            {
-                method: 'GET',
-                params: {
-                    status: LISTING_STATUS.ACTIVE,
-                    available: true
-                }
-            }
-        );
-
-        console.log(listingData);
+        const {data: listingData, error: listingError} = await supabase
+            .from('listings_with_availability')
+            .select('*')
+            .eq('status', LISTING_STATUS.ACTIVE)
+            .eq('available', true)
+            .limit(HOTTEST_LIST_SIZE);
 
         if (listingError) {
             addToast(TOAST_TYPE.ERROR, `Error fetching listings: ${listingError.message}`)

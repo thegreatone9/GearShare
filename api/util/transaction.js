@@ -1,5 +1,6 @@
 import {Pool} from "pg";
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 // Create a shared connection pool for serverless functions
@@ -42,7 +43,7 @@ export async function endpointWrapper(req, res, fn) {
         res.status(200).json(result);
 
     } catch (err) {
-        const errorBody = err instanceof Error ? { message: err.message } : err;
-        res.status(500).json({ error: errorBody });
+        const errorBody = err instanceof Error ? {message: err.message} : err;
+        res.status(500).json({error: errorBody});
     }
 }
