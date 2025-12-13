@@ -4,6 +4,10 @@ import {endpointWrapper} from "./util/transaction.js";
  * Handles item return and creates a dispute
  */
 export default async function returnItemCreateDispute(req, res) {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
     const createDisputeQuery = async (req, tx) => {
         const {rentalId, disputeStatus, rentalStatus} = req.body;
 

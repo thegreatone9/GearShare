@@ -78,6 +78,10 @@ async function updateRentalStatus(rentalId, rentalStatus, tx) {
  * Resolves a dispute and updates associated listing and rental
  */
 export default async function resolveDispute(req, res) {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
     const resolveDisputeQuery = async (req, tx) => {
         const {disputeId, rentalId, rentalStatus, disputeStatus} = req.body;
 

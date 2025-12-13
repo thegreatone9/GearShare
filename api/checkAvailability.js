@@ -4,6 +4,10 @@ import {endpointWrapper} from "./util/transaction.js";
  * Checks if an item is available for a borrower to request
  */
 export default async function checkAvailability(req, res) {
+    if (req.method !== 'GET') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
     const checkAvailabilityQuery = async (req, tx) => {
         const {listingId, borrowerId} = req.query;
 

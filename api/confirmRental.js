@@ -16,6 +16,10 @@ function datesOverlap(start1, end1, start2, end2) {
  * Confirms rental acceptance and updates related records
  */
 export default async function confirmRental(req, res) {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
     const confirmRentalQuery = async (req, tx) => {
         const {
             requestId,

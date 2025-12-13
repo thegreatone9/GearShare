@@ -28,6 +28,10 @@ function buildUpdateClauses(data, currentData) {
  * Upserts a listing with availability information
  */
 export default async function upsertListing(req, res) {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
     const upsertListingQuery = async (req, tx) => {
         const {
             ownerId,

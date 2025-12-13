@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
 import {AlertTriangle, CheckCircle, Mail, Package, Phone, Shield, User} from 'lucide-react';
 import {
+    apiRequest,
     BORROWER_ITEM_ACTIONS,
     formatDateStr,
     getStatusClasses,
@@ -107,7 +108,7 @@ export default function ItemForm() {
 
         // Rule 2: Disable days that fall within any of the specifically UNAVAILABLE ranges
         for (const range of unavailableRanges) {
-            if (isWithinInterval(day, { start: range.from, end: range.to })) {
+            if (isWithinInterval(day, {start: range.from, end: range.to})) {
                 return true;
             }
         }
@@ -139,7 +140,7 @@ export default function ItemForm() {
             const start = startOfDay(new Date(range.from));
             const end = endOfDay(new Date(range.to));
 
-            if (isWithinInterval(day, { start: start, end: end })) {
+            if (isWithinInterval(day, {start: start, end: end})) {
                 return true;
             }
         }
@@ -296,9 +297,15 @@ export default function ItemForm() {
                 setEditMode(!isNaN(itemIdNum));
 
             } else if (role === ROLE.BORROWER) {
-                const {data: available, error} = await supabase.rpc('is_item_available', {
-                    r_listing_id: item.id,
-                    r_borrower_id: authenticatedUser.id
+                // const {data: available, error} = await supabase.rpc('is_item_available', {
+                //     r_listing_id: item.id,
+                //     r_borrower_id: authenticatedUser.id
+                // });
+                const {data: available, error} = await apiRequest('/api/checkAvailability', {
+                    params: {
+                        listingId: item.id,
+                        borrowerId: authenticatedUser.id
+                    }
                 });
 
                 if (error) {
@@ -445,9 +452,16 @@ export default function ItemForm() {
 
         try {
             //Delete pending requests associated with the listing.
-            const {deleteError} = await supabase.rpc('delete_listing_and_requests', {
-                r_listing_id: itemIdNum,
-                active_status: REQUEST_STATUS.ACTIVE
+            // const {deleteError} = await supabase.rpc('delete_listing_and_requests', {
+            //     r_listing_id: itemIdNum,
+            //     active_status: REQUEST_STATUS.ACTIVE
+            // });
+            const {deleteError} = await apiRequest('/api/deleteListingWithRequests', {
+                method: 'POST',
+                params: {
+                    listingId: itemIdNum,
+                    activeStatus: REQUEST_STATUS.ACTIVE
+                }
             });
 
             if (deleteError) {
@@ -483,12 +497,23 @@ export default function ItemForm() {
         };
 
         try {
-            const { data: updatedListing, error: dbError } = await supabase.rpc('upsert_listing_with_availability', {
-                p_owner_id: authenticatedUser.id,
-                p_listing_id: itemIdNum,
-                p_listing_data: itemData,
-                p_overall_available_range: overallAvailableDates,
-                p_unavailable_ranges: unavailableRanges
+            // const {data: updatedListing, error: dbError} = await supabase.rpc('upsert_listing_with_availability', {
+            //     p_owner_id: authenticatedUser.id,
+            //     p_listing_id: itemIdNum,
+            //     p_listing_data: itemData,
+            //     p_overall_available_range: overallAvailableDates,
+            //     p_unavailable_ranges: unavailableRanges
+            // });
+
+            const {data: updatedListing, error: dbError} = await apiRequest('/api/upsertListing', {
+                method: 'POST',
+                body: {
+                    ownerId: authenticatedUser.id,
+                    listingId: itemIdNum,
+                    listingData: itemData,
+                    overallAvailableRange: overallAvailableDates,
+                    unavailableRanges: unavailableRanges
+                }
             });
 
             if (dbError) {
@@ -759,7 +784,8 @@ export default function ItemForm() {
                             <div className="text-gray-700 text-center">
                                 {overallAvailableDates.from && overallAvailableDates.to ? (
                                     <>
-                                        <span className="font-bold">{formatDateStr(overallAvailableDates.from)}</span> to{' '}
+                                        <span
+                                            className="font-bold">{formatDateStr(overallAvailableDates.from)}</span> to{' '}
                                         <span className="font-bold">{formatDateStr(overallAvailableDates.to)}</span>
                                     </>
                                 ) : (
@@ -842,7 +868,8 @@ export default function ItemForm() {
                             <div className="text-gray-700 text-center">
                                 {requestDates.start_date && requestDates.end_date ? (
                                     <>
-                                        <span className="font-bold">{formatDateStr(requestDates.start_date)}</span> to{' '}
+                                        <span
+                                            className="font-bold">{formatDateStr(requestDates.start_date)}</span> to{' '}
                                         <span className="font-bold">{formatDateStr(requestDates.end_date)}</span>
                                     </>
                                 ) : (

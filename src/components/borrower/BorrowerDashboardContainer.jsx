@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS, REQUEST_STATUS, ROLE, TOAST_TYPE} from "../util/Util.js";
+import {apiRequest, DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS, ROLE, TOAST_TYPE} from "../util/Util.js";
 import {supabase} from "../../server/supabaseClient.js";
 import BorrowerDashboardPresenter from "./BorrowerDashboardPresenter.jsx";
 import {useBorrowerDashboardDataHook} from "./useBorrowerDashboardDataHook.jsx";
@@ -85,10 +85,19 @@ export default function BorrowerDashboardContainer() {
     const handleReturn = async function (rental, event) {
         event.preventDefault();
 
-        const {data: newDispute, error} = await supabase.rpc('handle_item_return_create_dispute', {
-            rental_id: rental.id,
-            dispute_status: DISPUTE_STATUS.PENDING_DEPOSIT_RETURN,
-            rental_status: RENTAL_STATUS.RETURNED
+        // const {data: newDispute, error} = await supabase.rpc('handle_item_return_create_dispute', {
+        //     rental_id: rental.id,
+        //     dispute_status: DISPUTE_STATUS.PENDING_DEPOSIT_RETURN,
+        //     rental_status: RENTAL_STATUS.RETURNED
+        // });
+
+        const {data: newDispute, error} = await apiRequest('/api/returnItemCreateDispute', {
+            method: 'POST',
+            body: {
+                rentalId: rental.id,
+                disputeStatus: DISPUTE_STATUS.PENDING_DEPOSIT_RETURN,
+                rentalStatus: RENTAL_STATUS.RETURNED
+            }
         });
 
         if (error) {
@@ -96,7 +105,7 @@ export default function BorrowerDashboardContainer() {
             return;
         }
 
-        const { data: updatedRental, error: rentalError  } = await supabase.from('rentals')
+        const {data: updatedRental, error: rentalError} = await supabase.from('rentals')
             .select('*')
             .eq('id', rental.id)
             .single();
