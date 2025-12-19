@@ -293,10 +293,10 @@ export default function ItemForm() {
                 itemUnavailableRanges = listingsAvailableRanges.unavailable_ranges;
             }
 
-            if (role === ROLE.LENDER) {
+            if (role === ROLE.LENDER && item.owner_id === authenticatedUser.id) {
                 setEditMode(!isNaN(itemIdNum));
 
-            } else if (role === ROLE.BORROWER) {
+            } else {
                 const {data: lenderData, error: lenderFetchError} = await supabase
                     .from('accounts')
                     .select('id, name, email, image_url')
@@ -309,20 +309,7 @@ export default function ItemForm() {
 
                 setLender(lenderData);
 
-                if (item && item.owner_id !== authenticatedUser.id) {
-                    const {data: available, error} = await apiRequest('/api/checkAvailability', {
-                        params: {
-                            listingId: item.id,
-                            borrowerId: authenticatedUser.id
-                        }
-                    });
-
-                    if (error) {
-                        throw new Error(`Error checking request existence for borrower: ${error.message}`);
-                    }
-
-                    setCanRequestBorrow(available);
-
+                if (item.owner_id !== authenticatedUser.id) {
                     const {data: requestDates, error: requestDatesError} = await supabase
                         .from('requests')
                         .select('start_date, end_date')
@@ -342,6 +329,21 @@ export default function ItemForm() {
                     );
 
                     setUnavailableRanges(itemUnavailableRanges);
+
+                    if (role === ROLE.BORROWER) {
+                        const {data: available, error} = await apiRequest('/api/checkAvailability', {
+                            params: {
+                                listingId: item.id,
+                                borrowerId: authenticatedUser.id
+                            }
+                        });
+
+                        if (error) {
+                            throw new Error(`Error checking request existence for borrower: ${error.message}`);
+                        }
+
+                        setCanRequestBorrow(available);
+                    }
                 }
             }
 
