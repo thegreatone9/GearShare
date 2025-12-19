@@ -493,14 +493,6 @@ export default function ItemForm() {
         };
 
         try {
-            // const {data: updatedListing, error: dbError} = await supabase.rpc('upsert_listing_with_availability', {
-            //     p_owner_id: authenticatedUser.id,
-            //     p_listing_id: itemIdNum,
-            //     p_listing_data: itemData,
-            //     p_overall_available_range: overallAvailableDates,
-            //     p_unavailable_ranges: unavailableRanges
-            // });
-
             const {data: updatedListing, error: dbError} = await apiRequest('/api/upsertListing', {
                 method: 'POST',
                 body: {
@@ -513,7 +505,7 @@ export default function ItemForm() {
             });
 
             if (dbError) {
-                addToast(TOAST_TYPE.ERROR, `Database submission error: ${dbError.message}`);
+                addToast(TOAST_TYPE.ERROR, `Database submission error: ${dbError}`);
 
             } else {
                 setTimeout(() => navigate(`/lender?toast=Successfully Updated Listing: ${itemState.title}`), 500);

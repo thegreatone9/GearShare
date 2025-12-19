@@ -1,4 +1,5 @@
 import {endpointWrapper} from "./util/transaction.js";
+import {ACTIVITY} from "../src/components/util/Util.js";
 
 /**
  * Builds SQL SET clause for UPDATE with non-null values only
@@ -206,6 +207,12 @@ export default async function upsertListing(req, res) {
                     ]
                 );
             }
+
+            //log activity
+            await tx.query(
+                `INSERT INTO activity_log (created_at, user_id, type, message) VALUES (NOW(), $1, '${ACTIVITY.UPSERT_ITEM}', $2)`,
+                [ownerId, `You (User ID: #${ownerId}) upserted the item: #${listingId}`],
+            );
         }
 
         return updatedListing;

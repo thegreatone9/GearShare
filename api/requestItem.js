@@ -72,7 +72,7 @@ export default async function requestItem(req, res) {
         //log activity
         await tx.query(
             `INSERT INTO activity_log (created_at, user_id, type, message) VALUES (NOW(), $1, '${ACTIVITY.REQUEST_ITEM}', $2)`,
-            [borrowerId, `You (${borrowerId}) have requested the item: #${listingId}`],
+            [borrowerId, `You (User ID: #${borrowerId}) have requested the item: #${listingId}`],
         );
 
         return newRequestId;
