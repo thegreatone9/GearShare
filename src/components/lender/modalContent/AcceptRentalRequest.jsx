@@ -17,7 +17,7 @@ export default function AcceptRentalRequest({request, onClose, setRequests, setL
     const [itemWithAvailability, setItemWithAvailability] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const {id, listing_id: listingId, borrower_id: borrowerId, lender_id: lenderId} = request;
+    const {id, listing_id: listingId, borrower_id: borrowerId, lender_id: lenderId, listing_snapshot: listingSnapshot} = request;
 
     useEffect(() => {
         const fetchData = async function () {
@@ -98,8 +98,8 @@ export default function AcceptRentalRequest({request, onClose, setRequests, setL
                     Item: {itemWithAvailability.title}
                 </p>
                 <p className="text-sm text-gray-600">
-                    Price: ${itemWithAvailability.price}/{itemWithAvailability.time_unit} | Deposit Hold:
-                    ${itemWithAvailability.replacement_value}
+                    Price: ${listingSnapshot.price}/{listingSnapshot.time_unit} | Deposit Hold:
+                    ${listingSnapshot.replacement_value}
                 </p>
             </div>
 
@@ -119,7 +119,7 @@ export default function AcceptRentalRequest({request, onClose, setRequests, setL
                 </div>
                 <div className="flex text-sm text-gray-600">
                     <DollarSign className="w-4 h-4 mr-2 flex-shrink-0"/>
-                    <p>Total Rental Value: <span className="font-medium">${itemWithAvailability.price} (Total)</span>
+                    <p>Total Rental Value: <span className="font-medium">${listingSnapshot.price} (Total)</span>
                     </p>
                 </div>
                 <div className="flex text-sm text-gray-600">

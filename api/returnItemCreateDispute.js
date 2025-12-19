@@ -22,11 +22,10 @@ export default async function returnItemCreateDispute(req, res) {
             `SELECT
                  r.id, r.request_id,
                  req.borrower_id, req.lender_id, req.start_date, req.end_date,
-                 l.price,
+                 req.listing_snapshot,
                  pi.id as payment_intent_id, pi.amount as total_held_amount
              FROM rentals r
                       JOIN requests req ON r.request_id = req.id
-                      JOIN listings l ON req.listing_id = l.id
                       JOIN payment_intents pi ON pi.request_id = req.id
              WHERE r.id = $1 AND pi.status = ${PAYMENT_INTENT_STATUS.CAPTURED}`,
             [rentalId]
@@ -46,6 +45,7 @@ export default async function returnItemCreateDispute(req, res) {
         );
 
         const rental = rentalData.rows[0];
+        const listingSnapshot = rental.listing_snapshot;
 
         // 3. Update the rental with return date and new status
         await tx.query(
@@ -60,7 +60,7 @@ export default async function returnItemCreateDispute(req, res) {
         const end = new Date(rental.end_date);
         const dayDiff = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
         const duration = dayDiff > 0 ? dayDiff : 1;
-        const rentalFee = Number(rental.price) * duration;
+        const rentalFee = Number(listingSnapshot.price) * duration;
 
         // 5. Create Transaction: Pay Rent to Lender
         // We move the Rent portion from Escrow -> Lender

@@ -223,6 +223,11 @@ export default function ItemForm() {
     };
 
     useEffect(() => {
+        setCanRequestBorrow(false);
+        setLoading(true);
+        setEditMode(false);
+        setStatusMessage({type: '', field: '', text: ''});
+
         if (!itemIdNum) {
             setLoading(false);
             setEditMode(true);
@@ -231,11 +236,6 @@ export default function ItemForm() {
         }
 
         const fetchItem = async () => {
-            setLoading(true);
-            setEditMode(false);
-            setCanRequestBorrow(false);
-            setStatusMessage({type: '', field: '', text: ''});
-
             const {data: item, error} = await supabase
                 .from('listings')
                 .select('*')
@@ -297,23 +297,6 @@ export default function ItemForm() {
                 setEditMode(!isNaN(itemIdNum));
 
             } else if (role === ROLE.BORROWER) {
-                // const {data: available, error} = await supabase.rpc('is_item_available', {
-                //     r_listing_id: item.id,
-                //     r_borrower_id: authenticatedUser.id
-                // });
-                const {data: available, error} = await apiRequest('/api/checkAvailability', {
-                    params: {
-                        listingId: item.id,
-                        borrowerId: authenticatedUser.id
-                    }
-                });
-
-                if (error) {
-                    throw new Error(`Error checking request existence for borrower: ${error.message}`);
-                }
-
-                setCanRequestBorrow(available);
-
                 const {data: lenderData, error: lenderFetchError} = await supabase
                     .from('accounts')
                     .select('id, name, email, image_url')
@@ -327,6 +310,19 @@ export default function ItemForm() {
                 setLender(lenderData);
 
                 if (item && item.owner_id !== authenticatedUser.id) {
+                    const {data: available, error} = await apiRequest('/api/checkAvailability', {
+                        params: {
+                            listingId: item.id,
+                            borrowerId: authenticatedUser.id
+                        }
+                    });
+
+                    if (error) {
+                        throw new Error(`Error checking request existence for borrower: ${error.message}`);
+                    }
+
+                    setCanRequestBorrow(available);
+
                     const {data: requestDates, error: requestDatesError} = await supabase
                         .from('requests')
                         .select('start_date, end_date')

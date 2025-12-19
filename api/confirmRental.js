@@ -39,14 +39,14 @@ export default async function confirmRental(req, res) {
         }
 
         // 0. Check if request exists
-        const requestCheck = await tx.query(
-            `SELECT id
+        const requestData = await tx.query(
+            `SELECT *
              FROM requests
              WHERE id = $1`,
             [requestId]
         );
 
-        if (requestCheck.rows.length === 0) {
+        if (requestData.rows.length === 0) {
             throw new Error(`Request with ID ${requestId} does not exist.`);
         }
 
@@ -61,14 +61,6 @@ export default async function confirmRental(req, res) {
         if (listingCheck.rows.length === 0) {
             throw new Error(`Listing with ID ${listingId} does not exist.`);
         }
-
-        // Get the accepted request's dates
-        const requestData = await tx.query(
-            `SELECT start_date, end_date
-             FROM requests
-             WHERE id = $1`,
-            [requestId]
-        );
 
         const {start_date: acceptedStartDate, end_date: acceptedEndDate} = requestData.rows[0];
 

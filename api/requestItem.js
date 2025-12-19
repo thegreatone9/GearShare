@@ -15,7 +15,7 @@ export default async function requestItem(req, res) {
         }
 
         const listingResult = await tx.query(
-            `SELECT price, replacement_value 
+            `SELECT * 
              FROM listings 
              WHERE id = $1`,
             [listingId]
@@ -37,11 +37,13 @@ export default async function requestItem(req, res) {
         const deposit = Number(listing.replacement_value);
         const totalAuthAmount = rentalFee + deposit;
 
+        const listingJson = JSON.stringify(listing);
+
         //Insert into requests table
         const requestsResult = await tx.query(
-            `INSERT INTO requests (listing_id, borrower_id, lender_id, status, date, start_date, end_date)
-             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-            [listingId, borrowerId, lenderId, status, date, startDate, endDate]
+            `INSERT INTO requests (listing_id, borrower_id, lender_id, status, date, start_date, end_date, listing_snapshot)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+            [listingId, borrowerId, lenderId, status, date, startDate, endDate, listingJson]
         );
 
         const newRequestId = requestsResult.rows[0].id;
