@@ -27,15 +27,15 @@ CREATE TABLE listings
 -- Table for Requests
 CREATE TABLE requests
 (
-    id              SERIAL PRIMARY KEY,
-    listing_id      INT REFERENCES listings (id) NOT NULL,
-    borrower_id     INT REFERENCES accounts (id) NOT NULL,
-    lender_id       INT REFERENCES accounts (id) NOT NULL,
-    request_date    DATE,
-    rent_start_date DATE,
-    rent_end_date   DATE,
-    status          TEXT,
-    deposit         NUMERIC
+    id                       SERIAL PRIMARY KEY,
+    listing_id               INT REFERENCES listings (id) NOT NULL,
+    borrower_id              INT REFERENCES accounts (id) NOT NULL,
+    lender_id                INT REFERENCES accounts (id) NOT NULL,
+    date                     DATE,
+    start_date               DATE,
+    end_date                 DATE,
+    status                   TEXT,
+    listing_snapshot         JSONB
 );
 
 -- Table for Rentals
@@ -75,23 +75,15 @@ CREATE TABLE listings_available_dates
     overall_available_range JSONB DEFAULT '{}'::jsonb NOT NULL
 );
 
-CREATE VIEW public.listings_with_availability AS
-SELECT
-    l.*, -- All columns from listings
-    lad.overall_available_range,
-    lad.unavailable_ranges
-FROM
-    listings l
-        LEFT JOIN
-    listings_available_dates lad ON l.id = lad.listing_id;
-
 create table payment_intents
 (
     id          SERIAL PRIMARY KEY,
     created_at  timestamp default now()      not null,
-    updated_at  timestamp default now()      not null,
-    rental_id   int references rentals (id)  not null,
+    updated_at  timestamp default now(),
+    request_id  int references requests (id) not null,
+    rental_id   int references rentals (id),
     payer_id    int references accounts (id) not null,
+    payee_id    int references accounts (id) not null,
     amount      decimal(10, 2)               not null check (amount > 0),
     status      text                         not null,
     description text
@@ -101,10 +93,19 @@ create table transactions
 (
     id                SERIAL PRIMARY KEY,
     created_at        timestamp default now() not null,
-    payment_intent_id uuid references payment_intents (id),
+    payment_intent_id int references payment_intents (id),
     payer_id          int references accounts (id),
     payee_id          int references accounts (id),
     amount            decimal(10, 2)          not null check (amount > 0),
     type              text                    not null,
     description       text
+);
+
+create table activity_log
+(
+    id         SERIAL PRIMARY KEY,
+    created_at timestamp default now() not null,
+    user_id    int references accounts (id),
+    type       text                    not null,
+    message    text                    not null
 );

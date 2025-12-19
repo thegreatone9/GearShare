@@ -25,3 +25,5 @@ is serious, the digital equivalent of showing up with cash in hand.
 14) Platforms use Terms of Service (TOS) and Card Holds. When a user signs up, they agree that they are liable for the
 full replacement value. The platform often places a "silent" authorization hold on their card for a higher amount, or
 simply retains the legal right to charge the card for the remaining balance later.
+15) Improve Authentication, and ItemForm (e.g. pictures and policy docs)
+16) Think if the App is being helpful and intuitive
