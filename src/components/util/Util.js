@@ -1,10 +1,22 @@
 import Cookies from "js-cookie";
-import AcceptRentalRequest from "../lender/modalContent/AcceptRentalRequest.jsx";
-import ModalItemDetails from "../common/ModalItemDetails.jsx";
-import UserDetails from "../common/UserDetails.jsx";
 import {format} from "date-fns";
 
 export const IMG_NOT_FOUND_URL = 'https://tmuiycpixqjawkspqpiu.supabase.co/storage/v1/object/public/GearShare%20Assets/img-not-found.png';
+
+export const ADMIN_ID = {
+    ESCROW: 16,
+    ADMIN: 17,
+}
+
+export const ACTIVITY = {
+    REQUEST_ITEM: 'REQUEST_ITEM',
+    CONFIRM_RENTAL: 'CONFIRM_RENTAL',
+    DECLINE_REQUEST: 'DECLINE_REQUEST',
+    DELETE_LISTING: 'DELETE_LISTING',
+    PAY_DAMAGES: 'PAY_DAMAGES',
+    RETURN_ITEM_CREATE_DISPUTE: 'RETURN_ITEM_CREATE_DISPUTE',
+    SETTLE_DISPUTE: 'SETTLE_DISPUTE'
+}
 
 export const ROLE = {
     LENDER: 'lender',
@@ -41,6 +53,25 @@ export const DISPUTE_STATUS = {
 export const LENDER_ITEM_ACTIONS = {
     SAVE: 'save',
     DELETE: 'delete'
+}
+
+export const PAYMENT_INTENT_STATUS = {
+    REQUIRES_PAYMENT_METHOD: 'REQUIRES_PAYMENT_METHOD', //Initial state before borrower 'pays'
+    AUTHORIZED: 'AUTHORIZED',                           //Borrower clicked 'Request', funds are held (Mock)
+    CAPTURED: 'CAPTURED',                               //Lender accepted, funds moved to Escrow
+    RELEASED: 'RELEASED',                               //Rental done, funds paid out to Lender
+    REFUNDED: 'REFUNDED',                               //Rental declined/done, funds back to Borrower
+    PARTIALLY_REFUNDED: 'PARTIALLY_REFUNDED',           //Rental done, but some deposit kept for damages
+    CANCELLED: 'CANCELLED',
+    SETTLED: 'SETTLED'
+}
+
+export const TRANSACTION_STATUS = {
+    SECURITY_DEPOSIT: 'REQUIRES_PAYMENT_METHOD',        //Money moving into Escrow
+    DEPOSIT_REFUND: 'AUTHORIZED',                       //Money returning to Borrower
+    RENTAL_FEE: 'CAPTURED',                             //Rent money going to Lender
+    DAMAGE_FEE: 'RELEASED',                             //Money taken from Deposit going to Lender
+    DAMAGE_OVERAGE: 'REFUNDED'                          //EXTRA money charged to Borrower (Liability > Deposit)
 }
 
 export const BORROWER_ITEM_ACTIONS = {
@@ -151,15 +182,6 @@ export const MODAL_CATEGORY = {
     BORROWER: 'borrower',
     LENDER: 'lender'
 }
-
-export const ModalComponentMap = {
-    [MODAL_CATEGORY.ACCEPT_RENTAL_REQUEST]: AcceptRentalRequest,
-    [MODAL_CATEGORY.ITEM]: ModalItemDetails,
-    [MODAL_CATEGORY.BORROWER]: UserDetails,
-    [MODAL_CATEGORY.LENDER]: UserDetails
-
-    // Can add other generic item modals here as needed (e.g., disputeReview, returnFlow)
-};
 
 export const getStatusClasses = (type) => {
     switch (type) {

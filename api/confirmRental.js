@@ -1,4 +1,5 @@
 import {endpointWrapper} from "./util/transaction.js";
+import {ACTIVITY, ADMIN_ID, PAYMENT_INTENT_STATUS, TRANSACTION_STATUS} from "../src/components/util/Util.js";
 
 /**
  * Checks if two date ranges overlap
@@ -23,6 +24,8 @@ export default async function confirmRental(req, res) {
     const confirmRentalQuery = async (req, tx) => {
         const {
             requestId,
+            borrowerId,
+            lenderId,
             listingId,
             rentalStatus,
             requestStatus,
@@ -141,6 +144,51 @@ export default async function confirmRental(req, res) {
              SET unavailable_ranges = $2
              WHERE listing_id = $1`,
             [listingId, JSON.stringify(unavailableRanges)]
+        );
+
+        //5. Update Payment Intent
+        const intentResult = await tx.query(
+            `UPDATE payment_intents 
+             SET status = '${PAYMENT_INTENT_STATUS.CAPTURED}', updated_at = NOW() 
+             WHERE request_id = $1 AND status = '${PAYMENT_INTENT_STATUS.AUTHORIZED}'
+             RETURNING id, amount`,
+            [requestId] // In your schema, requestId was used as the link in requestItem
+        );
+
+        if (intentResult.rows.length === 0) {
+            throw new Error(`No authorized payment intent found for request ${requestId}.`);
+        }
+
+        const { id: intentId, amount: totalAmount } = intentResult.rows[0];
+
+        // 6. Create Transaction Ledger Entry
+        // This marks the actual financial event of money moving into escrow.
+        await tx.query(
+            `INSERT INTO transactions (
+                payment_intent_id, 
+                rental_id, 
+                payer_id, 
+                payee_id, 
+                amount, 
+                type, 
+                description
+            )
+             VALUES ($1, $2, $3, $4, $5, '${TRANSACTION_STATUS.SECURITY_DEPOSIT}', $6)`,
+            [
+                intentId,
+                insertedRental.id, // Linked to the new Rental record
+                borrowerId,        // The Borrower is paying
+                ADMIN_ID.ESCROW,   // Money is currently held by the platform
+                totalAmount,
+                `Security deposit and rental fee captured for Rental #${insertedRental.id}`
+            ]
+        );
+
+        //7. Activity Log (Optional but recommended)
+        await tx.query(
+            `INSERT INTO activity_log (created_at, user_id, type, message)
+             VALUES (NOW(), $1, $2, $3)`,
+            [lenderId, ACTIVITY.CONFIRM_RENTAL, `Your payment for #${listingId} has been captured and the rental is confirmed.`]
         );
 
         // Return the inserted rental

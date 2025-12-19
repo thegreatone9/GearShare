@@ -58,12 +58,14 @@ export default function AcceptRentalRequest({request, onClose, setRequests, setL
         //     }
         // ).single();
 
-        const {data: rentalResult, error: rpcError} = await apiRequest(
+        const { error: rpcError} = await apiRequest(
             '/api/confirmRental',
             {
                 method: 'POST',
                 body: {
                     requestId: id,
+                    borrowerId: borrowerId,
+                    lenderId: lenderId,
                     listingId: listingId,
                     rentalStatus: RENTAL_STATUS.ACTIVE,
                     requestStatus: REQUEST_STATUS.COMPLETED,
@@ -74,7 +76,7 @@ export default function AcceptRentalRequest({request, onClose, setRequests, setL
         );
 
         if (rpcError) {
-            throw new Error(`Rental Request Acceptance Transaction failed: ${rpcError.message}`);
+            throw new Error(`Rental Request Acceptance Transaction failed: ${rpcError}`);
         }
 
         closeAllModals();

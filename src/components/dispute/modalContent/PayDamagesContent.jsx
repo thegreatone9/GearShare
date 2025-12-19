@@ -1,25 +1,22 @@
 import React from 'react';
-import {DISPUTE_STATUS} from "../../util/Util.js";
-import {supabase} from "../../../server/supabaseClient.js";
+import {apiRequest, DISPUTE_STATUS} from "../../util/Util.js";
 
 export default function PayDamagesContent ({ disputeData, onClose, setAppData }) {
     const payDamages = async (dispute) => {
         const disputeId = dispute.id;
         const damageAmount = dispute.damage_amount;
-        // NOTE: In production, this function would first call a payment gateway API (Stripe, PayPal).
-        // If payment succeeds, we update the dispute status to COMPLETED.
 
-        const updateData = {
-            status: DISPUTE_STATUS.COMPLETED,
-            end_date: new Date().toISOString(),
-        };
-
-        const { data: updatedDispute, error } = await supabase
-            .from('disputes')
-            .update(updateData)
-            .eq('id', disputeId)
-            .select()
-            .single();
+        const {data: updatedDispute, error} = await apiRequest(
+            '/api/payDamages',
+            {
+                method: 'POST',
+                body: {
+                    disputeId: disputeId,
+                    damageAmount: damageAmount,
+                    disputeResolutionStatus: DISPUTE_STATUS.COMPLETED
+                }
+            }
+        );
 
         if (error) {
             console.error("Error finalizing damage payment:", error);

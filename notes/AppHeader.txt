@@ -1,0 +1,10 @@
+Proposed Structure:
+Borrower (Tab): High-level view of gear I’m currently renting or requesting.
+
+Lender (Tab): High-level view of my gear and incoming requests.
+
+Activity (Consolidated): Move this inside the Borrower/Lender views. Use a notification bell or a sidebar for "Activity" (e.g., "Lender accepted your request").
+
+Disputes (Conditional): Unless a user is a high-volume power user, they shouldn't have a dispute open 90% of the time. This could live inside Profile or only appear as a red badge on a specific rental.
+
+Transactions (Sub-menu): Place this under Profile. Users check transactions when they have a specific question about money, not every time they open the app.

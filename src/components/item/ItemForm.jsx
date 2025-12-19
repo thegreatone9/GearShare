@@ -417,22 +417,22 @@ export default function ItemForm() {
         }
 
         try {
-            const {error: requestError} = await supabase
-                .from('requests')
-                .insert([
-                    {
-                        listing_id: itemIdNum,
-                        borrower_id: authenticatedUser.id,
-                        lender_id: lender.id,
+            const {error: requestError} = await apiRequest('/api/requestItem',
+                {
+                    method: 'POST',
+                    body: {
+                        listingId: itemIdNum,
+                        borrowerId: authenticatedUser.id,
+                        lenderId: lender.id,
                         status: REQUEST_STATUS.ACTIVE,
                         date: new Date().toISOString(),
-                        start_date: rentStartDate,
-                        end_date: rentEndDate
+                        startDate: rentStartDate,
+                        endDate: rentEndDate
                     }
-                ]);
+                });
 
             if (requestError) {
-                throw new Error(`Failed to request borrowing of listing: ${requestError.message}`);
+                throw new Error(`Failed to request borrowing of listing: ${requestError}`);
             }
 
             setTimeout(() => {
@@ -451,14 +451,10 @@ export default function ItemForm() {
         event.preventDefault();
 
         try {
-            //Delete pending requests associated with the listing.
-            // const {deleteError} = await supabase.rpc('delete_listing_and_requests', {
-            //     r_listing_id: itemIdNum,
-            //     active_status: REQUEST_STATUS.ACTIVE
-            // });
             const {deleteError} = await apiRequest('/api/deleteListingWithRequests', {
                 method: 'POST',
                 params: {
+                    userId: authenticatedUser.id,
                     listingId: itemIdNum,
                     activeStatus: REQUEST_STATUS.ACTIVE
                 }
@@ -537,8 +533,6 @@ export default function ItemForm() {
     }
 
     if (!isEmptyString(toastMessage)) {
-        console.log('RENDER TOAST');
-
         setTimeout(() => {
             addToast(TOAST_TYPE.SUCCESS, toastMessage);
 

@@ -1,6 +1,5 @@
 import {endpointWrapper} from "./util/transaction.js";
-
-const HOTTEST_LIST_SIZE = 8;
+import {ACTIVITY} from "../src/components/util/Util.js";
 
 export default async function deleteListingWithRequests(req, res) {
     if (req.method !== 'POST') {
@@ -8,7 +7,7 @@ export default async function deleteListingWithRequests(req, res) {
     }
 
     const deleteListingWithRequestsQuery = async (req, tx) => {
-        const {listingId, activeStatus} = req.query;
+        const {userId, listingId, activeStatus} = req.query;
 
         await tx.query(
             `DELETE
@@ -23,6 +22,12 @@ export default async function deleteListingWithRequests(req, res) {
              FROM listings
              WHERE id = $1`,
             [listingId]
+        );
+
+        await tx.query(
+            `INSERT INTO activity_log (created_at, user_id, type, message)
+             VALUES (NOW(), $1, $2, $3)`,
+            [userId, ACTIVITY.DELETE_LISTING, `User Deleted Listing: ${listingId}`],
         );
     };
 

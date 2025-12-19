@@ -1,4 +1,5 @@
 import {endpointWrapper} from "./util/transaction.js";
+import {ACTIVITY, ADMIN_ID, PAYMENT_INTENT_STATUS, TRANSACTION_STATUS} from "../src/components/util/Util.js";
 
 /**
  * Handles item return and creates a dispute
@@ -17,26 +18,34 @@ export default async function returnItemCreateDispute(req, res) {
         }
 
         // 1. Check if rental exists
-        const rentalCheck = await tx.query(
-            `SELECT id
-             FROM rentals
-             WHERE id = $1`,
+        const rentalData = await tx.query(
+            `SELECT
+                 r.id, r.request_id,
+                 req.borrower_id, req.lender_id, req.start_date, req.end_date,
+                 l.price,
+                 pi.id as payment_intent_id, pi.amount as total_held_amount
+             FROM rentals r
+                      JOIN requests req ON r.request_id = req.id
+                      JOIN listings l ON req.listing_id = l.id
+                      JOIN payment_intents pi ON pi.request_id = req.id
+             WHERE r.id = $1 AND pi.status = ${PAYMENT_INTENT_STATUS.CAPTURED}`,
             [rentalId]
         );
 
-        if (rentalCheck.rows.length === 0) {
-            throw new Error(`Rental with ID ${rentalId} does not exist.`);
+        if (rentalData.rows.length === 0) {
+            throw new Error(`Rental ${rentalId} not found or active payment not found.`);
         }
 
-        // 2. Create the dispute record
         const currentDate = new Date();
+
+        // 2. Create the dispute record
         const disputeResult = await tx.query(
             `INSERT INTO disputes (rental_id, start_date, status)
              VALUES ($1, $2, $3) RETURNING *`,
             [rentalId, currentDate, disputeStatus]
         );
 
-        const createdDispute = disputeResult.rows[0];
+        const rental = rentalData.rows[0];
 
         // 3. Update the rental with return date and new status
         await tx.query(
@@ -45,6 +54,44 @@ export default async function returnItemCreateDispute(req, res) {
                  status      = $3
              WHERE id = $1`,
             [rentalId, currentDate, rentalStatus]
+        );
+
+        const start = new Date(rental.start_date);
+        const end = new Date(rental.end_date);
+        const dayDiff = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+        const duration = dayDiff > 0 ? dayDiff : 1;
+        const rentalFee = Number(rental.price) * duration;
+
+        // 5. Create Transaction: Pay Rent to Lender
+        // We move the Rent portion from Escrow -> Lender
+        await tx.query(
+            `INSERT INTO transactions (
+                payment_intent_id, rental_id, payer_id, payee_id, amount, type, description, created_at
+            )
+             VALUES ($1, $2, $3, $4, $5, '${TRANSACTION_STATUS.RENTAL_FEE}', $6, NOW())`,
+            [
+                rental.payment_intent_id,
+                rentalId,
+                ADMIN_ID.ESCROW,
+                rental.lender_id,
+                rentalFee,
+                `Rental fee payout for Rental #${rentalId}`
+            ]
+        );
+
+        const createdDispute = disputeResult.rows[0];
+
+        // 6. LOGIC DECISION: Payment Intent Status
+        await tx.query(
+            `UPDATE payment_intents SET description = $2 WHERE id = $1`,
+            [rental.payment_intent_id, `Funds Held for Dispute #${createdDispute.id}`]
+        );
+
+        // 7. Activity Log
+        await tx.query(
+            `INSERT INTO activity_log (created_at, user_id, type, message)
+             VALUES (NOW(), $1, '${ACTIVITY.RETURN_ITEM_CREATE_DISPUTE}', $2)`,
+            [rental.lender_id, `Dispute opened for Rental #${rentalId}. Rental fee paid, deposit held.`]
         );
 
         // Return the created dispute

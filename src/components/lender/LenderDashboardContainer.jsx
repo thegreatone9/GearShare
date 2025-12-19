@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import {useNavigate} from 'react-router-dom';
 import {supabase} from "../../server/supabaseClient.js";
 import {
+    apiRequest,
     DISPUTE_STATUS,
     LISTING_STATUS,
     MODAL_CATEGORY,
@@ -64,13 +65,16 @@ export default function LenderDashboardContainer() {
     }
 
     const declineRequest = async (request) => {
-        const { error } = await supabase
-            .from('requests')
-            .update({ status: REQUEST_STATUS.DECLINED })
-            .eq('id', request.id);
+        const {error} = await apiRequest('/api/declineRentalRequest', {
+            method: 'POST',
+            params: {
+                requestId: request.id,
+                newStatus: REQUEST_STATUS.DECLINED
+            }
+        });
 
         if (error) {
-            addToast(TOAST_TYPE.ERROR, `Error declining request: ${request.id}: ${error.message}`);
+            addToast(TOAST_TYPE.ERROR, `Error declining request: ${request.id}: ${error}`);
             return;
         }
 

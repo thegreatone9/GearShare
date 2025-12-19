@@ -1,4 +1,5 @@
 import {endpointWrapper} from "./util/transaction.js";
+import {ACTIVITY, ADMIN_ID, PAYMENT_INTENT_STATUS, TRANSACTION_STATUS} from "../src/components/util/Util.js";
 
 /**
  * Updates listing status by removing the date range from unavailable_ranges
@@ -93,7 +94,7 @@ export default async function resolveDispute(req, res) {
         // Step 1: Update dispute
         const disputeResult = await tx.query(
             `UPDATE disputes
-             SET status   = $2, end_date = NOW()
+             SET status = $2, end_date = NOW()
              WHERE id = $1 RETURNING *`,
             [disputeId, disputeStatus]
         );
@@ -109,6 +110,72 @@ export default async function resolveDispute(req, res) {
 
         // Step 3: Update rental status
         await updateRentalStatus(rentalId, rentalStatus, tx);
+
+        const contextData = await tx.query(
+            `SELECT 
+                pi.id as payment_intent_id, 
+                pi.amount as total_captured_amount,
+                req.borrower_id
+             FROM rentals r
+             JOIN requests req ON r.request_id = req.id
+             JOIN payment_intents pi ON pi.rental_id = req.id
+             WHERE r.id = $1`,
+            [rentalId]
+        );
+
+        if (contextData.rows.length === 0) {
+            throw new Error(`Payment context for Rental #${rentalId} not found.`);
+        }
+
+        const {
+            payment_intent_id: intentId,
+            total_captured_amount: totalCaptured,
+            borrower_id: borrowerId
+        } = contextData.rows[0];
+
+        // Step 4 & 5 Preparation: Calculate Refund Amount
+        // The Rent was likely paid when the dispute started. We need to find what's left (The Deposit).
+        const transactionHistory = await tx.query(
+            `SELECT amount FROM transactions WHERE payment_intent_id = $1`,
+            [intentId]
+        );
+
+        // Sum all previous payouts (e.g., Rental Fee)
+        const amountAlreadyPaid = transactionHistory.rows.reduce((sum, t) => sum + Number(t.amount), 0);
+
+        // The remaining balance is the Security Deposit
+        const refundAmount = Number(totalCaptured) - amountAlreadyPaid;
+
+        if (refundAmount > 0) {
+            // Step 5: Create Transaction (Refund the Deposit)
+            await tx.query(
+                `INSERT INTO transactions (
+                    payment_intent_id, rental_id, payer_id, payee_id, amount, type, description, created_at
+                ) VALUES ($1, $2, ${ADMIN_ID.ESCROW}, $3, $4, '${TRANSACTION_STATUS.DEPOSIT_REFUND}', $5, NOW())`,
+                [
+                    intentId,
+                    rentalId,
+                    borrowerId, // Money goes back to Borrower
+                    refundAmount,
+                    `Full security deposit refund after dispute resolution`
+                ]
+            );
+        }
+
+        // Step 4: Update Payment Intents (Close the loop)
+        // Mark the intent as SETTLED because the account is now empty.
+        await tx.query(
+            `UPDATE payment_intents 
+             SET status = '${PAYMENT_INTENT_STATUS.SETTLED}', updated_at = NOW() 
+             WHERE id = $1`,
+            [intentId]
+        );
+
+        await tx.query(
+            `INSERT INTO activity_log (created_at, user_id, type, message)
+             VALUES (NOW(), $1, '${ACTIVITY.SETTLE_DISPUTE}', $2)`,
+            [borrowerId, `Dispute resolved in your favor. Security deposit of $${refundAmount} refunded.`]
+        );
 
         // Return the updated dispute
         return updatedDispute;

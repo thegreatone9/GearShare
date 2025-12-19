@@ -16,6 +16,8 @@ import BorrowerDashboardContainer from "./components/borrower/BorrowerDashboardC
 import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
 import {useAuth} from "./components/AppContext.jsx";
 import ToastContainer from "./components/common/ToastContainer.jsx";
+import Transactions from "./components/transactions/Transactions.jsx";
+import ActivityLog from "./components/activity/ActivityLog.jsx";
 
 export default function App() {
     const location = useLocation();
@@ -98,6 +100,18 @@ export default function App() {
                             path="/profile"
                             element={<ProtectedRoute>
                                 <UserProfile/>
+                            </ProtectedRoute>}
+                        />
+                        <Route
+                            path="/transactions"
+                            element={<ProtectedRoute>
+                                <Transactions/>
+                            </ProtectedRoute>}
+                        />
+                        <Route
+                            path="/activity"
+                            element={<ProtectedRoute>
+                                <ActivityLog/>
                             </ProtectedRoute>}
                         />
 

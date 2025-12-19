@@ -1,6 +1,18 @@
 import Modal from "./Modal.jsx";
 import React from 'react';
-import {MODAL_CATEGORY, ModalComponentMap} from "../util/Util.js";
+import {MODAL_CATEGORY} from "../util/Util.js";
+import AcceptRentalRequest from "../lender/modalContent/AcceptRentalRequest.jsx";
+import ModalItemDetails from "./ModalItemDetails.jsx";
+import UserDetails from "./UserDetails.jsx";
+
+const ModalComponentMap = {
+    [MODAL_CATEGORY.ACCEPT_RENTAL_REQUEST]: AcceptRentalRequest,
+    [MODAL_CATEGORY.ITEM]: ModalItemDetails,
+    [MODAL_CATEGORY.BORROWER]: UserDetails,
+    [MODAL_CATEGORY.LENDER]: UserDetails
+
+    // Can add other generic item modals here as needed (e.g., disputeReview, returnFlow)
+};
 
 export default function ActionModal({ category, modalProps, isModalOpen, setIsModalOpen }) {
     const ComponentToRender = ModalComponentMap[category];
