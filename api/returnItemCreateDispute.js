@@ -27,7 +27,7 @@ export default async function returnItemCreateDispute(req, res) {
              FROM rentals r
                       JOIN requests req ON r.request_id = req.id
                       JOIN payment_intents pi ON pi.request_id = req.id
-             WHERE r.id = $1 AND pi.status = ${PAYMENT_INTENT_STATUS.CAPTURED}`,
+             WHERE r.id = $1 AND pi.status = '${PAYMENT_INTENT_STATUS.CAPTURED}'`,
             [rentalId]
         );
 
@@ -66,12 +66,11 @@ export default async function returnItemCreateDispute(req, res) {
         // We move the Rent portion from Escrow -> Lender
         await tx.query(
             `INSERT INTO transactions (
-                payment_intent_id, rental_id, payer_id, payee_id, amount, type, description, created_at
+                payment_intent_id, payer_id, payee_id, amount, type, description, created_at
             )
-             VALUES ($1, $2, $3, $4, $5, '${TRANSACTION_STATUS.RENTAL_FEE}', $6, NOW())`,
+             VALUES ($1, $2, $3, $4, '${TRANSACTION_STATUS.RENTAL_FEE}', $5, NOW())`,
             [
                 rental.payment_intent_id,
-                rentalId,
                 ADMIN_ID.ESCROW,
                 rental.lender_id,
                 rentalFee,
@@ -91,7 +90,7 @@ export default async function returnItemCreateDispute(req, res) {
         await tx.query(
             `INSERT INTO activity_log (created_at, user_id, type, message)
              VALUES (NOW(), $1, '${ACTIVITY.RETURN_ITEM_CREATE_DISPUTE}', $2)`,
-            [rental.lender_id, `Dispute opened for Rental #${rentalId}. Rental fee paid, deposit held.`]
+            [rental.borrower_id, `Dispute opened for Rental #${rentalId}. Rental fee paid, deposit held.`]
         );
 
         // Return the created dispute

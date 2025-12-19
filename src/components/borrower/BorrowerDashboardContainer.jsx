@@ -85,12 +85,6 @@ export default function BorrowerDashboardContainer() {
     const handleReturn = async function (rental, event) {
         event.preventDefault();
 
-        // const {data: newDispute, error} = await supabase.rpc('handle_item_return_create_dispute', {
-        //     rental_id: rental.id,
-        //     dispute_status: DISPUTE_STATUS.PENDING_DEPOSIT_RETURN,
-        //     rental_status: RENTAL_STATUS.RETURNED
-        // });
-
         const {data: newDispute, error} = await apiRequest('/api/returnItemCreateDispute', {
             method: 'POST',
             body: {

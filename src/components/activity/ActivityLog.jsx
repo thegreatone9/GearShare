@@ -20,7 +20,8 @@ export default function ActivityLog() {
                 const {data} = await supabase
                     .from('activity_log')
                     .select('*')
-                    .eq('user_id', authenticatedUser.id);
+                    .eq('user_id', authenticatedUser.id)
+                    .order('created_at', { ascending: false });
 
                 setActivities(data);
 
@@ -68,6 +69,7 @@ export default function ActivityLog() {
 
             // 📅 Operational Requests (Blue/Info)
             case ACTIVITY.REQUEST_ITEM:
+            case ACTIVITY.UPSERT_ITEM:
                 return {
                     color: 'bg-blue-100 text-blue-600 border-blue-200',
                     icon: (
@@ -98,10 +100,10 @@ export default function ActivityLog() {
 
     return (
         <div className="max-w-3xl mx-auto p-6 space-y-6">
-            <h1 className="text-2xl font-bold text-gray-800">Activity Log</h1>
+            <h3 className="text-3xl font-bold text-gray-800">Activity Log</h3>
 
             {activities.length === 0 ? (
-                <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                <div className="text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-300">
                     <p className="text-gray-500">No recent activity.</p>
                 </div>
             ) : (

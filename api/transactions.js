@@ -30,8 +30,7 @@ export default async function transactions(req, res) {
                 ) as rentals
             FROM transactions t
             JOIN payment_intents p ON p.id = t.payment_intent_id    
-            JOIN rentals r ON p.rental_id = r.id
-            JOIN requests req ON r.request_id = req.id
+            JOIN requests req ON p.request_id = req.id
             JOIN listings l ON req.listing_id = l.id
             WHERE t.payer_id = $1 OR t.payee_id = $1
             ORDER BY t.created_at DESC

@@ -141,10 +141,10 @@ export default async function confirmRental(req, res) {
         //5. Update Payment Intent
         const intentResult = await tx.query(
             `UPDATE payment_intents 
-             SET status = '${PAYMENT_INTENT_STATUS.CAPTURED}', updated_at = NOW() 
-             WHERE request_id = $1 AND status = '${PAYMENT_INTENT_STATUS.AUTHORIZED}'
+             SET status = '${PAYMENT_INTENT_STATUS.CAPTURED}', updated_at = NOW(), rental_id = $1
+             WHERE request_id = $2 AND status = '${PAYMENT_INTENT_STATUS.AUTHORIZED}'
              RETURNING id, amount`,
-            [requestId] // In your schema, requestId was used as the link in requestItem
+            [insertedRental.id, requestId] // In your schema, requestId was used as the link in requestItem
         );
 
         if (intentResult.rows.length === 0) {
@@ -158,17 +158,15 @@ export default async function confirmRental(req, res) {
         await tx.query(
             `INSERT INTO transactions (
                 payment_intent_id, 
-                rental_id, 
                 payer_id, 
                 payee_id, 
                 amount, 
                 type, 
                 description
             )
-             VALUES ($1, $2, $3, $4, $5, '${TRANSACTION_STATUS.SECURITY_DEPOSIT}', $6)`,
+             VALUES ($1, $2, $3, $4, '${TRANSACTION_STATUS.SECURITY_DEPOSIT}', $5)`,
             [
                 intentId,
-                insertedRental.id, // Linked to the new Rental record
                 borrowerId,        // The Borrower is paying
                 ADMIN_ID.ESCROW,   // Money is currently held by the platform
                 totalAmount,
@@ -180,7 +178,7 @@ export default async function confirmRental(req, res) {
         await tx.query(
             `INSERT INTO activity_log (created_at, user_id, type, message)
              VALUES (NOW(), $1, $2, $3)`,
-            [lenderId, ACTIVITY.CONFIRM_RENTAL, `Your payment for #${listingId} has been captured and the rental is confirmed.`]
+            [lenderId, ACTIVITY.CONFIRM_RENTAL, `Your payment for Listing #${listingId} has been captured and the rental is confirmed.`]
         );
 
         // Return the inserted rental

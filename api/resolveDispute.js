@@ -115,11 +115,10 @@ export default async function resolveDispute(req, res) {
             `SELECT 
                 pi.id as payment_intent_id, 
                 pi.amount as total_captured_amount,
-                req.borrower_id
-             FROM rentals r
-             JOIN requests req ON r.request_id = req.id
-             JOIN payment_intents pi ON pi.rental_id = req.id
-             WHERE r.id = $1`,
+                pi.payer_id as borrowerId,
+                pi.payee_id as lenderId
+             FROM payment_intents pi
+             WHERE pi.rental_id = $1`,
             [rentalId]
         );
 
@@ -130,7 +129,8 @@ export default async function resolveDispute(req, res) {
         const {
             payment_intent_id: intentId,
             total_captured_amount: totalCaptured,
-            borrower_id: borrowerId
+            borrower_id: borrowerId,
+            lender_id: lenderId
         } = contextData.rows[0];
 
         // Step 4 & 5 Preparation: Calculate Refund Amount
@@ -175,6 +175,12 @@ export default async function resolveDispute(req, res) {
             `INSERT INTO activity_log (created_at, user_id, type, message)
              VALUES (NOW(), $1, '${ACTIVITY.SETTLE_DISPUTE}', $2)`,
             [borrowerId, `Dispute resolved in your favor. Security deposit of $${refundAmount} refunded.`]
+        );
+
+        await tx.query(
+            `INSERT INTO activity_log (created_at, user_id, type, message)
+             VALUES (NOW(), $1, '${ACTIVITY.SETTLE_DISPUTE}', $2)`,
+            [lenderId, `Dispute resolved. Security deposit of $${refundAmount} refunded.`]
         );
 
         // Return the updated dispute
