@@ -3,7 +3,7 @@ import {Package, ShieldAlert, Zap} from 'lucide-react';
 import {getDisputeDisplay} from "./BorrowerUtil.js";
 import ActionModal from "../common/ActionModal.jsx";
 import DashboardListSection from "../common/DashboardListSection.jsx";
-import {REQUEST_STATUS} from "../util/Util.js";
+import {imageSrc, REQUEST_STATUS} from "../util/Util.js";
 
 export default function BorrowerDashboardPresenter({
                                                        itemDetailsModalActive,
@@ -47,7 +47,7 @@ export default function BorrowerDashboardPresenter({
             <div key={rental.id}
                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 bg-gray-50 rounded-xl hover:bg-gray-100 transition gap-8">
                 <div className="flex items-center space-x-3 cursor-pointer" onClick={() => openItemDetailsModal(item)}>
-                    <img src={item.image_url} alt={item.title}
+                    <img src={imageSrc(item.image_url, item.title)} alt={item.title}
                          className="w-12 h-12 rounded-lg object-cover"/>
                     <div>
                         <p className="font-medium text-gray-900">{item.title}</p>
@@ -76,7 +76,7 @@ export default function BorrowerDashboardPresenter({
             <div key={req.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-8 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
                 <div className="flex items-center space-x-3 cursor-pointer"
                      onClick={() => openItemDetailsModal(item)}>
-                    <img src={item.image_url} alt={item.title} className="w-12 h-12 rounded-lg object-cover"/>
+                    <img src={imageSrc(item.image_url, item.title)} alt={item.title} className="w-12 h-12 rounded-lg object-cover"/>
                     <div className="flex flex-col justify-center items-center">
                         <p className="text-sm text-gray-700 mb-1">
                             Requested <span className="text-indigo-600 font-bold">{item.title}</span> from <a href="#" className="font-bold text-indigo-900 hover:underline" onClick={(event) => openLenderDetailsModal(event, req.lender_id)}>Lender</a>
@@ -109,7 +109,7 @@ export default function BorrowerDashboardPresenter({
                  className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-2 border border-red-300 bg-red-50 rounded-xl hover:bg-red-100 transition w-full gap-8">
                 {/* Item Details (Left Side) */}
                 <div className="flex items-center space-x-4 cursor-pointer" onClick={() => openItemDetailsModal(item)}>
-                    <img src={item.image_url} alt={item.title}
+                    <img src={imageSrc(item.image_url, item.title)} alt={item.title}
                          className="w-12 h-12 rounded-lg object-cover border"/>
                     <div>
                         <p className="font-medium text-gray-900">{item.title}</p>
@@ -135,7 +135,7 @@ export default function BorrowerDashboardPresenter({
             <div key={rental.id}
                  className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-2 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition rounded-lg gap-8">
                 <div className='flex space-x-4 items-center cursor-pointer' onClick={() => openItemDetailsModal(item)}>
-                    <img src={item.image_url} alt={item.title} className="w-10 h-10 rounded-lg object-cover"/>
+                    <img src={imageSrc(item.image_url, item.title)} alt={item.title} className="w-10 h-10 rounded-lg object-cover"/>
                     <div>
                         <p className="font-medium text-gray-900">{item.title}</p>
                         <p className="text-sm text-gray-500">Returned: {new Date(rental.return_date).toLocaleDateString()}</p>

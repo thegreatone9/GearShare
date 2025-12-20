@@ -264,3 +264,22 @@ export async function apiRequest(endpoint, options = {}) {
         };
     }
 }
+
+export const COLORS = [
+    '6366f1', // Indigo
+    'ef4444', // Red
+    '22c55e', // Green
+    '3b82f6', // Blue
+    'a855f7', // Purple
+    'f97316', // Orange
+    'db2777', // Pink
+    '0f766e'  // Teal
+];
+
+export const RANDOM_COLOR = function () {
+    return COLORS[Math.floor(Math.random() * COLORS.length)];
+}
+
+export const imageSrc = function (image_url, title) {
+    return image_url?.url_1 || image_url?.url_2 || image_url?.url_3 || `https://placehold.co/600x400/${RANDOM_COLOR()}/FFFFFF?text=${title}`;
+}

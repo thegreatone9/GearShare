@@ -28,7 +28,7 @@ export function useItemForm() {
     const [itemState, setItemState] = useState({
         title: '', description: '', location: '', category: '',
         condition: '', price: '', replacement_value: '', time_unit: '',
-        image_url: '', status: '', owner_id: null
+        image_url: {}, status: '', owner_id: null
     });
 
     // Date State
@@ -66,7 +66,7 @@ export function useItemForm() {
                 setCurrentItem(item);
                 setItemState({
                     ...item,
-                    image_url: item.image_url || `https://placehold.co/100x70/6366f1/ffffff?text=${item.title || 'Item'}`
+                    image_url: item.image_url || { url_1: '', url_2: '', url_3: '' }
                 });
 
                 // Fetch Availability

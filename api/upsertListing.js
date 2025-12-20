@@ -10,7 +10,7 @@ import {ACTIVITY} from "../src/components/util/Util.js";
 function buildUpdateClauses(data, currentData) {
     const fields = [
         'title', 'description', 'location', 'category',
-        'condition', 'price', 'replacement_value', 'time_unit', 'status'
+        'condition', 'price', 'replacement_value', 'time_unit', 'status', 'image_url'
     ];
 
     const updates = {};
@@ -55,7 +55,7 @@ export default async function upsertListing(req, res) {
             // *** INSERT NEW LISTING ***
             const insertResult = await tx.query(
                 `INSERT INTO listings (owner_id, title, description, location, category,
-                                       condition, price, replacement_value, time_unit, status)
+                                       condition, price, replacement_value, time_unit, status, image_url)
                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
                 [
                     ownerId,
@@ -67,7 +67,8 @@ export default async function upsertListing(req, res) {
                     listingData.price,
                     listingData.replacement_value,
                     listingData.time_unit,
-                    listingData.status
+                    listingData.status,
+                    listingData.image_url
                 ]
             );
 
@@ -130,7 +131,8 @@ export default async function upsertListing(req, res) {
                      price             = $7,
                      replacement_value = $8,
                      time_unit         = $9,
-                     status            = $10
+                     status            = $10,
+                     image_url         = $11
                  WHERE id = $1 RETURNING *`,
                 [
                     listingId,
@@ -142,7 +144,8 @@ export default async function upsertListing(req, res) {
                     updates.price,
                     updates.replacement_value,
                     updates.time_unit,
-                    updates.status
+                    updates.status,
+                    updates.image_url
                 ]
             );
 

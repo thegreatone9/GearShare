@@ -4,7 +4,8 @@ import {AlertTriangle, CheckCircle} from 'lucide-react';
 import {getStatusClasses, ROLE} from "../util/Util.js";
 import ItemCalendar from "./ItemCalendar.jsx";
 import {useItemForm} from "./useItemForm.js";
-import {ActionButtons, BasicInfoSection, LenderInfoCard, PhotoSection, PricingSection} from "./ItemFormSections.jsx";
+import {ActionButtons, BasicInfoSection, LenderInfoCard, PricingSection} from "./ItemFormSections.jsx";
+import {PhotoSection} from "./PhotoSection.jsx";
 
 export default function ItemForm2() {
     const {
@@ -75,7 +76,7 @@ export default function ItemForm2() {
                 <PhotoSection
                     editMode={editMode}
                     itemState={itemState}
-                    handleFileChange={handleFileChange}
+                    handleChange={handleChange}
                 />
 
 

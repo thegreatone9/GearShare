@@ -1,4 +1,5 @@
 import {endpointWrapper} from "./util/transaction.js";
+import {isPartiallyAvailable} from "./util/util.js";
 
 /**
  * Checks if an item is available for a borrower to request
@@ -32,7 +33,7 @@ export default async function checkAvailability(req, res) {
 
         // 2. Check if item is available
         const availabilityResult = await tx.query(
-            `SELECT available
+            `SELECT *
              FROM listings_with_availability
              WHERE id = $1`,
             [listingId]
@@ -43,7 +44,10 @@ export default async function checkAvailability(req, res) {
             return {available: false, reason: 'Listing not found'};
         }
 
-        const available = availabilityResult.rows[0].available ?? false;
+        const available = isPartiallyAvailable(
+            availabilityResult.rows[0].overall_available_range,
+            availabilityResult.rows[0].unavailable_ranges
+        );
 
         return {
             available,

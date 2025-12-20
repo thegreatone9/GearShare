@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import Loader from "../common/Loader.jsx";
-import {LISTING_STATUS, TOAST_TYPE} from "../util/Util.js";
+import {apiRequest, LISTING_STATUS, TOAST_TYPE} from "../util/Util.js";
 import {useToast} from "../AppContext.jsx";
 import SearchAndFilter from "./SearchAndFilter.jsx";
 import ItemCard from "./ItemCard.jsx";
@@ -15,18 +15,19 @@ export default function MarketplaceContent() {
     const fetchHottestListingData = async () => {
         setLoading(true);
 
-        const {data: listingData, error: listingError} = await supabase
-            .from('listings_with_availability')
-            .select('*')
-            .eq('status', LISTING_STATUS.ACTIVE)
-            .eq('available', true)
-            .limit(HOTTEST_LIST_SIZE);
+        const {data: listingData, error: listingError} = await apiRequest('/api/listingsWithAvailability',
+            {
+                params: {
+                    status: LISTING_STATUS.ACTIVE,
+                    available: true
+                }
+            })
 
         if (listingError) {
-            addToast(TOAST_TYPE.ERROR, `Error fetching listings: ${listingError.message}`)
+            addToast(TOAST_TYPE.ERROR, `Error fetching listings: ${listingError}`)
         }
 
-        setListings(listingData || []);
+        setListings(listingData.slice(0, HOTTEST_LIST_SIZE) || []);
         setLoading(false);
     }
 

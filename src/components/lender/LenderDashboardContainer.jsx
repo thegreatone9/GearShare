@@ -108,8 +108,26 @@ export default function LenderDashboardContainer() {
                 return data;
             };
 
+            const fetchListingsFromApi = async () => {
+                const { data, error } = await apiRequest('/api/listingsWithAvailability', {
+                    params: {
+                        ownerId: userId,
+                        status: LISTING_STATUS.ACTIVE,
+                        available: true
+                    }
+                });
+
+                if (error) {
+                    addToast(TOAST_TYPE.ERROR, `Error fetching listings: ${error}`);
+                    return null;
+                }
+
+                setListings(data);
+                return data;
+            };
+
             const [fetchedListings, fetchedRequests] = await Promise.all([
-                fetchTable('listings_with_availability', {'owner_id': userId}, setListings),
+                fetchListingsFromApi(),
                 fetchTable('requests', {'lender_id': userId}, setRequests)
             ]);
 

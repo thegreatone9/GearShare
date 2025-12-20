@@ -6,7 +6,6 @@ import {
     ChartNoAxesColumnIncreasing,
     Mail,
     MapPinned,
-    Package,
     Phone,
     Shield,
     Tags,
@@ -91,26 +90,6 @@ export const PricingSection = ({ editMode, itemState, handleChange }) => (
                 )}
             </div>
         </div>
-    </div>
-);
-
-// 3. Photos
-export const PhotoSection = ({ editMode, itemState, handleFileChange }) => (
-    <div className="space-y-4">
-        <h4 className="text-xl font-semibold text-indigo-700">3. Photos</h4>
-        {editMode ? (
-            <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50 hover:bg-gray-100 cursor-pointer">
-                <label htmlFor="photos" className="cursor-pointer block">
-                    <input id="photos" type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
-                    <Package className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm font-medium text-gray-700">Click to upload photos.</p>
-                </label>
-            </div>
-        ) : (
-            <div className="rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                <img src={itemState.image_url} alt={itemState.title} className="w-full h-80 object-cover" />
-            </div>
-        )}
     </div>
 );
 
