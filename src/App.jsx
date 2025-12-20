@@ -18,6 +18,7 @@ import {useAuth} from "./components/AppContext.jsx";
 import ToastContainer from "./components/common/ToastContainer.jsx";
 import Transactions from "./components/transactions/Transactions.jsx";
 import ActivityLog from "./components/activity/ActivityLog.jsx";
+import ItemForm2 from "./components/item/ItemForm2.jsx";
 
 export default function App() {
     const location = useLocation();
@@ -87,7 +88,7 @@ export default function App() {
                         <Route
                             path="/item/:id?"
                             element={<ProtectedRoute>
-                                <ItemForm/>
+                                <ItemForm2/>
                             </ProtectedRoute>}
                         />
                         <Route

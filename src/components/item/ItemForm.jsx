@@ -707,14 +707,14 @@ export default function ItemForm() {
                                     type="number"
                                     required
                                     placeholder="e.g., 350 (Mid-Value Tier)"
-                                    value={itemState.value}
+                                    value={itemState.replacement_value}
                                     onChange={handleChange}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
                                 />
                             ) : (
                                 <p id="value"
                                    className="w-full px-4 py-3 bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200">
-                                    ${itemState.value}
+                                    ${itemState.replacement_value}
                                 </p>
                             )}
                             <p className="mt-1 text-xs text-gray-500">This determines the borrower's security deposit
