@@ -61,7 +61,7 @@ export const BasicInfoSection = ({ editMode, itemState, handleChange }) => (
         <div>
             <label htmlFor="description" className={getLabelClass(editMode)}><BookOpenText className="inline w-4 h-4 ml-2 text-gray-500" /> Description</label>
             {editMode ? (
-                <textarea id="description" rows="4" required value={itemState.description} onChange={handleChange} className="form-textarea w-full px-4 py-3 border rounded-lg" />
+                <textarea id="description" rows="4" required value={itemState.description} placeholder="Describe the Item..." onChange={handleChange} className="form-textarea w-full px-4 py-3 border rounded-lg" />
             ) : (
                 <p className="read-only-field whitespace-pre-wrap"><i>{itemState.description || 'No description'}</i></p>
             )}
@@ -77,7 +77,7 @@ export const PricingSection = ({ editMode, itemState, handleChange }) => (
             <div>
                 <label htmlFor="price" className={getLabelClass(editMode)}><BadgeDollarSign className="inline w-4 h-4 ml-2 text-green-500" /> Daily Rate ($)</label>
                 {editMode ? (
-                    <input id="price" type="number" required value={itemState.price} onChange={handleChange} className="form-input w-full px-4 py-3 border rounded-lg" />
+                    <input id="price" type="number" required value={itemState.price} placeholder="Price per unit time" onChange={handleChange} className="form-input w-full px-4 py-3 border rounded-lg" />
                 ) : (
                     <p className="read-only-field">${itemState.price} / {itemState.time_unit}</p>
                 )}
@@ -85,7 +85,7 @@ export const PricingSection = ({ editMode, itemState, handleChange }) => (
             <div>
                 <label htmlFor="value" className={getLabelClass(editMode)}><Shield className="inline w-4 h-4 ml-2 text-red-500" /> Replacement Value ($)</label>
                 {editMode ? (
-                    <input id="value" type="number" required value={itemState.replacement_value} onChange={handleChange} className="form-input w-full px-4 py-3 border rounded-lg" />
+                    <input id="value" type="number" required value={itemState.replacement_value} placeholder="Security Deposit Amount" onChange={handleChange} className="form-input w-full px-4 py-3 border rounded-lg" />
                 ) : (
                     <p className="read-only-field">${itemState.replacement_value}</p>
                 )}
