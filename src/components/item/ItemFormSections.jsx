@@ -9,9 +9,17 @@ import {
     Phone,
     Shield,
     Tags,
+    Timer,
     User
 } from 'lucide-react';
-import {LISTING_CATEGORY, LISTING_CONDITION, RENTAL_STATUS, ROLE} from "../util/Util.js";
+import {
+    LISTING_CATEGORY,
+    LISTING_CONDITION,
+    RENTAL_STATUS,
+    ROLE,
+    TIME_UNIT,
+    upperCaseFirstLetter
+} from "../util/Util.js";
 
 // 1. Basic Info
 export const BasicInfoSection = ({ editMode, itemState, handleChange }) => (
@@ -72,13 +80,24 @@ export const BasicInfoSection = ({ editMode, itemState, handleChange }) => (
 export const PricingSection = ({ editMode, itemState, handleChange }) => (
     <div className="space-y-4 pb-6">
         <h4 className="text-xl font-semibold text-indigo-700">2. Pricing & Protection</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-                <label htmlFor="price" className={getLabelClass(editMode)}><BadgeDollarSign className="inline w-4 h-4 ml-2 text-green-500" /> Daily Rate ($)</label>
+                <label htmlFor="price" className={getLabelClass(editMode)}><BadgeDollarSign className="inline w-4 h-4 ml-2 text-green-500" /> Rate ($)</label>
                 {editMode ? (
                     <input id="price" type="number" required value={itemState.price} placeholder="Price per unit time" onChange={handleChange} className="form-input w-full px-4 py-3 border rounded-lg" />
                 ) : (
-                    <p className="read-only-field">${itemState.price} / {itemState.time_unit}</p>
+                    <p className="read-only-field">${itemState.price}</p>
+                )}
+            </div>
+            <div>
+                <label className={getLabelClass(editMode)}><Timer className="inline w-4 h-4 ml-2 text-yellow-500" /> Time Unit</label>
+                {editMode ? (
+                    <select id="time_unit" required value={itemState.time_unit} onChange={handleChange} className="form-select w-full px-4 py-3 border rounded-lg bg-white">
+                        <option value="" disabled>Select Time Unit</option>
+                        {Object.values(TIME_UNIT).map(c => <option key={c} value={c}>{upperCaseFirstLetter(c)}</option>)}
+                    </select>
+                ) : (
+                    <p className="read-only-field">{upperCaseFirstLetter(itemState.time_unit)}</p>
                 )}
             </div>
             <div>

@@ -23,7 +23,7 @@ export const PhotoSection = ({ editMode, itemState, handleChange }) => {
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 pb-6">
             <h4 className="text-xl font-semibold text-indigo-700">3. Photos</h4>
 
             <div className="grid grid-cols-3 gap-4">

@@ -283,3 +283,7 @@ export const RANDOM_COLOR = function () {
 export const imageSrc = function (image_url, title) {
     return image_url?.url_1 || image_url?.url_2 || image_url?.url_3 || `https://placehold.co/600x400/${RANDOM_COLOR()}/FFFFFF?text=${title}`;
 }
+
+export const upperCaseFirstLetter = function (string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
