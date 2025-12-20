@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {AlertTriangle, CheckCircle, Hash, Image, Mail, Phone, Save, User} from 'lucide-react';
+import {AlertTriangle, CheckCircle, Hash, Image, Mail, Phone, Save, ScanEye, User} from 'lucide-react';
 import {supabase} from "../../server/supabaseClient.js";
 import {getStatusClasses, getUserSessionData, IMG_NOT_FOUND_URL, TOAST_TYPE, updateUserCookie} from "../util/Util.js";
 import {useAuth} from "../AppContext.jsx";
+import PDFViewer from "../common/PdfViewer.jsx";
 
 export default function UserProfile() {
     const {authenticatedUser, setAuthenticatedUser} = useAuth();
@@ -20,7 +21,8 @@ export default function UserProfile() {
         email: '',
         password: '',
         phone: '',
-        image_url: ''
+        image_url: '',
+        nid_url: ''
     });
 
     const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
@@ -43,12 +45,7 @@ export default function UserProfile() {
         fetchUserData()
             .then(user => {
                 const userData = {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    password: user.password,
-                    phone: user.phone || '',
-                    image_url: user.image_url || ''
+                    ...user
                 };
 
                 setInitialUserData(userData);
@@ -85,6 +82,10 @@ export default function UserProfile() {
 
             if (!URL_REGEX.test(formData.image_url)) {
                 throw new Error(`Photo URL must be a valid HTTPS link!`);
+            }
+
+            if (!URL_REGEX.test(formData.nid_url)) {
+                throw new Error(`NID URL must be a valid HTTPS link!`);
             }
 
             const { error: accountError } = await supabase
@@ -225,6 +226,21 @@ export default function UserProfile() {
                             onChange={handleChange}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition autofill-fix"
                         />
+                    </div>
+
+                    <div>
+                        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                            <ScanEye className="w-4 h-4 mr-2 text-indigo-600" /> National Identification
+                        </label>
+                        <input
+                            id="nid_url"
+                            type="text"
+                            placeholder={`Link to your National Identification`}
+                            value={formData.nid_url || ''}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition autofill-fix"
+                        />
+                        <PDFViewer fileUrl={formData.nid_url} fileTitle={'National Identification'}/>
                     </div>
                 </div>
 

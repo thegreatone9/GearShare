@@ -27,15 +27,15 @@ CREATE TABLE listings
 -- Table for Requests
 CREATE TABLE requests
 (
-    id                       SERIAL PRIMARY KEY,
-    listing_id               INT REFERENCES listings (id) NOT NULL,
-    borrower_id              INT REFERENCES accounts (id) NOT NULL,
-    lender_id                INT REFERENCES accounts (id) NOT NULL,
-    date                     DATE,
-    start_date               DATE,
-    end_date                 DATE,
-    status                   TEXT,
-    listing_snapshot         JSONB
+    id               SERIAL PRIMARY KEY,
+    listing_id       INT REFERENCES listings (id) NOT NULL,
+    borrower_id      INT REFERENCES accounts (id) NOT NULL,
+    lender_id        INT REFERENCES accounts (id) NOT NULL,
+    date             DATE,
+    start_date       DATE,
+    end_date         DATE,
+    status           TEXT,
+    listing_snapshot JSONB
 );
 
 -- Table for Rentals
