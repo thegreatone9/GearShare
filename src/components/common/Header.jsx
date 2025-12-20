@@ -88,6 +88,7 @@ export default function Header () {
                                     className="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100 transition focus:outline-none"
                                 >
                                     <User className="w-6 h-6 text-indigo-600"/>
+                                    <span className={'text-sm font-semibold text-gray-600 hover:bg-gray-100'}>{authenticatedUser.name}</span>
                                     <ChevronDown className="w-4 h-4 text-gray-500"/>
                                 </button>
 
@@ -102,7 +103,7 @@ export default function Header () {
                                             className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition"
                                         >
                                             <User className="w-4 h-4 mr-2" />
-                                            {authenticatedUser.name}
+                                            Profile
                                         </Link>
 
                                         <div className="border-t border-gray-100 my-1"></div>
@@ -148,6 +149,7 @@ export default function Header () {
                 </div>
 
                 {/* B. Mobile Menu Toggle Button (Visible only on small screens) */}
+                <span className={'sm:hidden text-gray-600 hover:bg-gray-100'}>{authenticatedUser.name}</span>
                 <button
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                     className="sm:hidden w-10 h-10 flex items-center justify-center rounded-full bg-indigo-200 text-black p-0 border-0 shadow-md"
