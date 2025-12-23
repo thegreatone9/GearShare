@@ -4,7 +4,6 @@ import {apiRequest, LISTING_STATUS, TOAST_TYPE} from "../util/Util.js";
 import {useToast} from "../AppContext.jsx";
 import SearchAndFilter from "./SearchAndFilter.jsx";
 import ItemCard from "./ItemCard.jsx";
-import {supabase} from "../../server/supabaseClient.js";
 
 export default function MarketplaceContent() {
     const HOTTEST_LIST_SIZE = 8;

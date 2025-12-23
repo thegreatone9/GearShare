@@ -7,13 +7,29 @@ export default async function listingsWithAvailability(req, res) {
     }
 
     const listingsWithAvailabilityQuery = async (req, tx) => {
-        const {ownerId} = req.query;
+        const { ownerId, status, available } = req.query;
 
-        const result = await tx.query(`SELECT *
-                                       FROM listings_with_availability
-                                       ${ownerId && `WHERE owner_id = ${ownerId}`}`);
+        let queryText = `SELECT * FROM listings_with_availability`;
+        const queryParams = [];
+        const conditions = [];
 
-        return result.rows.map(row => {
+        if (ownerId) {
+            queryParams.push(ownerId);
+            conditions.push(`owner_id = $${queryParams.length}`);
+        }
+
+        if (status) {
+            queryParams.push(status);
+            conditions.push(`status = $${queryParams.length}`);
+        }
+
+        if (conditions.length > 0) {
+            queryText += ` WHERE ` + conditions.join(' AND ');
+        }
+
+        const result = await tx.query(queryText, queryParams);
+
+        const processedResult = result.rows.map(row => {
             const isAvailable = isPartiallyAvailable(
                 row.overall_available_range,
                 row.unavailable_ranges
@@ -23,6 +39,16 @@ export default async function listingsWithAvailability(req, res) {
                 ...row,
                 available: isAvailable
             };
+        });
+
+        return processedResult.filter(row => {
+            if (available === undefined) {
+                return true;
+            }
+
+            const targetAvailability = available === 'true';
+
+            return row.available === targetAvailability;
         });
     };
 
