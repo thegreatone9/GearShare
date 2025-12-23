@@ -81,7 +81,7 @@ export default function Header () {
                         ))}
 
                         {/* 3. Profile/Auth Icon and Dropdown */}
-                        {authenticatedUser ? (
+                        {isAuthenticated ? (
                             <div className="relative">
                                 <button
                                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -149,7 +149,9 @@ export default function Header () {
                 </div>
 
                 {/* B. Mobile Menu Toggle Button (Visible only on small screens) */}
-                <span className={'sm:hidden text-gray-600 hover:bg-gray-100'}>{authenticatedUser.name}</span>
+                {
+                    isAuthenticated && <span className={'sm:hidden text-gray-600 hover:bg-gray-100'}>{authenticatedUser.name}</span>
+                }
                 <button
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                     className="sm:hidden w-10 h-10 flex items-center justify-center rounded-full bg-indigo-200 text-black p-0 border-0 shadow-md"
