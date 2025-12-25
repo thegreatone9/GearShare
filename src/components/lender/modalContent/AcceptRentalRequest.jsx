@@ -46,18 +46,6 @@ export default function AcceptRentalRequest({request, onClose, setRequests, setL
     }, [request]);
 
     const confirmAcceptance = async () => {
-        // const { data: rentalResult, error: rpcError } = await supabase.rpc(
-        //     'confirm_rental_acceptance',
-        //     {
-        //         request_id: id,
-        //         r_listing_id: listingId,
-        //         rental_status: RENTAL_STATUS.ACTIVE,
-        //         request_status: REQUEST_STATUS.COMPLETED,
-        //         other_request_status: REQUEST_STATUS.DECLINED,
-        //         active_request_status: REQUEST_STATUS.ACTIVE
-        //     }
-        // ).single();
-
         const { error: rpcError} = await apiRequest(
             '/api/confirmRental',
             {

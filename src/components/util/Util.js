@@ -99,8 +99,7 @@ export const BORROWER_DISPUTE_ACTIONS = {
 
 export const TIME_UNIT = {
     HOUR: 'hour',
-    DAY: 'day',
-    MONTH: 'month'
+    DAY: 'day'
 }
 
 export const LISTING_CATEGORY = {
@@ -291,3 +290,42 @@ export const userImageSrc = function (title) {
 export const upperCaseFirstLetter = function (string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+export const calculateRentalFee = (unit, pricePerUnit, start, end) => {
+    const duration = calculateDuration(start, end, unit);
+
+    return duration * pricePerUnit;
+};
+
+export const calculateDuration = (start, end, unit = TIME_UNIT.DAY) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    // Calculate difference in milliseconds
+    const diffInMs = endDate - startDate;
+
+    // Sanity check: if end is before start, return 0
+    if (diffInMs < 0) {
+        return 0;
+    }
+
+    // Conversion Constants
+    const MS_PER_HOUR = 1000 * 60 * 60;
+    const MS_PER_DAY = MS_PER_HOUR * 24;
+
+    let duration = 0;
+
+    if (unit === TIME_UNIT.HOUR) {
+        duration = diffInMs / MS_PER_HOUR;
+
+    } else if (unit === TIME_UNIT.DAY) {
+        // Default to 'day'
+        duration = diffInMs / MS_PER_DAY;
+    }
+
+    // Rental Logic: Always round up.
+    // Example: 25 hours = 1.04 days -> Pay for 2 days.
+    // Example: 2 hours = Pay for 1 hour (if unit is hour).
+    // Use Math.max(1, ...) to ensure minimum rental is always 1 unit if dates are valid
+    return Math.max(1, Math.ceil(duration));
+};
