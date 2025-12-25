@@ -16,7 +16,7 @@ import {
     REQUEST_STATUS,
     ROLE,
     TIME_UNIT,
-    TOAST_TYPE
+    TOAST_TYPE, userImageSrc
 } from "../util/Util.js";
 import {supabase} from "../../server/supabaseClient.js";
 import {useAuth, useToast} from "../AppContext.jsx";
@@ -800,7 +800,7 @@ export default function ItemForm() {
                         <h4 className="text-xl font-semibold text-indigo-700">4. Lender Details</h4>
 
                         <div className="flex flex-col items-center w-full">
-                            <img src={lender.image_url} alt={lender.name}
+                            <img src={userImageSrc(lender.name)} alt={lender.name}
                                  className="w-fit h-25 m-auto object-cover rounded-lg"/>
                         </div>
 

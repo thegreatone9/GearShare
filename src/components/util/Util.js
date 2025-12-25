@@ -280,8 +280,12 @@ export const RANDOM_COLOR = function () {
     return COLORS[Math.floor(Math.random() * COLORS.length)];
 }
 
-export const imageSrc = function (image_url, title) {
+export const itemImageSrc = function (image_url, title) {
     return image_url?.url_1 || image_url?.url_2 || image_url?.url_3 || `https://placehold.co/600x400/${RANDOM_COLOR()}/FFFFFF?text=${title}`;
+}
+
+export const userImageSrc = function (title) {
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${title}`;
 }
 
 export const upperCaseFirstLetter = function (string) {

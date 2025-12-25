@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {useAuth} from "../AppContext.jsx";
 import Loader from "../common/Loader.jsx";
-import {apiRequest, imageSrc} from "../util/Util.js";
+import {apiRequest, itemImageSrc} from "../util/Util.js";
 import TransactionReceiptModal from "./TransactionReceiptModal.jsx";
 import {ReceiptText} from 'lucide-react';
 
@@ -85,7 +85,7 @@ export default function Transactions() {
                         const style = getTransactionStyle(tx);
                         // Access nested data safely (assuming query joins rentals -> listings)
                         const itemTitle = tx.listing?.title || "Unknown Item";
-                        const itemImage = imageSrc(tx.listing?.image_url, tx.listing?.title) || "/placeholder.jpg";
+                        const itemImage = itemImageSrc(tx.listing?.image_url, tx.listing?.title) || "/placeholder.jpg";
 
                         return (
                             <div
@@ -103,9 +103,8 @@ export default function Transactions() {
                                         <p className="font-medium text-gray-900">{itemTitle}</p>
                                         <div className="flex items-center gap-2 text-sm text-gray-500">
                                             <span>{new Date(tx.created_at).toLocaleDateString()}</span>
-                                            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                            <span className="uppercase text-xs font-bold tracking-wide">
-                                                {formatType(tx.type)}
+                                            <span className="text-xs font-bold">
+                                                {formatType(tx.description)}
                                             </span>
                                         </div>
                                     </div>

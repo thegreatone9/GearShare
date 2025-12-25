@@ -3,7 +3,7 @@ import {Download, User} from 'lucide-react';
 import Modal from "../common/Modal.jsx";
 import {supabase} from "../../server/supabaseClient.js";
 import Loader from "../common/Loader.jsx";
-import {imageSrc} from "../util/Util.js";
+import {itemImageSrc, userImageSrc} from "../util/Util.js";
 import {toPng} from "html-to-image";
 
 const TransactionReceiptModal = ({isOpen, onClose, transaction}) => {
@@ -121,13 +121,13 @@ const TransactionReceiptModal = ({isOpen, onClose, transaction}) => {
                                         <h1 className="text-2xl font-black text-indigo-700 tracking-tight">GearShare</h1>
                                         <p className="text-sm text-gray-500 mt-1">Transaction ID: #{transaction.id}</p>
                                         <p className="text-sm text-gray-400">{new Date(transaction.created_at).toLocaleDateString()}</p>
-                                        <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-green-100 text-green-700">
-                                            {transaction.type}
+                                        <span className="inline-block px-3 py-1 rounded-full text-xs font-bold tracking-wide bg-green-100 text-green-700">
+                                            {transaction.description}
                                         </span>
                                     </div>
                                     <div className="flex flex-col items-center">
                                         <div className="mb-2">
-                                            <img src={imageSrc(transaction.listing?.image_url, transaction.listing?.title)}
+                                            <img src={itemImageSrc(transaction.listing?.image_url, transaction.listing?.title)}
                                                  alt={transaction.listing?.title}
                                                  className="w-20 rounded-lg object-cover border border-gray-200"/>
                                         </div>
@@ -144,7 +144,7 @@ const TransactionReceiptModal = ({isOpen, onClose, transaction}) => {
                                         </h4>
                                         <div className="flex items-center">
                                             <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">
-                                                <img src={details.lender?.image_url || "https://placehold.co/100"}
+                                                <img src={userImageSrc(details.lender?.name)}
                                                      className="w-full h-full object-cover" alt={details.lender?.name}/>
                                             </div>
                                             <div>
@@ -160,7 +160,7 @@ const TransactionReceiptModal = ({isOpen, onClose, transaction}) => {
                                         </h4>
                                         <div className="flex items-center">
                                             <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">
-                                                <img src={details.borrower?.image_url || "https://placehold.co/100"}
+                                                <img src={userImageSrc(details.borrower?.name)}
                                                      className="w-full h-full object-cover" alt={details.borrower?.name}/>
                                             </div>
                                             <div>

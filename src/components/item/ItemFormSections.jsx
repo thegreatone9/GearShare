@@ -18,7 +18,7 @@ import {
     RENTAL_STATUS,
     ROLE,
     TIME_UNIT,
-    upperCaseFirstLetter
+    upperCaseFirstLetter, userImageSrc
 } from "../util/Util.js";
 
 // 1. Basic Info
@@ -116,7 +116,7 @@ export const PricingSection = ({ editMode, itemState, handleChange }) => (
 export const LenderInfoCard = ({ lender }) => (
     <div className="space-y-4 pb-6 mx-auto flex flex-col items-center">
         <h4 className="text-xl font-semibold text-indigo-700">4. Lender Details</h4>
-        <img src={lender.image_url} alt={lender.name} className="w-24 h-24 object-cover rounded-full" />
+        <img src={userImageSrc(lender.name)} alt={lender.name} className="w-24 h-24 object-cover rounded-full" />
         <InfoRow icon={User} label="Name" value={lender.name} />
         <InfoRow icon={Mail} label="Email" value={lender.email} />
         <InfoRow icon={Phone} label="Phone" value={lender.phone || 'N/A'} />

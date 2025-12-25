@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import {supabase} from "../../server/supabaseClient.js";
 import Loader from "./Loader.jsx";
 import {CheckCircle, XCircle} from 'lucide-react';
+import {userImageSrc} from "../util/Util.js";
 
 export default function UserDetails({userId, onClose}) {
     const [user, setUser] = useState(null);
@@ -38,7 +39,7 @@ export default function UserDetails({userId, onClose}) {
             <h3 className="text-2xl font-bold text-gray-900 mb-4 border-b pb-2">{user.name} Overview</h3>
 
             <div className="mb-4">
-                <img src={user.image_url} alt={user.name} className="w-fit h-30 m-auto object-cover rounded-lg mb-3"/>
+                <img src={userImageSrc(user.name)} alt={user.name} className="w-fit h-30 m-auto object-cover rounded-lg mb-3"/>
                 <p className="text-gray-700 mb-2"><strong>Name:</strong> {user.name}</p>
                 <p className="text-gray-700 mb-2"><strong>Email:</strong> {user.email}</p>
                 <p className="text-gray-700 mb-2"><strong>Phone:</strong> {user.phone}</p>

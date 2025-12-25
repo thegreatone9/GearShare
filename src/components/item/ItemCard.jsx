@@ -1,5 +1,5 @@
 import {useNavigate} from "react-router-dom";
-import {imageSrc, ROLE} from "../util/Util.js";
+import {itemImageSrc, ROLE} from "../util/Util.js";
 import {useAuth} from "../AppContext.jsx";
 
 export default function ItemCard({item}) {
@@ -20,7 +20,7 @@ export default function ItemCard({item}) {
             onClick={handleItemClick}
             className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden cursor-pointer">
             <img
-                src={imageSrc(item.image_url, item.title)}
+                src={itemImageSrc(item.image_url, item.title)}
                 alt={item.title}
                 className="w-full h-48 object-cover object-center"
                 onError={(e) => {
