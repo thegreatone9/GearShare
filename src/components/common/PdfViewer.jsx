@@ -1,6 +1,6 @@
 export default function PDFViewer ({fileUrl, fileTitle, defaultText = 'No document available.'}) {
     return (
-        <div className="bg-gray-50 border rounded-xl overflow-hidden h-96 my-2">
+        <div className={`bg-gray-50 border rounded-xl overflow-hidden ${fileUrl ? 'h-96' : 'h-20'} my-2`}>
             {fileUrl ? (
                 <iframe
                     src={`${fileUrl}#toolbar=0`}

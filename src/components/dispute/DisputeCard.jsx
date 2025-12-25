@@ -1,5 +1,5 @@
 import React from "react";
-import {BORROWER_DISPUTE_ACTIONS, LENDER_DISPUTE_ACTIONS, ROLE} from "../util/Util.js";
+import {BORROWER_DISPUTE_ACTIONS, imageSrc, LENDER_DISPUTE_ACTIONS, ROLE} from "../util/Util.js";
 import {ACTION_ICONS} from "./DisputeUtils.jsx";
 
 export default function DisputeCard({disputeData, openActionModal, openOpponentDetails, openItemDetails}) {
@@ -71,7 +71,7 @@ export default function DisputeCard({disputeData, openActionModal, openOpponentD
              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-8 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
             <div className="flex items-center space-x-3 cursor-pointer"
                  onClick={() => openItemDetails(disputeData)}>
-                <img src={disputeData.item.image_url} alt={disputeData.item.title}
+                <img src={imageSrc(disputeData.item.image_url, disputeData.item.title)} alt={disputeData.item.title}
                      className="w-12 h-12 rounded-lg object-cover"/>
                 <div>
                     <p className="text-md text-gray-900">{disputeData.item.title}</p>

@@ -13,26 +13,18 @@ export default async function transactions(req, res) {
         }
 
         const text = `
-            SELECT 
-                t.id, 
-                t.amount, 
-                t.type, 
-                t.created_at, 
-                t.payer_id, 
-                t.payee_id,
-                json_build_object(
-                    'requests', json_build_object(
-                        'listings', json_build_object(
-                            'title', l.title,
-                            'image_url', l.image_url
-                        )
-                    )
-                ) as rentals
+            SELECT t.*,
+                   req.id AS request_id,
+                   json_build_object(
+                           'title', l.title,
+                           'image_url', l.image_url
+                   ) AS listing
             FROM transactions t
-            JOIN payment_intents p ON p.id = t.payment_intent_id    
-            JOIN requests req ON p.request_id = req.id
-            JOIN listings l ON req.listing_id = l.id
-            WHERE t.payer_id = $1 OR t.payee_id = $1
+                     JOIN payment_intents p ON p.id = t.payment_intent_id
+                     JOIN requests req ON p.request_id = req.id
+                     JOIN listings l ON req.listing_id = l.id
+            WHERE t.payer_id = $1
+               OR t.payee_id = $1
             ORDER BY t.created_at DESC
         `;
 

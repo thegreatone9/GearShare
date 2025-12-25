@@ -5,7 +5,10 @@ dotenv.config();
 
 // Create a shared connection pool for serverless functions
 const pool = new Pool({
-    connectionString: process.env.SUPABASE_DB_URL
+    connectionString: process.env.SUPABASE_DB_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 export async function transactionWrapper(fn) {

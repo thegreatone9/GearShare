@@ -1,12 +1,22 @@
 import React, {useEffect, useState} from 'react';
 import {useAuth} from "../AppContext.jsx";
 import Loader from "../common/Loader.jsx";
-import {apiRequest} from "../util/Util.js";
+import {apiRequest, imageSrc} from "../util/Util.js";
+import TransactionReceiptModal from "./TransactionReceiptModal.jsx";
+import {ReceiptText} from 'lucide-react';
 
 export default function Transactions() {
     const {authenticatedUser} = useAuth();
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [selectedTransaction, setSelectedTransaction] = useState(null);
+    const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+
+    const handleOpenReceipt = (transaction) => {
+        setSelectedTransaction(transaction);
+        setIsReceiptOpen(true);
+    };
 
     useEffect(() => {
         if (!authenticatedUser) {
@@ -57,10 +67,6 @@ export default function Transactions() {
         return type.replace(/_/g, ' '); // e.g. "SECURITY_DEPOSIT" -> "SECURITY DEPOSIT"
     };
 
-    const openReceiptModal = function () {
-
-    }
-
     if (loading) {
         return <Loader show={loading} message={'Loading Ledger...'}/>
     }
@@ -78,8 +84,8 @@ export default function Transactions() {
                     {transactions.map((tx) => {
                         const style = getTransactionStyle(tx);
                         // Access nested data safely (assuming query joins rentals -> listings)
-                        const itemTitle = tx.rentals?.requests?.listings?.title || "Unknown Item";
-                        const itemImage = tx.rentals?.requests?.listings?.image_url || "/placeholder.jpg";
+                        const itemTitle = tx.listing?.title || "Unknown Item";
+                        const itemImage = imageSrc(tx.listing?.image_url, tx.listing?.title) || "/placeholder.jpg";
 
                         return (
                             <div
@@ -113,12 +119,10 @@ export default function Transactions() {
                                     </span>
 
                                     <button
-                                        onClick={() => openReceiptModal(tx)}
+                                        onClick={() => handleOpenReceipt(tx)}
                                         className="text-xs text-gray-500 hover:text-blue-600 flex items-center gap-1 transition-colors"
                                     >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
+                                        <ReceiptText/>
                                         Receipt
                                     </button>
                                 </div>
@@ -127,6 +131,12 @@ export default function Transactions() {
                     })}
                 </div>
             )}
+
+            <TransactionReceiptModal
+                isOpen={isReceiptOpen}
+                onClose={() => setIsReceiptOpen(false)}
+                transaction={selectedTransaction}
+            />
         </div>
     );
 }
