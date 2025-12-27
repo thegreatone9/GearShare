@@ -1,6 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {Calendar, DollarSign, Package, Star, User} from 'lucide-react';
-import {apiRequest, RENTAL_STATUS, REQUEST_STATUS} from "../../util/Util.js";
+import {
+    apiRequest,
+    calculateRentalFee,
+    RENTAL_STATUS,
+    REQUEST_STATUS,
+    TIME_UNIT,
+    upperCaseFirstLetter
+} from "../../util/Util.js";
 import {supabase} from "../../../server/supabaseClient.js";
 import Loader from "../../common/Loader.jsx";
 
@@ -18,6 +25,7 @@ export default function AcceptRentalRequest({request, onClose, setRequests, setL
     const [loading, setLoading] = useState(true);
 
     const {id, listing_id: listingId, borrower_id: borrowerId, lender_id: lenderId, listing_snapshot: listingSnapshot} = request;
+    const pricePerUnit = listingSnapshot.daily_rate;
 
     useEffect(() => {
         const fetchData = async function () {
@@ -86,7 +94,7 @@ export default function AcceptRentalRequest({request, onClose, setRequests, setL
                     Item: {itemWithAvailability.title}
                 </p>
                 <p className="text-sm text-gray-600">
-                    Price: ${listingSnapshot.price}/{listingSnapshot.time_unit} | Deposit Hold:
+                    Daily Rate: ${pricePerUnit}/{TIME_UNIT.DAY} | Deposit Hold:
                     ${listingSnapshot.replacement_value}
                 </p>
             </div>
@@ -107,7 +115,7 @@ export default function AcceptRentalRequest({request, onClose, setRequests, setL
                 </div>
                 <div className="flex text-sm text-gray-600">
                     <DollarSign className="w-4 h-4 mr-2 flex-shrink-0"/>
-                    <p>Total Rental Value: <span className="font-medium">${listingSnapshot.price} (Total)</span>
+                    <p>Total Rental Value: <span className="font-medium">${calculateRentalFee(TIME_UNIT.DAY, pricePerUnit, request.start_date, request.end_date)} (Total)</span>
                     </p>
                 </div>
                 <div className="flex text-sm text-gray-600">

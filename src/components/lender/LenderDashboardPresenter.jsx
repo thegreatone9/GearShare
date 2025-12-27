@@ -1,6 +1,6 @@
 import {CheckCheck, Clock, Landmark, Package, ShieldAlert, Wrench, Zap} from 'lucide-react';
 import {Link} from 'react-router-dom';
-import {itemImageSrc, RENTAL_STATUS, REQUEST_STATUS, ROLE} from "../util/Util.js";
+import {itemImageSrc, RENTAL_STATUS, REQUEST_STATUS, ROLE, TIME_UNIT, upperCaseFirstLetter} from "../util/Util.js";
 import ActionModal from "../common/ActionModal.jsx";
 import DashboardListSection from "../common/DashboardListSection.jsx";
 import React from 'react';
@@ -111,7 +111,7 @@ export default function LenderDashboardPresenter({
                          className="w-12 h-12 rounded-lg object-cover"/>
                     <div>
                         <p className="font-medium text-gray-900">{item.title}</p>
-                        <p className="text-sm text-gray-500">Rent: ${item.price}/day</p>
+                        <p className="text-sm text-left text-gray-500">Rent: ${item.daily_rate}/{TIME_UNIT.DAY}</p>
                     </div>
                 </div>
                 <div className="sm:text-right">

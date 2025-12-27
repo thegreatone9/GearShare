@@ -1,5 +1,11 @@
 import {endpointWrapper} from "./util/transaction.js";
-import {ACTIVITY, PAYMENT_INTENT_STATUS} from "../src/components/util/Util.js";
+import {
+    ACTIVITY,
+    calculateDuration,
+    calculateRentalFee,
+    PAYMENT_INTENT_STATUS,
+    TIME_UNIT
+} from "../src/components/util/Util.js";
 
 export default async function requestItem(req, res) {
     if (req.method !== 'POST') {
@@ -26,17 +32,12 @@ export default async function requestItem(req, res) {
         }
 
         const listing = listingResult.rows[0];
+        const pricePerUnit = listing.daily_rate;
 
         // Calculate Duration and Totals
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        const dayDiff = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-        const duration = dayDiff > 0 ? dayDiff : 1; // Minimum 1 day
-
-        const rentalFee = Number(listing.price) * duration;
+        const duration = calculateDuration(startDate, endDate, TIME_UNIT.DAY);
         const deposit = Number(listing.replacement_value);
-        const totalAuthAmount = rentalFee + deposit;
-
+        const totalAuthAmount = calculateRentalFee(TIME_UNIT.DAY, pricePerUnit, startDate, endDate) + deposit;
         const listingJson = JSON.stringify(listing);
 
         //Insert into requests table

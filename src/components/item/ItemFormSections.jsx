@@ -1,25 +1,18 @@
 import React from 'react';
+// 2. Pricing
 import {
-    BadgeDollarSign,
     BookA,
     BookOpenText,
+    Calendar,
     ChartNoAxesColumnIncreasing,
     Mail,
     MapPinned,
     Phone,
     Shield,
     Tags,
-    Timer,
     User
-} from 'lucide-react';
-import {
-    LISTING_CATEGORY,
-    LISTING_CONDITION,
-    RENTAL_STATUS,
-    ROLE,
-    TIME_UNIT,
-    upperCaseFirstLetter, userImageSrc
-} from "../util/Util.js";
+} from 'lucide-react'; // Assuming lucide-react
+import {LISTING_CATEGORY, LISTING_CONDITION, RENTAL_STATUS, ROLE, userImageSrc} from "../util/Util.js";
 
 // 1. Basic Info
 export const BasicInfoSection = ({ editMode, itemState, handleChange }) => (
@@ -76,34 +69,50 @@ export const BasicInfoSection = ({ editMode, itemState, handleChange }) => (
     </div>
 );
 
-// 2. Pricing
 export const PricingSection = ({ editMode, itemState, handleChange }) => (
     <div className="space-y-4 pb-6">
         <h4 className="text-xl font-semibold text-indigo-700">2. Pricing & Protection</h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Daily Rate Input */}
             <div>
-                <label htmlFor="price" className={getLabelClass(editMode)}><BadgeDollarSign className="inline w-4 h-4 ml-2 text-green-500" /> Rate ($)</label>
+                <label htmlFor="daily_rate" className={getLabelClass(editMode)}>
+                    <Calendar className="inline w-4 h-4 mr-2 text-green-500" />
+                    Daily Rate ($)
+                </label>
                 {editMode ? (
-                    <input id="price" type="number" required value={itemState.price} placeholder="Price per unit time" onChange={handleChange} className="form-input w-full px-4 py-3 border rounded-lg" />
+                    <input
+                        id="daily_rate"
+                        type="number"
+                        min="0"
+                        value={itemState.daily_rate || ''}
+                        placeholder="e.g. 100"
+                        onChange={handleChange}
+                        className="form-input w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-all"
+                    />
                 ) : (
-                    <p className="read-only-field">${itemState.price}</p>
+                    <p className="read-only-field">
+                        {itemState.daily_rate ? `$${itemState.daily_rate} / day` : <span className="text-gray-400 italic">Not offered</span>}
+                    </p>
                 )}
             </div>
+
+            {/* Replacement Value (Security Deposit) */}
             <div>
-                <label className={getLabelClass(editMode)}><Timer className="inline w-4 h-4 ml-2 text-yellow-500" /> Time Unit</label>
+                <label htmlFor="replacement_value" className={getLabelClass(editMode)}>
+                    <Shield className="inline w-4 h-4 mr-2 text-red-500" />
+                    Replacement Value ($)
+                </label>
                 {editMode ? (
-                    <select id="time_unit" required value={itemState.time_unit} onChange={handleChange} className="form-select w-full px-4 py-3 border rounded-lg bg-white">
-                        <option value="" disabled>Select Time Unit</option>
-                        {Object.values(TIME_UNIT).map(c => <option key={c} value={c}>{upperCaseFirstLetter(c)}</option>)}
-                    </select>
-                ) : (
-                    <p className="read-only-field">{upperCaseFirstLetter(itemState.time_unit)}</p>
-                )}
-            </div>
-            <div>
-                <label htmlFor="value" className={getLabelClass(editMode)}><Shield className="inline w-4 h-4 ml-2 text-red-500" /> Replacement Value ($)</label>
-                {editMode ? (
-                    <input id="value" type="number" required value={itemState.replacement_value} placeholder="Security Deposit Amount" onChange={handleChange} className="form-input w-full px-4 py-3 border rounded-lg" />
+                    <input
+                        id="replacement_value"
+                        type="number"
+                        required
+                        value={itemState.replacement_value}
+                        placeholder="Security Deposit Amount"
+                        onChange={handleChange}
+                        className="form-input w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    />
                 ) : (
                     <p className="read-only-field">${itemState.replacement_value}</p>
                 )}

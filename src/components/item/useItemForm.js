@@ -27,8 +27,8 @@ export function useItemForm() {
     // Flattened Item State
     const [itemState, setItemState] = useState({
         title: '', description: '', location: '', category: '',
-        condition: '', price: '', replacement_value: '', time_unit: '',
-        image_url: {}, status: '', owner_id: null
+        condition: '', replacement_value: '', daily_rate: '', image_url: {},
+        status: '', owner_id: null
     });
 
     // Date State
@@ -145,7 +145,7 @@ export function useItemForm() {
                 .eq('status', REQUEST_STATUS.ACTIVE);
 
             const newUnavailable = [...existingUnavailable];
-            if(requestDates) {
+            if (requestDates) {
                 newUnavailable.push(...requestDates.map(d => ({ to: d.end_date, from: d.start_date })));
             }
 
@@ -234,7 +234,7 @@ export function useItemForm() {
         try {
             const itemData = {
                 ...itemState,
-                price: parseFloat(itemState.price),
+                daily_rate: parseFloat(itemState.daily_rate),
                 replacement_value: parseFloat(itemState.replacement_value),
                 status: itemState.status || LISTING_STATUS.ACTIVE,
                 time_unit: itemState.time_unit || TIME_UNIT.DAY

@@ -27,3 +27,5 @@ full replacement value. The platform often places a "silent" authorization hold 
 simply retains the legal right to charge the card for the remaining balance later.
 15) Improve Authentication, and ItemForm (e.g. pictures and policy docs)
 16) Think if the App is being helpful and intuitive
+17) Improve form validation in ItemForm.
+18) Use common duration calculation function

@@ -1,5 +1,5 @@
 import React from "react";
-import {itemImageSrc} from "../util/Util.js";
+import {itemImageSrc, TIME_UNIT} from "../util/Util.js";
 
 export default function ModalItemDetails({ item, role, onClose }) {
     return (
@@ -9,7 +9,7 @@ export default function ModalItemDetails({ item, role, onClose }) {
             <div className="mb-4">
                 <img src={itemImageSrc(item.image_url, item.title)} alt={item.title} className="w-full h-48 object-cover rounded-lg mb-3"/>
                 <p className="text-gray-700 mb-2"><strong>Location:</strong> {item.location || 'N/A'}</p>
-                <p className="text-gray-700"><strong>Rate:</strong> ${item.price}/{item.time_unit}</p>
+                <p className="text-gray-700"><strong>Rate:</strong> ${item.daily_rate}/{TIME_UNIT.DAY}</p>
             </div>
 
             <p className="text-sm text-gray-500 mb-6">

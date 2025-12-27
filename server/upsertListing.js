@@ -10,7 +10,7 @@ import {ACTIVITY} from "../src/components/util/Util.js";
 function buildUpdateClauses(data, currentData) {
     const fields = [
         'title', 'description', 'location', 'category',
-        'condition', 'price', 'replacement_value', 'time_unit', 'status', 'image_url'
+        'condition', 'daily_rate', 'replacement_value', 'time_unit', 'status', 'image_url'
     ];
 
     const updates = {};
@@ -55,7 +55,7 @@ export default async function upsertListing(req, res) {
             // *** INSERT NEW LISTING ***
             const insertResult = await tx.query(
                 `INSERT INTO listings (owner_id, title, description, location, category,
-                                       condition, price, replacement_value, time_unit, status, image_url)
+                                       condition, daily_rate, replacement_value, time_unit, status, image_url)
                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
                 [
                     ownerId,
@@ -64,7 +64,7 @@ export default async function upsertListing(req, res) {
                     listingData.location,
                     listingData.category,
                     listingData.condition,
-                    listingData.price,
+                    listingData.daily_rate,
                     listingData.replacement_value,
                     listingData.time_unit,
                     listingData.status,
@@ -128,7 +128,7 @@ export default async function upsertListing(req, res) {
                      location          = $4,
                      category          = $5,
                      condition         = $6,
-                     price             = $7,
+                     daily_rate        = $7,
                      replacement_value = $8,
                      time_unit         = $9,
                      status            = $10,
@@ -141,7 +141,7 @@ export default async function upsertListing(req, res) {
                     updates.location,
                     updates.category,
                     updates.condition,
-                    updates.price,
+                    updates.daily_rate,
                     updates.replacement_value,
                     updates.time_unit,
                     updates.status,

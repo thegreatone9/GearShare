@@ -1,5 +1,12 @@
 import {endpointWrapper} from "./util/transaction.js";
-import {ACTIVITY, ADMIN_ID, PAYMENT_INTENT_STATUS, TRANSACTION_STATUS} from "../src/components/util/Util.js";
+import {
+    ACTIVITY,
+    ADMIN_ID,
+    calculateRentalFee,
+    PAYMENT_INTENT_STATUS,
+    TIME_UNIT,
+    TRANSACTION_STATUS
+} from "../src/components/util/Util.js";
 
 /**
  * Handles item return and creates a dispute
@@ -56,11 +63,8 @@ export default async function returnItemCreateDispute(req, res) {
             [rentalId, currentDate, rentalStatus]
         );
 
-        const start = new Date(rental.start_date);
-        const end = new Date(rental.end_date);
-        const dayDiff = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-        const duration = dayDiff > 0 ? dayDiff : 1;
-        const rentalFee = Number(listingSnapshot.price) * duration;
+        const pricePerUnit = listingSnapshot.daily_rate;
+        const rentalFee = calculateRentalFee(TIME_UNIT.DAY, pricePerUnit, rental.start_date, rental.end_date);
 
         // 5. Create Transaction: Pay Rent to Lender
         // We move the Rent portion from Escrow -> Lender

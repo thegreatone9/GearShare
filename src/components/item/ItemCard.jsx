@@ -1,5 +1,5 @@
 import {useNavigate} from "react-router-dom";
-import {itemImageSrc, ROLE} from "../util/Util.js";
+import {itemImageSrc, ROLE, TIME_UNIT, upperCaseFirstLetter} from "../util/Util.js";
 import {useAuth} from "../AppContext.jsx";
 
 export default function ItemCard({item}) {
@@ -32,8 +32,8 @@ export default function ItemCard({item}) {
                 <div className="flex justify-between items-start">
                     <h2 className="text-lg font-semibold text-gray-800 truncate">{item.title}</h2>
                     <span className="text-sm font-bold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-full">
-          ${item.price}/{item.time_unit.slice(0, 3)}
-        </span>
+                        ${item.daily_rate}/{TIME_UNIT.DAY}
+                    </span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">{item.location}</p>
                 <div className="mt-2 flex items-center text-sm text-yellow-500">
