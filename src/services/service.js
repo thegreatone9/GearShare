@@ -6,55 +6,65 @@
  * - Development: localService.js (uses fetch() → local Express/SQLite server)
  *
  * Components import from this file and never touch supabase directly.
+ *
+ * Uses a lazy-init promise instead of top-level await for broader
+ * build-target compatibility (Safari 14, ES2020, etc.).
  */
 
 const isLocal = import.meta.env.VITE_USE_LOCAL_DB === 'true';
 
-let impl;
+const implPromise = isLocal
+    ? import('./localService.js')
+    : import('./supabaseService.js');
 
-if (isLocal) {
-    impl = await import('./localService.js');
-} else {
-    impl = await import('./supabaseService.js');
+/**
+ * Helper — wraps each exported function in a thin async wrapper
+ * that awaits the implementation module on first call.
+ */
+function lazy(fnName) {
+    return async (...args) => {
+        const impl = await implPromise;
+        return impl[fnName](...args);
+    };
 }
 
 // --- Accounts ---
-export const addAccount           = impl.addAccount;
-export const authenticateUser     = impl.authenticateUser;
-export const isUserExists         = impl.isUserExists;
-export const fetchUserByEmail     = impl.fetchUserByEmail;
-export const fetchUserById        = impl.fetchUserById;
-export const fetchUsersByIds      = impl.fetchUsersByIds;
-export const updateAccount        = impl.updateAccount;
+export const addAccount           = lazy('addAccount');
+export const authenticateUser     = lazy('authenticateUser');
+export const isUserExists         = lazy('isUserExists');
+export const fetchUserByEmail     = lazy('fetchUserByEmail');
+export const fetchUserById        = lazy('fetchUserById');
+export const fetchUsersByIds      = lazy('fetchUsersByIds');
+export const updateAccount        = lazy('updateAccount');
 
 // --- Listings ---
-export const fetchListingById             = impl.fetchListingById;
-export const fetchListingsByIds           = impl.fetchListingsByIds;
-export const searchListings               = impl.searchListings;
-export const fetchListingWithAvailability = impl.fetchListingWithAvailability;
+export const fetchListingById             = lazy('fetchListingById');
+export const fetchListingsByIds           = lazy('fetchListingsByIds');
+export const searchListings               = lazy('searchListings');
+export const fetchListingWithAvailability = lazy('fetchListingWithAvailability');
 
 // --- Listings Available Dates ---
-export const fetchAvailability        = impl.fetchAvailability;
-export const fetchAvailabilityColumns = impl.fetchAvailabilityColumns;
+export const fetchAvailability        = lazy('fetchAvailability');
+export const fetchAvailabilityColumns = lazy('fetchAvailabilityColumns');
 
 // --- Requests ---
-export const fetchRequestsByBorrower   = impl.fetchRequestsByBorrower;
-export const fetchRequestsByLender     = impl.fetchRequestsByLender;
-export const fetchRequestsByUser       = impl.fetchRequestsByUser;
-export const fetchActiveRequestDates   = impl.fetchActiveRequestDates;
-export const fetchRequestById          = impl.fetchRequestById;
-export const deleteRequest             = impl.deleteRequest;
+export const fetchRequestsByBorrower   = lazy('fetchRequestsByBorrower');
+export const fetchRequestsByLender     = lazy('fetchRequestsByLender');
+export const fetchRequestsByUser       = lazy('fetchRequestsByUser');
+export const fetchActiveRequestDates   = lazy('fetchActiveRequestDates');
+export const fetchRequestById          = lazy('fetchRequestById');
+export const deleteRequest             = lazy('deleteRequest');
 
 // --- Rentals ---
-export const fetchRentalsByRequestIds = impl.fetchRentalsByRequestIds;
-export const fetchRentalById          = impl.fetchRentalById;
+export const fetchRentalsByRequestIds = lazy('fetchRentalsByRequestIds');
+export const fetchRentalById          = lazy('fetchRentalById');
 
 // --- Disputes ---
-export const fetchDisputesByRentalIds = impl.fetchDisputesByRentalIds;
-export const updateDispute            = impl.updateDispute;
+export const fetchDisputesByRentalIds = lazy('fetchDisputesByRentalIds');
+export const updateDispute            = lazy('updateDispute');
 
 // --- Activity Log ---
-export const fetchActivityLog = impl.fetchActivityLog;
+export const fetchActivityLog = lazy('fetchActivityLog');
 
 // --- Generic ---
-export const fetchFromTable = impl.fetchFromTable;
+export const fetchFromTable = lazy('fetchFromTable');
