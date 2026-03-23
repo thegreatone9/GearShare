@@ -17,6 +17,7 @@ export default function ItemForm2() {
         lender,
         statusMessage,
         canRequestBorrow,
+        isSellListing,
         // Date State
         overallAvailableDates,
         requestDates,
@@ -32,6 +33,7 @@ export default function ItemForm2() {
         handleSubmit,
         handleDelete,
         handleBorrowRequest,
+        handleBuyNow,
         navigate
     } = useItemForm();
 
@@ -80,13 +82,13 @@ export default function ItemForm2() {
                 />
 
 
-                {/* 4. Borrower: Lender Details */}
+                {/* 4. Borrower: Seller/Lender Details */}
                 {role === ROLE.BORROWER && lender && (
-                    <LenderInfoCard lender={lender} />
+                    <LenderInfoCard lender={lender} isSellListing={isSellListing} />
                 )}
 
-                {/* 4. Lender: Availability Calendar */}
-                {((role === ROLE.LENDER && !itemState.id) || (itemState.owner_id === authenticatedUser.id)) && (
+                {/* 4. Lender: Availability Calendar (RENT only) */}
+                {!isSellListing && ((role === ROLE.LENDER && !itemState.id) || (itemState.owner_id === authenticatedUser.id)) && (
                     <div className="space-y-4 pb-6 mx-auto flex flex-col">
                         <h4 className="text-xl font-semibold text-indigo-700 text-center">4. Available Dates</h4>
                         <ItemCalendar
@@ -101,8 +103,8 @@ export default function ItemForm2() {
                     </div>
                 )}
 
-                {/* 5. Borrower: Request Dates */}
-                {role === ROLE.BORROWER && itemState.owner_id !== authenticatedUser.id && (
+                {/* 5. Borrower: Request Rent Dates (RENT only) */}
+                {!isSellListing && role === ROLE.BORROWER && itemState.owner_id !== authenticatedUser.id && (
                     <div className="space-y-4 pb-6 mx-auto flex flex-col">
                         <h4 className="text-xl font-semibold text-indigo-700 text-center">5. Request Rent Dates</h4>
                         {canRequestBorrow ? (
@@ -128,9 +130,12 @@ export default function ItemForm2() {
                         editMode={editMode}
                         itemState={itemState}
                         canRequestBorrow={canRequestBorrow}
+                        isSellListing={isSellListing}
+                        isOwner={itemState.owner_id === authenticatedUser?.id}
                         onBack={(e) => { e.preventDefault(); navigate(-1); }}
                         onDelete={handleDelete}
                         onBorrow={handleBorrowRequest}
+                        onBuyNow={handleBuyNow}
                     />
                 </div>
             </form>

@@ -5,7 +5,7 @@ import {
 } from "../../services/service.js";
 import {useAuth, useToast} from "../AppContext.jsx";
 import {endOfDay, format, isAfter, isBefore, isSameDay, isWithinInterval, startOfDay} from "date-fns";
-import {apiRequest, LISTING_STATUS, REQUEST_STATUS, ROLE, TIME_UNIT, TOAST_TYPE} from "../util/Util.js";
+import {apiRequest, LISTING_STATUS, LISTING_TYPE, REQUEST_STATUS, ROLE, TIME_UNIT, TOAST_TYPE} from "../util/Util.js";
 
 export function useItemForm() {
     const { authenticatedUser } = useAuth();
@@ -29,7 +29,8 @@ export function useItemForm() {
     // Flattened Item State
     const [itemState, setItemState] = useState({
         title: '', description: '', location: '', category: '',
-        condition: '', replacement_value: '', daily_rate: '', image_url: {},
+        condition: '', replacement_value: '', daily_rate: '', price: '',
+        image_url: {}, listing_type: 'RENT',
         status: '', owner_id: null
     });
 
@@ -215,32 +216,49 @@ export function useItemForm() {
         });
     };
 
+    const isSellListing = itemState.listing_type === 'SELL';
+
     // --- Actions ---
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!validateItemOverallAvailableDates()) {
+        // Skip date validation for SELL listings
+        if (!isSellListing && !validateItemOverallAvailableDates()) {
             return;
         }
 
         try {
             const itemData = {
                 ...itemState,
-                daily_rate: parseFloat(itemState.daily_rate),
-                replacement_value: parseFloat(itemState.replacement_value),
                 status: itemState.status || LISTING_STATUS.ACTIVE,
-                time_unit: itemState.time_unit || TIME_UNIT.DAY
             };
+
+            if (isSellListing) {
+                itemData.price = parseFloat(itemState.price);
+                itemData.daily_rate = null;
+                itemData.replacement_value = null;
+                itemData.time_unit = null;
+            } else {
+                itemData.daily_rate = parseFloat(itemState.daily_rate);
+                itemData.replacement_value = parseFloat(itemState.replacement_value);
+                itemData.time_unit = itemState.time_unit || TIME_UNIT.DAY;
+            }
+
+            const body = {
+                ownerId: authenticatedUser.id,
+                listingId: itemIdNum,
+                listingData: itemData,
+            };
+
+            // Only send availability data for RENT listings
+            if (!isSellListing) {
+                body.overallAvailableRange = overallAvailableDates;
+                body.unavailableRanges = unavailableRanges;
+            }
 
             const { error: dbError } = await apiRequest('/api/upsertListing', {
                 method: 'POST',
-                body: {
-                    ownerId: authenticatedUser.id,
-                    listingId: itemIdNum,
-                    listingData: itemData,
-                    overallAvailableRange: overallAvailableDates,
-                    unavailableRanges: unavailableRanges
-                }
+                body
             });
 
             if (dbError) {
@@ -279,6 +297,26 @@ export function useItemForm() {
             if (error) throw new Error(error);
             navigate(`/item/${itemIdNum}?role=${role}&toast=Request Sent!`, { replace: true });
             window.location.reload();
+
+        } catch (error) {
+            addToast(TOAST_TYPE.ERROR, `Error: ${error.message}`);
+        }
+    };
+
+    const handleBuyNow = async (e) => {
+        e.preventDefault();
+        try {
+            const { error } = await apiRequest('/api/purchaseItem', {
+                method: 'POST',
+                body: {
+                    listingId: itemIdNum,
+                    buyerId: authenticatedUser.id,
+                    sellerId: currentItem.owner_id
+                }
+            });
+
+            if (error) throw new Error(error);
+            navigate(`/borrower?toast=Purchase complete! You bought: ${itemState.title}`);
 
         } catch (error) {
             addToast(TOAST_TYPE.ERROR, `Error: ${error.message}`);
@@ -343,11 +381,12 @@ export function useItemForm() {
 
     return {
         authenticatedUser, loading, role, editMode, itemState, lender, statusMessage, canRequestBorrow,
+        isSellListing,
         overallAvailableDates, requestDates,
         selectedRangeForLender, selectedRangeForBorrower,
         handleChange, handleFileChange,
         handleDayClickForLender, handleDayClickForBorrower,
         disabledDaysForLender, disabledDaysForBorrower,
-        handleSubmit, handleDelete, handleBorrowRequest, navigate
+        handleSubmit, handleDelete, handleBorrowRequest, handleBuyNow, navigate
     };
 }

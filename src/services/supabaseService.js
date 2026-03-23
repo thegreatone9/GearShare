@@ -83,7 +83,7 @@ export async function fetchListingsByIds(ids) {
         .in('id', ids);
 }
 
-export async function searchListings({status, searchTerm, location, category}) {
+export async function searchListings({status, searchTerm, location, category, listingType}) {
     let query = supabase
         .from('listings_with_availability')
         .select('*')
@@ -99,6 +99,10 @@ export async function searchListings({status, searchTerm, location, category}) {
 
     if (category) {
         query = query.eq('category', category);
+    }
+
+    if (listingType) {
+        query = query.eq('listing_type', listingType);
     }
 
     return await query;

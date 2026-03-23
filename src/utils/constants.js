@@ -9,9 +9,16 @@ export const ADMIN_ID = {
     ADMIN: 17,
 }
 
+export const LISTING_TYPE = {
+    ANY: 'Listing: Any',
+    RENT: 'For Rent',
+    SELL: 'For Sale'
+}
+
 export const ACTIVITY = {
     UPSERT_ITEM: 'UPSERT_ITEM',
     REQUEST_ITEM: 'REQUEST_ITEM',
+    PURCHASE_ITEM: 'PURCHASE_ITEM',
     CONFIRM_RENTAL: 'CONFIRM_RENTAL',
     DECLINE_REQUEST: 'DECLINE_REQUEST',
     DELETE_LISTING: 'DELETE_LISTING',
@@ -28,7 +35,8 @@ export const ROLE = {
 
 export const LISTING_STATUS = {
     ACTIVE: 'ACTIVE',
-    INACTIVE: 'INACTIVE'
+    INACTIVE: 'INACTIVE',
+    SOLD: 'SOLD'
 }
 
 export const RENTAL_STATUS = {
@@ -73,11 +81,13 @@ export const TRANSACTION_STATUS = {
     DEPOSIT_REFUND: 'AUTHORIZED',
     RENTAL_FEE: 'CAPTURED',
     DAMAGE_FEE: 'RELEASED',
-    DAMAGE_OVERAGE: 'REFUNDED'
+    DAMAGE_OVERAGE: 'REFUNDED',
+    SALE: 'SALE'
 }
 
 export const BORROWER_ITEM_ACTIONS = {
-    REQUEST_BORROW: 'requestBorrow'
+    REQUEST_BORROW: 'requestBorrow',
+    BUY_NOW: 'buyNow'
 }
 
 export const LENDER_DISPUTE_ACTIONS = {

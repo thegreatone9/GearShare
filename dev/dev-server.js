@@ -22,6 +22,7 @@ import resolveDispute from '../server/handlers/resolveDispute.js';
 import transactions from '../server/handlers/transactions.js';
 import returnItemCreateDispute from '../server/handlers/returnItemCreateDispute.js';
 import upsertListing from '../server/handlers/upsertListing.js';
+import purchaseItem from '../server/handlers/purchaseItem.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -311,6 +312,7 @@ app.all('/api/resolveDispute', wrapHandler(resolveDispute));
 app.all('/api/returnItemCreateDispute', wrapHandler(returnItemCreateDispute));
 app.all('/api/transactions', wrapHandler(transactions));
 app.all('/api/upsertListing', wrapHandler(upsertListing));
+app.all('/api/purchaseItem', wrapHandler(purchaseItem));
 
 // ============================================================
 // SQLite Browser Console

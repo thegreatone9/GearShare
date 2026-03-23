@@ -21,6 +21,7 @@ CREATE TABLE listings
     rating            NUMERIC,
     replacement_value NUMERIC,
     image_url         TEXT,
+    listing_type      TEXT DEFAULT 'RENT',
     status            TEXT
 );
 

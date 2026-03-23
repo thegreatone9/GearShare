@@ -119,11 +119,12 @@ export async function fetchListingsByIds(ids) {
     return await get('listings', {'in.id': ids.join(',')});
 }
 
-export async function searchListings({status, searchTerm, location, category}) {
+export async function searchListings({status, searchTerm, location, category, listingType}) {
     const params = {'eq.status': status};
     if (searchTerm) params['or'] = `title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`;
     if (location) params['ilike.location'] = `%${location}%`;
     if (category) params['eq.category'] = category;
+    if (listingType) params['eq.listing_type'] = listingType;
 
     return await get('listings_with_availability', params);
 }

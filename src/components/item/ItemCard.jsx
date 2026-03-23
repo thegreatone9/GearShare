@@ -31,14 +31,24 @@ export default function ItemCard({item}) {
             <div className="p-4">
                 <div className="flex justify-between items-start">
                     <h2 className="text-lg font-semibold text-gray-800 truncate">{item.title}</h2>
-                    <span className="text-sm font-bold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-full">
-                        ${item.daily_rate}/{TIME_UNIT.DAY}
-                    </span>
+                    {item.listing_type === 'SELL' ? (
+                        <span className="text-sm font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">
+                            ${item.price}
+                        </span>
+                    ) : (
+                        <span className="text-sm font-bold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-full">
+                            ${item.daily_rate}/{TIME_UNIT.DAY}
+                        </span>
+                    )}
                 </div>
                 <p className="text-sm text-gray-500 mt-1">{item.location}</p>
                 <div className="mt-2 flex items-center text-sm text-yellow-500">
                     <span className="mr-1">★</span> {item.condition}
-                    <span className="ml-2 text-gray-500">· Available Now</span>
+                    {item.listing_type === 'SELL' ? (
+                        <span className="ml-2 text-emerald-600 font-medium">· For Sale</span>
+                    ) : (
+                        <span className="ml-2 text-gray-500">· For Rent</span>
+                    )}
                 </div>
             </div>
         </div>

@@ -21,6 +21,12 @@ const DB_PATH = path.join(__dirname, 'gearshare.db');
 
 let db;
 
+function deleteDbFiles() {
+    [DB_PATH, `${DB_PATH}-wal`, `${DB_PATH}-shm`].forEach(f => {
+        if (fs.existsSync(f)) fs.unlinkSync(f);
+    });
+}
+
 /**
  * Seed the database with schema (DDL) and sample data.
  */
@@ -42,7 +48,7 @@ export function initializeDatabase() {
     const dbExists = fs.existsSync(DB_PATH);
 
     if (shouldReset && dbExists) {
-        fs.unlinkSync(DB_PATH);
+        deleteDbFiles();
         console.log('[SQLite] Existing database deleted (--reset-db)');
     }
 
@@ -68,7 +74,7 @@ export function initializeDatabase() {
  */
 export function resetDatabase() {
     if (db) db.close();
-    if (fs.existsSync(DB_PATH)) fs.unlinkSync(DB_PATH);
+    deleteDbFiles();
 
     db = new Database(DB_PATH, {verbose: process.env.DEBUG_SQL ? console.log : undefined});
     db.pragma('journal_mode = WAL');

@@ -9,6 +9,7 @@ import resolveDispute from "../server/handlers/resolveDispute.js";
 import transactions from "../server/handlers/transactions.js";
 import returnItemCreateDispute from "../server/handlers/returnItemCreateDispute.js";
 import upsertListing from "../server/handlers/upsertListing.js";
+import purchaseItem from "../server/handlers/purchaseItem.js";
 
 export default async function handler(req, res) {
     // 2. extract the path from the URL
@@ -50,6 +51,9 @@ export default async function handler(req, res) {
 
         case 'upsertListing':
             return upsertListing(req, res);
+
+        case 'purchaseItem':
+            return purchaseItem(req, res);
 
         default:
             return res.status(404).json({ error: `Endpoint ${pathname} not found` });

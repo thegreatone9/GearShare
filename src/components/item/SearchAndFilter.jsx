@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {searchListings} from '../../services/service.js';
-import {isEmptyString, LISTING_CATEGORY, LISTING_STATUS, TOAST_TYPE} from "../util/Util.js";
+import {isEmptyString, LISTING_CATEGORY, LISTING_STATUS, LISTING_TYPE, TOAST_TYPE} from "../util/Util.js";
 import {useToast} from "../AppContext.jsx";
 import {clearAllSessionVariables, retrieveSessionVariable, saveSessionVariable} from "../util/SessionUtil.js";
 
@@ -14,6 +14,9 @@ function SearchAndFilter({ setListings, setLoading }) {
     );
     const [selectedCategory, setSelectedCategory] = useState(
         retrieveSessionVariable('selectedCategory') || ''
+    );
+    const [selectedListingType, setSelectedListingType] = useState(
+        retrieveSessionVariable('selectedListingType') || ''
     );
 
     useEffect(() => {
@@ -29,15 +32,21 @@ function SearchAndFilter({ setListings, setLoading }) {
         const hasSearchTerm = searchTerm.trim().length > 3;
         const hasLocation = searchLocation.trim().length > 3;
         const hasCategory = !isEmptyString(selectedCategory) && selectedCategory !== LISTING_CATEGORY.ANY;
+        const hasListingType = !isEmptyString(selectedListingType) && selectedListingType !== LISTING_TYPE.ANY;
 
         setLoading(true);
 
         try {
+            const listingTypeDbValue = hasListingType
+                ? Object.keys(LISTING_TYPE).find(key => LISTING_TYPE[key] === selectedListingType)
+                : null;
+
             const { data, error } = await searchListings({
                 status: LISTING_STATUS.ACTIVE,
                 searchTerm: hasSearchTerm ? searchTerm : null,
                 location: hasLocation ? searchLocation : null,
-                category: hasCategory ? selectedCategory : null
+                category: hasCategory ? selectedCategory : null,
+                listingType: listingTypeDbValue
             });
 
             if (error) {
@@ -89,6 +98,20 @@ function SearchAndFilter({ setListings, setLoading }) {
             >
                 {
                     Object.values(LISTING_CATEGORY).map(category => {
+                        return <option key={category}>{category}</option>
+                    })
+                }
+            </select>
+            <select
+                value={selectedListingType}
+                onChange={(e) => {
+                    setSelectedListingType(e.target.value);
+                    saveSessionVariable('selectedListingType', e.target.value);
+                }}
+                className="bg-white p-3 border border-gray-300 rounded-lg w-full md:w-auto text-gray-700"
+            >
+                {
+                    Object.values(LISTING_TYPE).map(category => {
                         return <option key={category}>{category}</option>
                     })
                 }

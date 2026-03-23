@@ -6,27 +6,33 @@ VALUES (1, 'tom@gearshare.com', 'password', 'Tom Hanks'),
        (2, 'jane@gearshare.com', 'password', 'Jane Doe');
 
 INSERT INTO listings (id, owner_id, title, description, price, daily_rate, unit, time_unit, location, rating,
-                      replacement_value, image_url, status, category, condition)
+                      replacement_value, image_url, listing_type, status, category, condition)
 VALUES (1, 2, 'Cordless Drill Set', 'A high-quality cordless drill with multiple bits and a carrying case.', 15, 15,
         'day', 'day', 'Downtown LA', 4.8, 150,
-        'https://placehold.co/300x200/4F46E5/FFFFFF?text=Drill', 'ACTIVE', 'Tools', 'Like New'),
+        'https://placehold.co/300x200/4F46E5/FFFFFF?text=Drill', 'RENT', 'ACTIVE', 'Tools', 'Like New'),
        (2, 1, 'DJI Mavic Mini Drone', 'Compact drone with 4K camera, perfect for aerial photography.', 35, 35, 'day',
         'day', 'Santa Monica', 4.5, 800,
-        'https://placehold.co/300x200/10B981/FFFFFF?text=Drone', 'ACTIVE', 'Electronics', 'Good'),
+        'https://placehold.co/300x200/10B981/FFFFFF?text=Drone', 'RENT', 'ACTIVE', 'Electronics', 'Good'),
        (3, 2, 'Professional Steam Iron', 'Industrial-grade steam iron, heats up in 30 seconds.', 5, 5, 'day', 'day',
         'Venice Beach', 4.9, 60,
-        'https://placehold.co/300x200/F97316/FFFFFF?text=Iron', 'ACTIVE', 'Home & Garden', 'Excellent'),
+        'https://placehold.co/300x200/F97316/FFFFFF?text=Iron', 'RENT', 'ACTIVE', 'Home & Garden', 'Excellent'),
        (4, 1, 'Fender Acoustic Guitar', 'Full-size acoustic guitar with carrying bag and spare strings.', 100, 100,
         'day', 'day', 'Culver City', 5.0, 450,
-        'https://placehold.co/300x200/EC4899/FFFFFF?text=Guitar', 'ACTIVE', 'Music', 'Like New'),
+        'https://placehold.co/300x200/EC4899/FFFFFF?text=Guitar', 'RENT', 'ACTIVE', 'Music', 'Like New'),
        (5, 2, 'Keyboard', 'Mechanical keyboard with RGB backlighting.', 20, 20, 'day', 'day', 'Montana City', 5.0, 20,
-        'https://placehold.co/300x200/EC4899/FFFFFF?text=Keyboard', 'ACTIVE', 'Electronics', 'Good'),
+        'https://placehold.co/300x200/EC4899/FFFFFF?text=Keyboard', 'RENT', 'ACTIVE', 'Electronics', 'Good'),
        (6, 1, 'Camera', 'DSLR camera with 50mm lens kit.', 500, 500, 'day', 'day', 'Vermont', 5.0, 450,
-        'https://placehold.co/300x200/EC4899/FFFFFF?text=Camera', 'ACTIVE', 'Electronics', 'Excellent'),
+        'https://placehold.co/300x200/EC4899/FFFFFF?text=Camera', 'RENT', 'ACTIVE', 'Electronics', 'Excellent'),
        (7, 2, 'Skateboard', 'Professional skateboard with custom deck.', 50, 50, 'day', 'day', 'Jericho', 5.0, 30,
-        'https://placehold.co/300x200/EC4899/FFFFFF?text=Skateboard', 'ACTIVE', 'Sports', 'Good');
+        'https://placehold.co/300x200/EC4899/FFFFFF?text=Skateboard', 'RENT', 'ACTIVE', 'Sports', 'Good'),
+       (8, 1, 'Weber BBQ Grill', 'Premium gas grill, barely used. Comes with cover and utensils.', 250, NULL, NULL, NULL,
+        'Pasadena', 4.7, NULL,
+        'https://placehold.co/300x200/DC2626/FFFFFF?text=BBQ+Grill', 'SELL', 'ACTIVE', 'Household', 'Like New'),
+       (9, 2, 'Nintendo Switch Bundle', 'Switch console + 3 games + Pro Controller. Original box included.', 320, NULL, NULL, NULL,
+        'Hollywood', 4.6, NULL,
+        'https://placehold.co/300x200/7C3AED/FFFFFF?text=Switch', 'SELL', 'ACTIVE', 'Electronics', 'Good');
 
--- Insert availability dates for listings
+-- Insert availability dates for rental listings only
 INSERT INTO listings_available_dates (listing_id, unavailable_ranges, overall_available_range)
 VALUES (1, '[]', '{"from": "2025-09-01", "to": "2026-12-31"}'),
        (2, '[]', '{"from": "2025-09-01", "to": "2026-12-31"}'),

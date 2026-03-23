@@ -1,10 +1,10 @@
 import React from 'react';
-// 2. Pricing
 import {
     BookA,
     BookOpenText,
     Calendar,
     ChartNoAxesColumnIncreasing,
+    DollarSign,
     Mail,
     MapPinned,
     Phone,
@@ -12,7 +12,7 @@ import {
     Tags,
     User
 } from 'lucide-react'; // Assuming lucide-react
-import {LISTING_CATEGORY, LISTING_CONDITION, RENTAL_STATUS, ROLE, userImageSrc} from "../util/Util.js";
+import {LISTING_CATEGORY, LISTING_CONDITION, LISTING_TYPE, RENTAL_STATUS, ROLE, userImageSrc} from "../util/Util.js";
 
 // 1. Basic Info
 export const BasicInfoSection = ({ editMode, itemState, handleChange }) => (
@@ -69,62 +69,120 @@ export const BasicInfoSection = ({ editMode, itemState, handleChange }) => (
     </div>
 );
 
-export const PricingSection = ({ editMode, itemState, handleChange }) => (
-    <div className="space-y-4 pb-6">
-        <h4 className="text-xl font-semibold text-indigo-700">2. Pricing & Protection</h4>
+export const PricingSection = ({ editMode, itemState, handleChange }) => {
+    const isSell = itemState.listing_type === 'SELL';
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Daily Rate Input */}
-            <div>
-                <label htmlFor="daily_rate" className={getLabelClass(editMode)}>
-                    <Calendar className="inline w-4 h-4 mr-2 text-green-500" />
-                    Daily Rate ($)
-                </label>
-                {editMode ? (
-                    <input
-                        id="daily_rate"
-                        type="number"
-                        min="0"
-                        value={itemState.daily_rate || ''}
-                        placeholder="e.g. 100"
-                        onChange={handleChange}
-                        className="form-input w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-all"
-                    />
-                ) : (
-                    <p className="read-only-field">
-                        {itemState.daily_rate ? `$${itemState.daily_rate} / day` : <span className="text-gray-400 italic">Not offered</span>}
-                    </p>
-                )}
-            </div>
+    return (
+        <div className="space-y-4 pb-6">
+            <h4 className="text-xl font-semibold text-indigo-700">2. Listing Type & Pricing</h4>
 
-            {/* Replacement Value (Security Deposit) */}
-            <div>
-                <label htmlFor="replacement_value" className={getLabelClass(editMode)}>
-                    <Shield className="inline w-4 h-4 mr-2 text-red-500" />
-                    Replacement Value ($)
-                </label>
-                {editMode ? (
-                    <input
-                        id="replacement_value"
-                        type="number"
-                        required
-                        value={itemState.replacement_value}
-                        placeholder="Security Deposit Amount"
-                        onChange={handleChange}
-                        className="form-input w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
-                    />
+            {/* Listing Type Toggle */}
+            {editMode && (
+                <div className="flex gap-2">
+                    <button
+                        type="button"
+                        onClick={() => handleChange({ target: { id: 'listing_type', value: 'RENT' } })}
+                        className={`px-5 py-2 rounded-lg font-medium transition-all ${!isSell ? 'bg-indigo-600 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                    >
+                        📦 For Rent
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleChange({ target: { id: 'listing_type', value: 'SELL' } })}
+                        className={`px-5 py-2 rounded-lg font-medium transition-all ${isSell ? 'bg-emerald-600 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                    >
+                        🏷️ For Sale
+                    </button>
+                </div>
+            )}
+
+            {!editMode && (
+                <p className="read-only-field">
+                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${isSell ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800'}`}>
+                        {isSell ? '🏷️ For Sale' : '📦 For Rent'}
+                    </span>
+                </p>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {isSell ? (
+                    /* Sale Price */
+                    <div>
+                        <label htmlFor="price" className={getLabelClass(editMode)}>
+                            <DollarSign className="inline w-4 h-4 mr-2 text-emerald-500" />
+                            Sale Price ($)
+                        </label>
+                        {editMode ? (
+                            <input
+                                id="price"
+                                type="number"
+                                min="1"
+                                required
+                                value={itemState.price || ''}
+                                placeholder="e.g. 250"
+                                onChange={handleChange}
+                                className="form-input w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 transition-all"
+                            />
+                        ) : (
+                            <p className="read-only-field text-emerald-700 font-bold text-lg">${itemState.price}</p>
+                        )}
+                    </div>
                 ) : (
-                    <p className="read-only-field">${itemState.replacement_value}</p>
+                    /* Rental Fields */
+                    <>
+                        <div>
+                            <label htmlFor="daily_rate" className={getLabelClass(editMode)}>
+                                <Calendar className="inline w-4 h-4 mr-2 text-green-500" />
+                                Daily Rate ($)
+                            </label>
+                            {editMode ? (
+                                <input
+                                    id="daily_rate"
+                                    type="number"
+                                    min="0"
+                                    value={itemState.daily_rate || ''}
+                                    placeholder="e.g. 100"
+                                    onChange={handleChange}
+                                    className="form-input w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-all"
+                                />
+                            ) : (
+                                <p className="read-only-field">
+                                    {itemState.daily_rate ? `$${itemState.daily_rate} / day` : <span className="text-gray-400 italic">Not offered</span>}
+                                </p>
+                            )}
+                        </div>
+                        <div>
+                            <label htmlFor="replacement_value" className={getLabelClass(editMode)}>
+                                <Shield className="inline w-4 h-4 mr-2 text-red-500" />
+                                Replacement Value ($)
+                            </label>
+                            {editMode ? (
+                                <input
+                                    id="replacement_value"
+                                    type="number"
+                                    required
+                                    value={itemState.replacement_value}
+                                    placeholder="Security Deposit Amount"
+                                    onChange={handleChange}
+                                    className="form-input w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                />
+                            ) : (
+                                <p className="read-only-field">${itemState.replacement_value}</p>
+                            )}
+                        </div>
+                    </>
                 )}
             </div>
         </div>
-    </div>
-);
+    );
+};
 
-// 4. Lender Info Card
-export const LenderInfoCard = ({ lender }) => (
+// 4. Lender/Seller Info Card
+export const LenderInfoCard = ({ lender, isSellListing }) => (
     <div className="space-y-4 pb-6 mx-auto flex flex-col items-center">
-        <h4 className="text-xl font-semibold text-indigo-700">4. Lender Details</h4>
+        <h4 className="text-xl font-semibold text-indigo-700">
+            {isSellListing ? '4. Seller Details' : '4. Lender Details'}
+        </h4>
         <img src={userImageSrc(lender.name)} alt={lender.name} className="w-24 h-24 object-cover rounded-full" />
         <InfoRow icon={User} label="Name" value={lender.name} />
         <InfoRow icon={Mail} label="Email" value={lender.email} />
@@ -139,7 +197,7 @@ const InfoRow = ({ icon: Icon, label, value }) => (
 );
 
 // 5. Action Buttons
-export const ActionButtons = ({ role, editMode, itemState, canRequestBorrow, onBack, onDelete, onBorrow }) => {
+export const ActionButtons = ({ role, editMode, itemState, canRequestBorrow, isSellListing, isOwner, onBack, onDelete, onBorrow, onBuyNow }) => {
     const commonClass = "flex justify-center items-center py-4 px-4 border border-transparent rounded-xl shadow-lg text-lg font-bold transition duration-150 w-full";
     const isNew = !itemState.id;
     const itemStatus = itemState.status;
@@ -155,7 +213,7 @@ export const ActionButtons = ({ role, editMode, itemState, canRequestBorrow, onB
                 Back
             </button>
 
-            {/* 2. Lender Actions */}
+            {/* 2. Lender/Seller Actions */}
             {!isNew && editMode ? (
                 <>
                     <button type="submit" className={`${commonClass} bg-indigo-600 hover:bg-indigo-700 text-white`}>
@@ -175,8 +233,13 @@ export const ActionButtons = ({ role, editMode, itemState, canRequestBorrow, onB
                 </button>
             )}
 
-            {/* 3. Borrower Actions */}
-            {role !== ROLE.LENDER && canRequestBorrow && (
+            {/* 3. Buyer/Borrower Actions */}
+            {!isOwner && isSellListing && (
+                <button type="button" onClick={onBuyNow} className={`${commonClass} bg-emerald-600 hover:bg-emerald-700 text-white`}>
+                    🛒 Buy Now — ${itemState.price}
+                </button>
+            )}
+            {!isOwner && !isSellListing && canRequestBorrow && (
                 <button type="button" onClick={onBorrow} className={`${commonClass} bg-green-600 hover:bg-green-700 text-white`}>
                     Request Borrow
                 </button>

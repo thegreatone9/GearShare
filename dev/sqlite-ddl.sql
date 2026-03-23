@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS listings
     rating            REAL,
     replacement_value REAL,
     image_url         TEXT,
+    listing_type      TEXT DEFAULT 'RENT',
     status            TEXT
 );
 
