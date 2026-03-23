@@ -7,7 +7,7 @@ import DisputeDashboard from "./components/dispute/DisputeDashboard.jsx";
 import AuthPage from "./components/auth/AuthPage.jsx";
 import React, {useEffect, useState} from "react";
 import ErrorPage from "./components/common/ErrorPage.jsx";
-import ItemForm from "./components/item/ItemForm.jsx";
+import ItemForm from "./components/item/ItemForm2.jsx";
 import {checkSession} from "./components/util/Util.js";
 import Footer from "./components/common/Footer.jsx";
 import UserProfile from "./components/user/UserProfile.jsx";
@@ -18,7 +18,6 @@ import {useAuth} from "./components/AppContext.jsx";
 import ToastContainer from "./components/common/ToastContainer.jsx";
 import Transactions from "./components/transactions/Transactions.jsx";
 import ActivityLog from "./components/activity/ActivityLog.jsx";
-import ItemForm2 from "./components/item/ItemForm2.jsx";
 
 export default function App() {
     const location = useLocation();
@@ -88,7 +87,7 @@ export default function App() {
                         <Route
                             path="/item/:id?"
                             element={<ProtectedRoute>
-                                <ItemForm2/>
+                                <ItemForm/>
                             </ProtectedRoute>}
                         />
                         <Route

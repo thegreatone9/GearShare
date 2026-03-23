@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "NODE_ENV=development concurrently -n \"EXP,VITE\" -c \"yellow,cyan\" \"npm:api-server\" \"vite\"",
+    "dev:local": "USE_LOCAL_DB=true concurrently -n \"API,VITE\" -c \"yellow,cyan\" \"node dev/dev-server.js\" \"VITE_USE_LOCAL_DB=true vite\"",
+    "dev:reset": "USE_LOCAL_DB=true concurrently -n \"API,VITE\" -c \"yellow,cyan\" \"node dev/dev-server.js --reset-db\" \"VITE_USE_LOCAL_DB=true vite\"",
     "build": "vite build",
     "preview": "vite preview",
     "api-server": "vercel dev --listen 5000 --yes"
@@ -29,6 +31,7 @@
     "@types/react": "18.2.15",
     "@types/react-dom": "18.2.7",
     "@vitejs/plugin-react": "5.0.4",
+    "better-sqlite3": "^12.8.0",
     "concurrently": "^9.2.1",
     "eslint": "8.45.0",
     "eslint-plugin-react": "7.32.2",

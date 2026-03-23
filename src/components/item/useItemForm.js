@@ -1,6 +1,8 @@
 import {useEffect, useState} from 'react';
 import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
-import {supabase} from "../../server/supabaseClient.js";
+import {
+    fetchListingById, fetchAvailability, fetchUserById, fetchActiveRequestDates
+} from "../../services/service.js";
 import {useAuth, useToast} from "../AppContext.jsx";
 import {endOfDay, format, isAfter, isBefore, isSameDay, isWithinInterval, startOfDay} from "date-fns";
 import {apiRequest, LISTING_STATUS, REQUEST_STATUS, ROLE, TIME_UNIT, TOAST_TYPE} from "../util/Util.js";
@@ -54,10 +56,7 @@ export function useItemForm() {
 
             try {
                 // Fetch Listing
-                const { data: item, error } = await supabase.from('listings')
-                    .select('*')
-                    .eq('id', itemIdNum)
-                    .single();
+                const { data: item, error } = await fetchListingById(itemIdNum);
 
                 if (error || !item) {
                     throw new Error("Item not found");
@@ -70,7 +69,7 @@ export function useItemForm() {
                 });
 
                 // Fetch Availability
-                const { data: availability } = await supabase.from('listings_available_dates').select('*').eq('listing_id', itemIdNum).single();
+                const { data: availability } = await fetchAvailability(itemIdNum);
 
                 if (availability) {
                     setOverallAvailableDates({
@@ -129,20 +128,13 @@ export function useItemForm() {
     // Helper to fetch extra data if viewing as Borrower
     const fetchBorrowerViewData = async (item, existingUnavailable) => {
         // Get Lender Details
-        const { data: lenderData } = await supabase.from('accounts')
-            .select('id, name, email, image_url, phone')
-            .eq('id', item.owner_id)
-            .single();
+        const { data: lenderData } = await fetchUserById(item.owner_id, 'id, name, email, image_url, phone');
 
         setLender(lenderData);
 
         if (item.owner_id !== authenticatedUser.id) {
             // Get Existing Requests to block dates
-            const { data: requestDates } = await supabase.from('requests')
-                .select('start_date, end_date')
-                .eq('listing_id', item.id)
-                .eq('borrower_id', authenticatedUser.id)
-                .eq('status', REQUEST_STATUS.ACTIVE);
+            const { data: requestDates } = await fetchActiveRequestDates(item.id, authenticatedUser.id, REQUEST_STATUS.ACTIVE);
 
             const newUnavailable = [...existingUnavailable];
             if (requestDates) {

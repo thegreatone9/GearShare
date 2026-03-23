@@ -8,7 +8,7 @@ import {
     TIME_UNIT,
     upperCaseFirstLetter
 } from "../../util/Util.js";
-import {supabase} from "../../../server/supabaseClient.js";
+import {fetchListingWithAvailability, fetchUserById} from "../../../services/service.js";
 import Loader from "../../common/Loader.jsx";
 
 /**
@@ -29,20 +29,12 @@ export default function AcceptRentalRequest({request, onClose, setRequests, setL
 
     useEffect(() => {
         const fetchData = async function () {
-            const {data: itemData, error: itemError} = await supabase
-                .from('listings_with_availability')
-                .select('*')
-                .eq('id', listingId)
-                .single();
+            const {data: itemData, error: itemError} = await fetchListingWithAvailability(listingId);
 
             if (itemError) console.error("Error fetching item:", itemError);
             setItemWithAvailability(itemData);
 
-            const {data: borrowerData, error: borrowerError} = await supabase
-                .from('accounts')
-                .select('name, email')
-                .eq('id', borrowerId)
-                .single();
+            const {data: borrowerData, error: borrowerError} = await fetchUserById(borrowerId, 'name, email');
 
             if (borrowerError) console.error("Error fetching borrower:", borrowerError);
             setBorrower(borrowerData);

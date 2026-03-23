@@ -1,7 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {apiRequest, DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS, ROLE, TOAST_TYPE} from "../util/Util.js";
-import {supabase} from "../../server/supabaseClient.js";
+import {
+    fetchRequestsByBorrower, fetchRentalsByRequestIds, fetchListingsByIds,
+    fetchDisputesByRentalIds, fetchRentalById, deleteRequest
+} from "../../services/service.js";
 import BorrowerDashboardPresenter from "./BorrowerDashboardPresenter.jsx";
 import {useBorrowerDashboardDataHook} from "./useBorrowerDashboardDataHook.jsx";
 import {useAuth, useToast} from "../AppContext.jsx";
@@ -30,10 +33,7 @@ export default function BorrowerDashboardContainer() {
             setLoading(true);
 
             // 1. Fetch Requests (Primary data source for Borrower)
-            const {data: requestData, error: reqError} = await supabase
-                .from('requests')
-                .select('*')
-                .eq('borrower_id', userId);
+            const {data: requestData, error: reqError} = await fetchRequestsByBorrower(userId);
 
             if (reqError) console.error("Error fetching requests:", reqError);
             const fetchedRequests = requestData || [];
@@ -43,30 +43,21 @@ export default function BorrowerDashboardContainer() {
             const listingIds = fetchedRequests.map(req => req.listing_id);
 
             // 2. Fetch Rentals associated with those Requests
-            const {data: rentalData, error: rentalError} = await supabase
-                .from('rentals')
-                .select('*, request_id')
-                .in('request_id', requestIds);
+            const {data: rentalData, error: rentalError} = await fetchRentalsByRequestIds(requestIds);
 
             if (rentalError) console.error("Error fetching rentals:", rentalError);
             const fetchedRentals = rentalData || [];
             setBorrowerRentals(fetchedRentals);
 
             // 3. Fetch Listings needed for display titles
-            const {data: listingData, error: listingError} = await supabase
-                .from('listings')
-                .select('*')
-                .in('id', listingIds);
+            const {data: listingData, error: listingError} = await fetchListingsByIds(listingIds);
 
             if (listingError) console.error("Error fetching listings:", listingError);
             setListings(listingData || []);
 
             // 4. Fetch Disputes linked to the retrieved Rentals
             const rentalIds = fetchedRentals.map(rental => rental.id);
-            const {data: disputeData, error: disputeError} = await supabase
-                .from('disputes')
-                .select('*')
-                .in('rental_id', rentalIds);
+            const {data: disputeData, error: disputeError} = await fetchDisputesByRentalIds(rentalIds);
 
             if (disputeError) console.error("Error fetching disputes:", disputeError);
             setDisputes(disputeData || []);
@@ -99,10 +90,7 @@ export default function BorrowerDashboardContainer() {
             return;
         }
 
-        const {data: updatedRental, error: rentalError} = await supabase.from('rentals')
-            .select('*')
-            .eq('id', rental.id)
-            .single();
+        const {data: updatedRental, error: rentalError} = await fetchRentalById(rental.id);
 
         if (rentalError) {
             addToast(TOAST_TYPE.ERROR, `Error retrieving updated rental: ${rentalError.message}`);
@@ -122,10 +110,7 @@ export default function BorrowerDashboardContainer() {
     }
 
     const cancelRequest = async (request) => {
-        const {error} = await supabase
-            .from('requests')
-            .delete()
-            .eq('id', request.id);
+        const {error} = await deleteRequest(request.id);
 
         if (error) {
             addToast(TOAST_TYPE.ERROR, `Error cancelling request: ${request.id}: ${error.message}`);

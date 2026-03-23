@@ -1,5 +1,5 @@
-import {endpointWrapper} from "./util/transaction.js";
-import {isPartiallyAvailable} from "./util/util.js";
+import {endpointWrapper} from "../util/transaction.js";
+import {isPartiallyAvailable} from "../util/util.js";
 
 export default async function listingsWithAvailability(req, res) {
     if (req.method !== 'GET') {

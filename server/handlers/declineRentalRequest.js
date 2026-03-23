@@ -1,5 +1,5 @@
-import {endpointWrapper} from "./util/transaction.js";
-import {ACTIVITY, PAYMENT_INTENT_STATUS} from "../src/components/util/Util.js";
+import {endpointWrapper} from "../util/transaction.js";
+import {ACTIVITY, PAYMENT_INTENT_STATUS} from "../../src/utils/constants.js";
 
 export default async function declineRentalRequest(req, res) {
     if (req.method !== 'POST') {

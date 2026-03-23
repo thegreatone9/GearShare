@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {Download, User} from 'lucide-react';
 import Modal from "../common/Modal.jsx";
-import {supabase} from "../../server/supabaseClient.js";
+import {fetchUsersByIds, fetchRequestById} from "../../services/service.js";
 import Loader from "../common/Loader.jsx";
 import {itemImageSrc, userImageSrc} from "../util/Util.js";
 import {toPng} from "html-to-image";
@@ -22,10 +22,10 @@ const TransactionReceiptModal = ({isOpen, onClose, transaction}) => {
             setLoading(true);
 
             try {
-                const {data: users, error: userFetchError} = await supabase
-                    .from('accounts')
-                    .select('id, name, email, image_url')
-                    .in('id', [transaction.payer_id, transaction.payee_id]);
+                const {data: users, error: userFetchError} = await fetchUsersByIds(
+                    [transaction.payer_id, transaction.payee_id],
+                    'id, name, email, image_url'
+                );
 
                 if (userFetchError) {
                     throw userFetchError;
@@ -33,11 +33,7 @@ const TransactionReceiptModal = ({isOpen, onClose, transaction}) => {
 
                 let requestData = {};
                 if (transaction.request_id) {
-                    const {data: req, error: reqError} = await supabase
-                        .from('requests')
-                        .select('start_date, end_date')
-                        .eq('id', transaction.request_id)
-                        .single();
+                    const {data: req, error: reqError} = await fetchRequestById(transaction.request_id, 'start_date, end_date');
 
                     if (!reqError) {
                         requestData = req;

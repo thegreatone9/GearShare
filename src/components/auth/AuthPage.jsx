@@ -1,6 +1,10 @@
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
-import {supabase} from "../../server/supabaseClient.js";
+import {
+    addAccount as svcAddAccount,
+    authenticateUser as svcAuthenticateUser,
+    isUserExists as svcIsUserExists
+} from "../../services/service.js";
 import {getUserSessionData, TOAST_TYPE, updateUserCookie} from "../util/Util.js";
 import {useAuth, useToast} from "../AppContext.jsx";
 
@@ -18,49 +22,28 @@ export default function AuthPage() {
         setAuthenticatedUser(getUserSessionData(user));
     };
 
-    const addAccount = async  (newUser) => {
-        const { data: user, error: accountError } = await supabase
-            .from('accounts')
-            .insert([
-                {
-                    email: newUser.email,
-                    name: newUser.name,
-                    password: newUser.password
-                }
-            ])
-            .select()
-            .single();
+    const addAccount = async (newUser) => {
+        const { data: user, error: accountError } = await svcAddAccount(newUser);
 
         if (accountError) {
-            throw new Error(accountError.message);
+            throw new Error(accountError.message || accountError);
         }
 
         return user;
     };
 
     const authenticateUser = async (email, password) => {
-        const { data: user, error: accountError  } = await supabase.from('accounts')
-            .select('*')
-            .eq('email', email)
-            .eq('password', password)
-            .single();
+        const { data: user, error: accountError } = await svcAuthenticateUser(email, password);
 
         if (accountError) {
-            throw new Error(accountError.message);
+            throw new Error(accountError.message || accountError);
         }
 
         return user;
     };
 
     const isUserExists = async (email) => {
-        const { data } = await supabase
-            .from('accounts')
-            .select('id')
-            .eq('email', email)
-            .limit(1)
-            .maybeSingle();
-
-        return !!data;
+        return await svcIsUserExists(email);
     };
 
     const handleSubmit = async (e) => {

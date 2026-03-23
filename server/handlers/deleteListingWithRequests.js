@@ -1,5 +1,5 @@
-import {endpointWrapper} from "./util/transaction.js";
-import {ACTIVITY} from "../src/components/util/Util.js";
+import {endpointWrapper} from "../util/transaction.js";
+import {ACTIVITY} from "../../src/utils/constants.js";
 
 export default async function deleteListingWithRequests(req, res) {
     if (req.method !== 'POST') {

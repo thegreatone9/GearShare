@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from "react";
 import {useNavigate} from 'react-router-dom';
-import {supabase} from "../../server/supabaseClient.js";
+import {
+    fetchRentalsByRequestIds, fetchDisputesByRentalIds, fetchFromTable
+} from "../../services/service.js";
 import {
     apiRequest,
     DISPUTE_STATUS,
@@ -91,12 +93,7 @@ export default function LenderDashboardContainer() {
             setLoading(true);
 
             const fetchTable = async (table, filters = {}, setState) => {
-                let query = supabase.from(table).select('*');
-                Object.entries(filters).forEach(([key, value]) => {
-                    query = query.eq(key, value);
-                });
-
-                const { data, error } = await query;
+                const { data, error } = await fetchFromTable(table, filters);
 
                 if (error) {
                     addToast(TOAST_TYPE.ERROR, `Error fetching ${table}: ${error.message}`);
@@ -133,13 +130,10 @@ export default function LenderDashboardContainer() {
 
             const requestIds = fetchedRequests ? fetchedRequests.map(req => req.id) : [];
 
-            const {data: rentalData, error: rentalError} = await supabase
-                .from('rentals')
-                .select('*, request_id')
-                .in('request_id', requestIds);
+            const {data: rentalData, error: rentalError} = await fetchRentalsByRequestIds(requestIds);
 
             if (rentalError) {
-                addToast(TOAST_TYPE.ERROR, `Error fetching rentals: ${rentalError.message}`);
+                addToast(TOAST_TYPE.ERROR, `Error fetching rentals: ${rentalError.message || rentalError}`);
             }
 
             const lenderRentals = rentalData || [];
@@ -147,13 +141,10 @@ export default function LenderDashboardContainer() {
 
             const rentalIds = lenderRentals.map(rental => rental.id);
 
-            const {data: disputeData, error: disputeError} = await supabase
-                .from('disputes')
-                .select('*')
-                .in('rental_id', rentalIds);
+            const {data: disputeData, error: disputeError} = await fetchDisputesByRentalIds(rentalIds);
 
             if (disputeError) {
-                addToast(TOAST_TYPE.ERROR, `Error fetching disputes: ${disputeError.message}`);
+                addToast(TOAST_TYPE.ERROR, `Error fetching disputes: ${disputeError.message || disputeError}`);
             }
 
             setDisputes(disputeData || []);

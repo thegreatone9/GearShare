@@ -3,7 +3,10 @@ import React, {useEffect, useMemo, useState} from 'react';
 import DisputeActionModal from "./DisputeActionModal.jsx";
 import {processUserDisputes} from "./DisputeUtils.jsx";
 import DisputeCard from "./DisputeCard.jsx";
-import {supabase} from "../../server/supabaseClient.js";
+import {
+    fetchRequestsByUser, fetchRentalsByRequestIds, fetchDisputesByRentalIds,
+    fetchListingsByIds, fetchUsersByIds
+} from "../../services/service.js";
 import {BORROWER_DISPUTE_ACTIONS, LENDER_DISPUTE_ACTIONS, ROLE} from "../util/Util.js";
 import {useAuth, useToast} from "../AppContext.jsx";
 import Loader from "../common/Loader.jsx";
@@ -54,13 +57,10 @@ export default function DisputeDashboard() {
             setLoading(true);
 
             // 1. Fetch ALL Requests involving the user (Lender OR Borrower)
-            const {data: allRequests, error: reqError} = await supabase
-                .from('requests')
-                .select('*')
-                .or(`borrower_id.eq.${authenticatedUser.id},lender_id.eq.${authenticatedUser.id}`);
+            const {data: allRequests, error: reqError} = await fetchRequestsByUser(authenticatedUser.id);
 
             if (reqError) {
-                addToast(`Error fetching requests: ${reqError.message}`);
+                addToast(`Error fetching requests: ${reqError.message || reqError}`);
                 setLoading(false);
                 return;
             }
@@ -73,13 +73,10 @@ export default function DisputeDashboard() {
             ])];
 
             // 2. Fetch Rentals associated with those requests
-            const {data: rentalData, error: rentalError} = await supabase
-                .from('rentals')
-                .select('*')
-                .in('request_id', requestIds);
+            const {data: rentalData, error: rentalError} = await fetchRentalsByRequestIds(requestIds);
 
             if (rentalError) {
-                addToast(`Error fetching rentals: ${rentalError.message}`);
+                addToast(`Error fetching rentals: ${rentalError.message || rentalError}`);
                 setLoading(false);
                 return;
             }
@@ -87,21 +84,18 @@ export default function DisputeDashboard() {
             const rentalIds = rentalData ? rentalData.map(r => r.id) : [];
 
             // 3. Fetch Disputes linked to those Rentals
-            const {data: disputeData, error: disputeError} = await supabase
-                .from('disputes')
-                .select('*')
-                .in('rental_id', rentalIds);
+            const {data: disputeData, error: disputeError} = await fetchDisputesByRentalIds(rentalIds);
 
             if (disputeError) {
-                addToast(`Error fetching disputes: ${disputeError.message}`);
+                addToast(`Error fetching disputes: ${disputeError.message || disputeError}`);
                 setLoading(false);
                 return;
             }
 
-            // 4. Fetch Listings
+            // 4. Fetch Listings and Accounts
             const [{data: listingsData}, {data: accountsData}] = await Promise.all([
-                supabase.from('listings').select('*').in('id', listingIds),
-                supabase.from('accounts').select('id, name, email').in('id', uniqueAccountIds),
+                fetchListingsByIds(listingIds),
+                fetchUsersByIds(uniqueAccountIds, 'id, name, email'),
             ]);
 
             setAppData({

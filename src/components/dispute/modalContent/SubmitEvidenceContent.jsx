@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {supabase} from "../../../server/supabaseClient.js";
+import {updateDispute} from "../../../services/service.js";
 import {DISPUTE_STATUS} from "../../util/Util.js";
 
 export default function SubmitEvidenceContent ({ disputeData, onClose, setAppData }) {
@@ -16,12 +16,7 @@ export default function SubmitEvidenceContent ({ disputeData, onClose, setAppDat
         };
 
         // 2. Update the dispute record in the database
-        const { data: updatedDispute, error } = await supabase
-            .from('disputes')
-            .update(updateData)
-            .eq('id', disputeId)
-            .select()
-            .single();
+        const { data: updatedDispute, error } = await updateDispute(disputeId, updateData);
 
         if (error) {
             console.error("Error submitting evidence:", error);

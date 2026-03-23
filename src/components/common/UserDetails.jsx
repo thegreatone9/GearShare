@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {supabase} from "../../server/supabaseClient.js";
+import {fetchUserById} from "../../services/service.js";
 import Loader from "./Loader.jsx";
 import {CheckCircle, XCircle} from 'lucide-react';
 import {userImageSrc} from "../util/Util.js";
@@ -12,11 +12,7 @@ export default function UserDetails({userId, onClose}) {
         setLoading(true);
 
         const fetchUser = async function () {
-            const {data: userData, error: userError} = await supabase
-                .from('accounts')
-                .select('name, email, phone, image_url, nid_url')
-                .eq('id', userId)
-                .single();
+            const {data: userData, error: userError} = await fetchUserById(userId, 'name, email, phone, image_url, nid_url');
 
             if (userError) {
                 console.error("Error fetching user:", userError);

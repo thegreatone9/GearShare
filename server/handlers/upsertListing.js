@@ -1,5 +1,5 @@
-import {endpointWrapper} from "./util/transaction.js";
-import {ACTIVITY} from "../src/components/util/Util.js";
+import {endpointWrapper} from "../util/transaction.js";
+import {ACTIVITY} from "../../src/utils/constants.js";
 
 /**
  * Builds SQL SET clause for UPDATE with non-null values only

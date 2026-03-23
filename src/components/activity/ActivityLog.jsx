@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {useAuth} from "../AppContext.jsx";
 import Loader from "../common/Loader.jsx";
-import {supabase} from "../../server/supabaseClient.js";
+import {fetchActivityLog} from "../../services/service.js";
 import {ACTIVITY} from "../util/Util.js";
 
 export default function ActivityLog() {
@@ -17,11 +17,7 @@ export default function ActivityLog() {
         // Fetch from your simple endpoint
         async function fetchActivity() {
             try {
-                const {data} = await supabase
-                    .from('activity_log')
-                    .select('*')
-                    .eq('user_id', authenticatedUser.id)
-                    .order('created_at', { ascending: false });
+                const {data} = await fetchActivityLog(authenticatedUser.id);
 
                 setActivities(data);
 

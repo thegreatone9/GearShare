@@ -1,14 +1,14 @@
-import listingsWithAvailability from "../server/listingsWithAvailability.js";
-import checkAvailability from "../server/checkAvailability.js";
-import confirmRental from "../server/confirmRental.js";
-import declineRentalRequest from "../server/declineRentalRequest.js";
-import deleteListingWithRequests from "../server/deleteListingWithRequests.js";
-import requestItem from "../server/requestItem.js";
-import payDamages from "../server/payDamages.js";
-import resolveDispute from "../server/resolveDispute.js";
-import transactions from "../server/transactions.js";
-import returnItemCreateDispute from "../server/returnItemCreateDispute.js";
-import upsertListing from "../server/upsertListing.js";
+import listingsWithAvailability from "../server/handlers/listingsWithAvailability.js";
+import checkAvailability from "../server/handlers/checkAvailability.js";
+import confirmRental from "../server/handlers/confirmRental.js";
+import declineRentalRequest from "../server/handlers/declineRentalRequest.js";
+import deleteListingWithRequests from "../server/handlers/deleteListingWithRequests.js";
+import requestItem from "../server/handlers/requestItem.js";
+import payDamages from "../server/handlers/payDamages.js";
+import resolveDispute from "../server/handlers/resolveDispute.js";
+import transactions from "../server/handlers/transactions.js";
+import returnItemCreateDispute from "../server/handlers/returnItemCreateDispute.js";
+import upsertListing from "../server/handlers/upsertListing.js";
 
 export default async function handler(req, res) {
     // 2. extract the path from the URL

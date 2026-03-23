@@ -1,12 +1,6 @@
-import {endpointWrapper} from "./util/transaction.js";
-import {
-    ACTIVITY,
-    ADMIN_ID,
-    calculateRentalFee,
-    PAYMENT_INTENT_STATUS,
-    TIME_UNIT,
-    TRANSACTION_STATUS
-} from "../src/components/util/Util.js";
+import {endpointWrapper} from "../util/transaction.js";
+import {ACTIVITY, ADMIN_ID, PAYMENT_INTENT_STATUS, TIME_UNIT, TRANSACTION_STATUS} from "../../src/utils/constants.js";
+import {calculateRentalFee} from "../../src/utils/rental.js";
 
 /**
  * Handles item return and creates a dispute

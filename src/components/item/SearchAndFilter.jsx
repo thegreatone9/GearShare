@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {supabase} from '../../server/supabaseClient.js';
+import {searchListings} from '../../services/service.js';
 import {isEmptyString, LISTING_CATEGORY, LISTING_STATUS, TOAST_TYPE} from "../util/Util.js";
 import {useToast} from "../AppContext.jsx";
 import {clearAllSessionVariables, retrieveSessionVariable, saveSessionVariable} from "../util/SessionUtil.js";
@@ -33,27 +33,15 @@ function SearchAndFilter({ setListings, setLoading }) {
         setLoading(true);
 
         try {
-            let query = supabase
-                .from('listings_with_availability')
-                .select('*')
-                .eq('status', LISTING_STATUS.ACTIVE);
-
-            if (hasSearchTerm) {
-                query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
-            }
-
-            if (hasLocation) {
-                query = query.ilike('location', `%${searchLocation}%`);
-            }
-
-            if (hasCategory) {
-                query = query.eq('category', selectedCategory);
-            }
-
-            const { data, error } = await query;
+            const { data, error } = await searchListings({
+                status: LISTING_STATUS.ACTIVE,
+                searchTerm: hasSearchTerm ? searchTerm : null,
+                location: hasLocation ? searchLocation : null,
+                category: hasCategory ? selectedCategory : null
+            });
 
             if (error) {
-                addToast(TOAST_TYPE.ERROR, `Error fetching filtered listings: ${error.message}`);
+                addToast(TOAST_TYPE.ERROR, `Error fetching filtered listings: ${error.message || error}`);
                 setLoading(false);
 
                 return;

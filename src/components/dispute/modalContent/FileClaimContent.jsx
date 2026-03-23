@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {DISPUTE_STATUS} from "../../util/Util.js";
-import {supabase} from "../../../server/supabaseClient.js";
+import {updateDispute} from "../../../services/service.js";
 
 export default function FileClaimContent({ disputeData, onClose, setAppData }) {
     const [damageDescription, setDamageDescription] = useState('');
@@ -22,12 +22,7 @@ export default function FileClaimContent({ disputeData, onClose, setAppData }) {
             lender_claim_details: damageDescription
         };
 
-        const { data: updatedDispute, error } = await supabase
-            .from('disputes')
-            .update(updateData)
-            .eq('id', disputeId)
-            .select()
-            .single();
+        const { data: updatedDispute, error } = await updateDispute(disputeId, updateData);
 
         if (error) {
             console.error("Error filing claim:", error);

@@ -1,4 +1,4 @@
-import { endpointWrapper } from "./util/transaction.js";
+import { endpointWrapper } from "../util/transaction.js";
 
 export default async function transactions(req, res) {
     if (req.method !== 'GET') {

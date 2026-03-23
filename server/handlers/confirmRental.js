@@ -1,5 +1,5 @@
-import {endpointWrapper} from "./util/transaction.js";
-import {ACTIVITY, ADMIN_ID, PAYMENT_INTENT_STATUS, TRANSACTION_STATUS} from "../src/components/util/Util.js";
+import {endpointWrapper} from "../util/transaction.js";
+import {ACTIVITY, ADMIN_ID, PAYMENT_INTENT_STATUS, TRANSACTION_STATUS} from "../../src/utils/constants.js";
 
 /**
  * Checks if two date ranges overlap

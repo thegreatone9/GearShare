@@ -1,11 +1,6 @@
-import {endpointWrapper} from "./util/transaction.js";
-import {
-    ACTIVITY,
-    calculateDuration,
-    calculateRentalFee,
-    PAYMENT_INTENT_STATUS,
-    TIME_UNIT
-} from "../src/components/util/Util.js";
+import {endpointWrapper} from "../util/transaction.js";
+import {ACTIVITY, PAYMENT_INTENT_STATUS, TIME_UNIT} from "../../src/utils/constants.js";
+import {calculateDuration, calculateRentalFee} from "../../src/utils/rental.js";
 
 export default async function requestItem(req, res) {
     if (req.method !== 'POST') {

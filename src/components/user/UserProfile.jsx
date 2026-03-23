@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {AlertTriangle, CheckCircle, Hash, Image, Mail, Phone, Save, ScanEye, User} from 'lucide-react';
-import {supabase} from "../../server/supabaseClient.js";
+import {fetchUserByEmail, updateAccount} from "../../services/service.js";
 import {getStatusClasses, getUserSessionData, IMG_NOT_FOUND_URL, TOAST_TYPE, updateUserCookie} from "../util/Util.js";
 import {useAuth} from "../AppContext.jsx";
 import PDFViewer from "../common/PdfViewer.jsx";
@@ -30,10 +30,7 @@ export default function UserProfile() {
 
     useEffect(() => {
         const fetchUserData = async function () {
-            const { data: user, error: accountError  } = await supabase.from('accounts')
-                .select('*')
-                .eq('email', authenticatedUser.email)
-                .single();
+            const { data: user, error: accountError  } = await fetchUserByEmail(authenticatedUser.email);
 
             if (accountError) {
                 throw new Error('Unable to load User Profile data');
@@ -88,10 +85,7 @@ export default function UserProfile() {
                 throw new Error(`NID URL must be a valid HTTPS link!`);
             }
 
-            const { error: accountError } = await supabase
-                .from('accounts')
-                .update(formData)
-                .eq('id', initialUserData.id);
+            const { error: accountError } = await updateAccount(initialUserData.id, formData);
 
             if (accountError) {
                 throw new Error(`Failed to update profile details: ${accountError.message}`);

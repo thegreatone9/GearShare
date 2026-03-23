@@ -1,15 +1,23 @@
-import {Pool} from "pg";
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Create a shared connection pool for serverless functions
-const pool = new Pool({
-    connectionString: process.env.SUPABASE_DB_URL,
-    ssl: {
-        rejectUnauthorized: false
-    }
-});
+let pool;
+
+if (process.env.USE_LOCAL_DB === 'true') {
+    // Use SQLite pool from dev/db.js
+    const { getPool } = await import('../../dev/db.js');
+    pool = getPool();
+} else {
+    // Use PostgreSQL pool
+    const { Pool } = await import('pg');
+    pool = new Pool({
+        connectionString: process.env.SUPABASE_DB_URL,
+        ssl: {
+            rejectUnauthorized: false
+        }
+    });
+}
 
 export async function transactionWrapper(fn) {
     let client;
