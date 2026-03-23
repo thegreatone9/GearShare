@@ -60,9 +60,9 @@ export default function DisputeActionModal({modalState, closeModal, setAppData})
             break;
 
         case LENDER_DISPUTE_ACTIONS.VIEW_BORROWER:
-            modalTitle = 'Lender Details';
+            modalTitle = 'Merchant Details';
         case BORROWER_DISPUTE_ACTIONS.VIEW_LENDER:
-            modalTitle = modalTitle ? modalTitle : 'Borrower Details';
+            modalTitle = modalTitle ? modalTitle : 'Client Details';
             modalContent = <UserDetails userId={disputeData.opponentId} onClose={closeModal} />;
             break;
 

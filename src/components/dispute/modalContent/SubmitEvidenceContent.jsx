@@ -32,7 +32,7 @@ export default function SubmitEvidenceContent ({ disputeData, onClose, setAppDat
             return { ...prevData, disputes: updatedDisputes };
         });
 
-        console.log(`CONFIRMED ACTION: Borrower submitted evidence for Case #${disputeId}`);
+        console.log(`CONFIRMED ACTION: Client submitted evidence for Case #${disputeId}`);
         onClose();
     };
 

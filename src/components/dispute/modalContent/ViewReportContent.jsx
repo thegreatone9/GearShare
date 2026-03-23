@@ -8,9 +8,9 @@ export default function ViewReportContent ({ disputeData, onClose }) {
                 <p className="font-semibold">Platform Ruling Date:</p>
                 <p>October 25, 2025</p>
                 <p className="font-semibold mt-3">Final Decision:</p>
-                <p className="text-lg font-bold text-green-700">Borrower found non-liable for damage.</p>
+                <p className="text-lg font-bold text-green-700">Client found non-liable for damage.</p>
                 <p className="font-semibold mt-3">Deposit Payout:</p>
-                <p>Full Deposit ($150.00) returned to Borrower.</p>
+                <p>Full Deposit ($150.00) returned to Client.</p>
                 <p className="font-semibold mt-3">Case Status:</p>
                 <p>Closed (Dispute Status: COMPLETED)</p>
             </div>

@@ -181,7 +181,7 @@ export const PricingSection = ({ editMode, itemState, handleChange }) => {
 export const LenderInfoCard = ({ lender, isSellListing }) => (
     <div className="space-y-4 pb-6 mx-auto flex flex-col items-center">
         <h4 className="text-xl font-semibold text-indigo-700">
-            {isSellListing ? '4. Seller Details' : '4. Lender Details'}
+            {isSellListing ? '4. Seller Details' : '4. Merchant Details'}
         </h4>
         <img src={userImageSrc(lender.name)} alt={lender.name} className="w-24 h-24 object-cover rounded-full" />
         <InfoRow icon={User} label="Name" value={lender.name} />

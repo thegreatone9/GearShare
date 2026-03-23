@@ -1,7 +1,7 @@
 import Modal from "./Modal.jsx";
 import React from 'react';
 import {MODAL_CATEGORY} from "../util/Util.js";
-import AcceptRentalRequest from "../lender/modalContent/AcceptRentalRequest.jsx";
+import AcceptRentalRequest from "../merchant/modalContent/AcceptRentalRequest.jsx";
 import ModalItemDetails from "./ModalItemDetails.jsx";
 import UserDetails from "./UserDetails.jsx";
 

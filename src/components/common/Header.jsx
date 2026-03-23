@@ -20,8 +20,8 @@ export default function Header () {
         { path: '/marketplace', label: 'Browse Marketplace', icon: Home },
     ];
     const dashboardTabs = [
-        { path: '/borrower', label: 'Borrower', icon: Zap },
-        { path: '/lender', label: 'Lender', icon: Briefcase },
+        { path: '/client', label: 'Client', icon: Zap },
+        { path: '/merchant', label: 'Merchant', icon: Briefcase },
         { path: '/disputes', label: 'Disputes', icon: Scale },
     ];
 

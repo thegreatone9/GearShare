@@ -11,8 +11,8 @@ import ItemForm from "./components/item/ItemForm2.jsx";
 import {checkSession} from "./components/util/Util.js";
 import Footer from "./components/common/Footer.jsx";
 import UserProfile from "./components/user/UserProfile.jsx";
-import LenderDashboardContainer from "./components/lender/LenderDashboardContainer.jsx";
-import BorrowerDashboardContainer from "./components/borrower/BorrowerDashboardContainer.jsx";
+import MerchantDashboardContainer from "./components/merchant/MerchantDashboardContainer.jsx";
+import ClientDashboardContainer from "./components/client/ClientDashboardContainer.jsx";
 import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
 import {useAuth} from "./components/AppContext.jsx";
 import ToastContainer from "./components/common/ToastContainer.jsx";
@@ -35,7 +35,7 @@ export default function App() {
 
                     const currentPath = location.pathname;
                     if (currentPath === '/' || currentPath === '/auth') {
-                        navigate('/borrower', {replace: true});
+                        navigate('/client', {replace: true});
                     }
 
                 } else {
@@ -73,15 +73,15 @@ export default function App() {
                         <Route path="/marketplace" element={<MarketplaceContent/>}/>
 
                         <Route
-                            path="/borrower"
+                            path="/client"
                             element={<ProtectedRoute>
-                                <BorrowerDashboardContainer/>
+                                <ClientDashboardContainer/>
                             </ProtectedRoute>}
                         />
                         <Route
-                            path="/lender"
+                            path="/merchant"
                             element={<ProtectedRoute>
-                                <LenderDashboardContainer/>
+                                <MerchantDashboardContainer/>
                             </ProtectedRoute>}
                         />
                         <Route

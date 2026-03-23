@@ -136,7 +136,7 @@ const TransactionReceiptModal = ({isOpen, onClose, transaction}) => {
                                     {/* Lender */}
                                     <div>
                                         <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 flex items-center">
-                                            <User className="w-3 h-3 mr-1"/> Payee (Lender)
+                                            <User className="w-3 h-3 mr-1"/> Payee (Merchant)
                                         </h4>
                                         <div className="flex items-center">
                                             <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">
@@ -152,7 +152,7 @@ const TransactionReceiptModal = ({isOpen, onClose, transaction}) => {
                                     {/* Borrower */}
                                     <div>
                                         <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 flex items-center">
-                                            <User className="w-3 h-3 mr-1"/> Payer (Borrower)
+                                            <User className="w-3 h-3 mr-1"/> Payer (Client)
                                         </h4>
                                         <div className="flex items-center">
                                             <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">

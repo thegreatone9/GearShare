@@ -13,14 +13,14 @@ import Loader from "../../common/Loader.jsx";
 
 /**
  * Content for the modal used to confirm a rental acceptance.
- * @param {Object} props - Contains request, item, borrower details, and action handlers.
+ * @param {Object} props - Contains request, item, client details, and action handlers.
  */
-export default function AcceptRentalRequest({request, onClose, setRequests, setLenderRentals, closeAllModals}) {
+export default function AcceptRentalRequest({request, onClose, setRequests, setMerchantRentals, closeAllModals}) {
     if (!request) return (
         <div className="text-center text-red-500">Error: Missing request details.</div>
     );
 
-    const [borrower, setBorrower] = useState(null);
+    const [client, setClient] = useState(null);
     const [itemWithAvailability, setItemWithAvailability] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -34,10 +34,10 @@ export default function AcceptRentalRequest({request, onClose, setRequests, setL
             if (itemError) console.error("Error fetching item:", itemError);
             setItemWithAvailability(itemData);
 
-            const {data: borrowerData, error: borrowerError} = await fetchUserById(borrowerId, 'name, email');
+            const {data: clientData, error: clientError} = await fetchUserById(borrowerId, 'name, email');
 
-            if (borrowerError) console.error("Error fetching borrower:", borrowerError);
-            setBorrower(borrowerData);
+            if (clientError) console.error("Error fetching client:", clientError);
+            setClient(clientData);
         }
 
         fetchData()
@@ -77,7 +77,7 @@ export default function AcceptRentalRequest({request, onClose, setRequests, setL
 
     return (
         <div className="space-y-5">
-            <p className="text-sm text-gray-500 mt-1">Review borrower details before finalizing the transaction.</p>
+            <p className="text-sm text-gray-500 mt-1">Review client details before finalizing the transaction.</p>
 
             {/* Item Summary */}
             <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
@@ -91,11 +91,11 @@ export default function AcceptRentalRequest({request, onClose, setRequests, setL
                 </p>
             </div>
 
-            {/* Borrower Details */}
+            {/* Client Details */}
             <div className="p-4 border border-gray-200 rounded-lg space-y-2">
                 <h4 className="font-semibold text-gray-800 flex items-center mb-2">
                     <User className="w-4 h-4 mr-2 text-indigo-600"/>
-                    Borrower: {borrower.name}
+                    Client: {client.name}
                 </h4>
                 <div className="flex text-sm text-gray-600 items-start">
                     <Calendar className="w-4 h-4 mr-2 flex-shrink-0 mt-[2px]"/>

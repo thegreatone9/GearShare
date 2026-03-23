@@ -1,11 +1,11 @@
 import React from 'react';
 import {Package, ShieldAlert, Zap} from 'lucide-react';
-import {getDisputeDisplay} from "./BorrowerUtil.js";
+import {getDisputeDisplay} from "./ClientUtil.js";
 import ActionModal from "../common/ActionModal.jsx";
 import DashboardListSection from "../common/DashboardListSection.jsx";
 import {itemImageSrc, REQUEST_STATUS} from "../util/Util.js";
 
-export default function BorrowerDashboardPresenter({
+export default function ClientDashboardPresenter({
                                                        itemDetailsModalActive,
                                                        isModalOpen,
                                                        closeAllModals,
@@ -18,9 +18,10 @@ export default function BorrowerDashboardPresenter({
                                                        requests,
                                                        listings,
                                                        disputes,
+                                                       purchases,
 
                                                        openItemDetailsModal,
-                                                       openLenderDetailsModal,
+                                                       openMerchantDetailsModal,
                                                        handleReturn,
                                                        handleViewDispute,
                                                        cancelRequest
@@ -60,8 +61,8 @@ export default function BorrowerDashboardPresenter({
                             onClick={(event) => handleReturn(rental, event)}>Pay & Return Item Now
                     </button>
                     <button className="text-sm ml-2 text-white bg-amber-500 px-3 py-1 rounded-lg hover:bg-orange-700 transition"
-                            onClick={(event) => openLenderDetailsModal(event, item.owner_id)}>
-                        Lender Details
+                            onClick={(event) => openMerchantDetailsModal(event, item.owner_id)}>
+                        Merchant Details
                     </button>
                 </div>
             </div>
@@ -79,7 +80,7 @@ export default function BorrowerDashboardPresenter({
                     <img src={itemImageSrc(item.image_url, item.title)} alt={item.title} className="w-12 h-12 rounded-lg object-cover"/>
                     <div className="flex flex-col justify-center items-center">
                         <p className="text-sm text-gray-700 mb-1">
-                            Requested <span className="text-indigo-600 font-bold">{item.title}</span> from <a href="#" className="font-bold text-indigo-900 hover:underline" onClick={(event) => openLenderDetailsModal(event, req.lender_id)}>Lender</a>
+                            Requested <span className="text-indigo-600 font-bold">{item.title}</span> from <a href="#" className="font-bold text-indigo-900 hover:underline" onClick={(event) => openMerchantDetailsModal(event, req.lender_id)}>Merchant</a>
                         </p>
                         <p className="text-xs text-gray-600">
                             Request Date: {req.date || 'N/A'} | Deposit: ${item.replacement_value || 'N/A'}
@@ -146,9 +147,36 @@ export default function BorrowerDashboardPresenter({
                         {display.label}
                     </span>
                     <button className="text-sm ml-2 text-white bg-amber-500 px-3 py-1 rounded-lg hover:bg-orange-700 transition"
-                            onClick={(event) => openLenderDetailsModal(event, item.owner_id)}>
-                        Lender Details
+                            onClick={(event) => openMerchantDetailsModal(event, item.owner_id)}>
+                        Merchant Details
                     </button>
+                </div>
+            </div>
+        );
+    };
+
+    // 5. Purchases Item Renderer
+    const renderPurchase = (purchase) => {
+        const snapshot = purchase.listing_snapshot;
+        if (!snapshot) return null;
+
+        return (
+            <div key={purchase.id}
+                 className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-emerald-50 border border-emerald-200 rounded-xl hover:bg-emerald-100 transition gap-8">
+                <div className="flex items-center space-x-3 cursor-pointer"
+                     onClick={() => openItemDetailsModal(snapshot)}>
+                    <img src={itemImageSrc(snapshot.image_url, snapshot.title)} alt={snapshot.title}
+                         className="w-12 h-12 rounded-lg object-cover border border-emerald-300"/>
+                    <div>
+                        <p className="font-medium text-gray-900">{snapshot.title}</p>
+                        <p className="text-sm text-gray-500">Purchased: {purchase.date}</p>
+                    </div>
+                </div>
+                <div className="sm:text-right flex items-center gap-2">
+                    <span className="text-sm font-bold text-emerald-700">${snapshot.price}</span>
+                    <span className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-700">
+                        Purchased ✅
+                    </span>
                 </div>
             </div>
         );
@@ -166,7 +194,7 @@ export default function BorrowerDashboardPresenter({
                 />
             )}
 
-            <h3 className="text-3xl font-bold text-gray-800 mb-8">Borrower History: Your Rentals</h3>
+            <h3 className="text-3xl font-bold text-gray-800 mb-8">Client Dashboard</h3>
 
             <div className="space-y-10">
                 {/* 1. Active Rentals (Physically Out) */}
@@ -189,7 +217,17 @@ export default function BorrowerDashboardPresenter({
                     emptyMessage="No requests for rentals are made."
                 />
 
-                {/* 3. Disputed Rentals (Returned but Unsettled) */}
+                {/* 3. My Purchases */}
+                <DashboardListSection
+                    title={`My Purchases (${purchases.length})`}
+                    Icon={Package}
+                    iconColor="text-emerald-500"
+                    list={purchases}
+                    renderItem={renderPurchase}
+                    emptyMessage="No purchases yet."
+                />
+
+                {/* 4. Disputed Rentals (Returned but Unsettled) */}
                 <DashboardListSection
                     title={`Disputed Rentals (${disputedRentals.length})`}
                     Icon={ShieldAlert}
@@ -208,7 +246,7 @@ export default function BorrowerDashboardPresenter({
                     }
                 />
 
-                {/* 4. Past Rentals (Settled) */}
+                {/* 5. Past Rentals (Settled) */}
                 <DashboardListSection
                     title={`Past Rentals (Settled) (${pastRentals.length})`}
                     Icon={Package}

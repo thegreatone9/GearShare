@@ -3,14 +3,14 @@ import {useNavigate} from 'react-router-dom';
 import {apiRequest, DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS, ROLE, TOAST_TYPE} from "../util/Util.js";
 import {
     fetchRequestsByBorrower, fetchRentalsByRequestIds, fetchListingsByIds,
-    fetchDisputesByRentalIds, fetchRentalById, deleteRequest
+    fetchDisputesByRentalIds, fetchRentalById, deleteRequest, fetchFromTable
 } from "../../services/service.js";
-import BorrowerDashboardPresenter from "./BorrowerDashboardPresenter.jsx";
-import {useBorrowerDashboardDataHook} from "./useBorrowerDashboardDataHook.jsx";
+import ClientDashboardPresenter from "./ClientDashboardPresenter.jsx";
+import {useClientDashboardDataHook} from "./useClientDashboardDataHook.jsx";
 import {useAuth, useToast} from "../AppContext.jsx";
 import Loader from "../common/Loader.jsx";
 
-export default function BorrowerDashboardContainer() {
+export default function ClientDashboardContainer() {
     const navigate = useNavigate();
     const {authenticatedUser} = useAuth();
     const {addToast} = useToast();
@@ -20,7 +20,8 @@ export default function BorrowerDashboardContainer() {
     const [listings, setListings] = useState([]);
     const [disputes, setDisputes] = useState([]);
     const [requests, setRequests] = useState([]);
-    const [borrowerRentals, setBorrowerRentals] = useState([]);
+    const [clientRentals, setClientRentals] = useState([]);
+    const [purchases, setPurchases] = useState([]);
 
     const [modalPayload, setModalPayload] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,10 +30,10 @@ export default function BorrowerDashboardContainer() {
 
     // --- Data Fetching (useEffect) ---
     useEffect(() => {
-        const fetchBorrowerData = async () => {
+        const fetchClientData = async () => {
             setLoading(true);
 
-            // 1. Fetch Requests (Primary data source for Borrower)
+            // 1. Fetch Requests (Primary data source for Client)
             const {data: requestData, error: reqError} = await fetchRequestsByBorrower(userId);
 
             if (reqError) console.error("Error fetching requests:", reqError);
@@ -47,7 +48,7 @@ export default function BorrowerDashboardContainer() {
 
             if (rentalError) console.error("Error fetching rentals:", rentalError);
             const fetchedRentals = rentalData || [];
-            setBorrowerRentals(fetchedRentals);
+            setClientRentals(fetchedRentals);
 
             // 3. Fetch Listings needed for display titles
             const {data: listingData, error: listingError} = await fetchListingsByIds(listingIds);
@@ -62,15 +63,41 @@ export default function BorrowerDashboardContainer() {
             if (disputeError) console.error("Error fetching disputes:", disputeError);
             setDisputes(disputeData || []);
 
+            // 5. Fetch Purchases (sale transactions where user is the buyer)
+            const {data: txData, error: txError} = await fetchFromTable('transactions', {payer_id: userId, type: 'SALE'});
+
+            if (txError) console.error("Error fetching purchases:", txError);
+            if (txData && txData.length > 0) {
+                // Get the request snapshots for each purchase
+                const purchaseRequestIds = txData.map(tx => tx.request_id);
+                const {data: purchaseRequests} = await fetchFromTable('requests', {});
+                const matchingRequests = (purchaseRequests || []).filter(r => purchaseRequestIds.includes(r.id));
+
+                const purchasesWithSnapshots = txData.map(tx => {
+                    const req = matchingRequests.find(r => r.id === tx.request_id);
+                    let snapshot = req?.listing_snapshot;
+                    if (typeof snapshot === 'string') {
+                        try { snapshot = JSON.parse(snapshot); } catch (e) { snapshot = null; }
+                    }
+                    return {
+                        ...tx,
+                        listing_snapshot: snapshot,
+                        date: req?.date || new Date(tx.created_at).toLocaleDateString()
+                    };
+                });
+
+                setPurchases(purchasesWithSnapshots);
+            }
+
             setLoading(false);
         };
 
-        fetchBorrowerData();
+        fetchClientData();
 
     }, [userId]);
 
     // --- Data Filtering (useMemo) ---
-    const {activeRentals, disputedRentals, pastRentals} = useBorrowerDashboardDataHook(borrowerRentals, disputes);
+    const {activeRentals, disputedRentals, pastRentals} = useClientDashboardDataHook(clientRentals, disputes);
 
     // --- Handlers ---
     const handleReturn = async function (rental, event) {
@@ -97,7 +124,7 @@ export default function BorrowerDashboardContainer() {
         }
 
         // C. Update local state
-        setBorrowerRentals(prevRentals =>
+        setClientRentals(prevRentals =>
             prevRentals.map(r => r.id === rental.id ? updatedRental : r)
         );
         setDisputes(prevDisputes => [...prevDisputes, newDispute]);
@@ -131,7 +158,7 @@ export default function BorrowerDashboardContainer() {
         setIsModalOpen(true);
     }
 
-    const openLenderDetailsModal = (event, userId) => {
+    const openMerchantDetailsModal = (event, userId) => {
         event.stopPropagation();
 
         setModalPayload({category: MODAL_CATEGORY.LENDER, data: {userId}});
@@ -154,7 +181,7 @@ export default function BorrowerDashboardContainer() {
             }
         },
         [MODAL_CATEGORY.LENDER]: {
-            title: "Lender Details",
+            title: "Merchant Details",
             maxWidth: "max-w-xl",
             props: {
                 userId: modalPayload?.data?.userId,
@@ -173,11 +200,11 @@ export default function BorrowerDashboardContainer() {
     const itemDetailsModalActive = currentModalConfig.title && isModalOpen;
 
     if (loading) {
-        return <Loader show={loading} message={'Loading Borrower Dashboard'}/>
+        return <Loader show={loading} message={'Loading Client Dashboard'}/>
     }
 
     return (
-        <BorrowerDashboardPresenter
+        <ClientDashboardPresenter
             itemDetailsModalActive={itemDetailsModalActive}
             isModalOpen={isModalOpen}
             closeAllModals={closeAllModals}
@@ -190,9 +217,10 @@ export default function BorrowerDashboardContainer() {
             requests={requests}
             listings={listings}
             disputes={disputes}
+            purchases={purchases}
 
             openItemDetailsModal={openItemDetailsModal}
-            openLenderDetailsModal={openLenderDetailsModal}
+            openMerchantDetailsModal={openMerchantDetailsModal}
             handleReturn={handleReturn}
             handleViewDispute={handleViewDispute}
             cancelRequest={cancelRequest}

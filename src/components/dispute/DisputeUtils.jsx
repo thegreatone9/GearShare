@@ -84,7 +84,7 @@ const getStatusDetails = (dispute, userRole) => {
         }
         // Borrower's view (passive)
         return {
-            label: 'Awaiting Lender Review',
+            label: 'Awaiting Merchant Review',
             color: 'bg-yellow-100 text-yellow-700',
             actions: []
         };
@@ -93,14 +93,14 @@ const getStatusDetails = (dispute, userRole) => {
     if (status === DISPUTE_STATUS.CLAIM_FILED) {
         if (userRole === ROLE.BORROWER) {
             return {
-                label: 'Lender Claim Filed: Action Required',
+                label: 'Merchant Claim Filed: Action Required',
                 color: 'bg-red-100 text-red-700',
                 actions: [BORROWER_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS, BORROWER_DISPUTE_ACTIONS.SUBMIT_EVIDENCE], // Consistent use of actions array
             };
         }
         // Lender's view (passive—waiting for borrower's evidence)
         return {
-            label: 'Awaiting Borrower Evidence',
+            label: 'Awaiting Client Evidence',
             color: 'bg-blue-100 text-blue-700',
             actions: [LENDER_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS]
         };
@@ -116,7 +116,7 @@ const getStatusDetails = (dispute, userRole) => {
         }
         // Lender's view (passive—waiting for borrower's evidence)
         return {
-            label: 'Judgement Pronounced: Awaiting Borrower Damages',
+            label: 'Judgement Pronounced: Awaiting Client Damages',
             color: 'bg-indigo-100 text-indigo-700',
             actions: [LENDER_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS, LENDER_DISPUTE_ACTIONS.VIEW_REPORT]
         };

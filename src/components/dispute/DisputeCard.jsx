@@ -28,7 +28,7 @@ export default function DisputeCard({disputeData, openActionModal, openOpponentD
         },
         [LENDER_DISPUTE_ACTIONS.VIEW_BORROWER]: {
             icon: ACTION_ICONS[LENDER_DISPUTE_ACTIONS.VIEW_BORROWER],
-            label: 'Borrower Details',
+            label: 'Client Details',
             className: 'bg-indigo-600 hover:bg-indigo-700'
         },
         [LENDER_DISPUTE_ACTIONS.VIEW_ITEM]: {
@@ -56,7 +56,7 @@ export default function DisputeCard({disputeData, openActionModal, openOpponentD
         },
         [BORROWER_DISPUTE_ACTIONS.VIEW_LENDER]: {
             icon: ACTION_ICONS[BORROWER_DISPUTE_ACTIONS.VIEW_LENDER],
-            label: 'Lender Details',
+            label: 'Merchant Details',
             className: 'bg-indigo-600 hover:bg-indigo-700'
         },
         [BORROWER_DISPUTE_ACTIONS.VIEW_ITEM]: {
@@ -75,7 +75,7 @@ export default function DisputeCard({disputeData, openActionModal, openOpponentD
                      className="w-12 h-12 rounded-lg object-cover"/>
                 <div>
                     <p className="text-md text-gray-900">{disputeData.item.title}</p>
-                    <a className="text-sm text-indigo-900 hover:underline" href="#" onClick={(event) => openOpponentDetails(event, disputeData)}>{isLender ? 'Borrower' : 'Lender'} Details</a>
+                    <a className="text-sm text-indigo-900 hover:underline" href="#" onClick={(event) => openOpponentDetails(event, disputeData)}>{isLender ? 'Client' : 'Merchant'} Details</a>
                     <p className={`my-1 px-2 py-1 text-xs font-medium rounded-full ${disputeData.color} shadow-sm`}>
                         {disputeData.label}
                     </p>

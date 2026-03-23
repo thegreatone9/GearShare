@@ -1,7 +1,7 @@
 import {useMemo} from "react";
 import {DISPUTE_STATUS, RENTAL_STATUS} from "../util/Util.js";
 
-export function useBorrowerDashboardDataHook(borrowerRentals, disputes) {
+export function useClientDashboardDataHook(clientRentals, disputes) {
     return useMemo(() => {
         const findDispute = (rental) => disputes?.find((d) => d.rental_id === rental.id);
 
@@ -9,7 +9,7 @@ export function useBorrowerDashboardDataHook(borrowerRentals, disputes) {
         const disputedRentals = [];
         const pastRentals = [];
 
-        borrowerRentals?.forEach((rental) => {
+        clientRentals?.forEach((rental) => {
             const dispute = findDispute(rental);
 
             if (rental.status === RENTAL_STATUS.ACTIVE) {
@@ -27,5 +27,5 @@ export function useBorrowerDashboardDataHook(borrowerRentals, disputes) {
 
         return { activeRentals, disputedRentals, pastRentals };
 
-    }, [borrowerRentals, disputes]);
+    }, [clientRentals, disputes]);
 }

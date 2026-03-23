@@ -1,12 +1,12 @@
-import {CheckCheck, Clock, Landmark, Package, ShieldAlert, Wrench, Zap} from 'lucide-react';
+import {CheckCheck, Clock, DollarSign, Landmark, Package, ShieldAlert, Wrench, Zap} from 'lucide-react';
 import {Link} from 'react-router-dom';
 import {itemImageSrc, RENTAL_STATUS, REQUEST_STATUS, ROLE, TIME_UNIT, upperCaseFirstLetter} from "../util/Util.js";
 import ActionModal from "../common/ActionModal.jsx";
 import DashboardListSection from "../common/DashboardListSection.jsx";
 import React from 'react';
-import {getDisputeDisplay} from "./LenderUtil.js";
+import {getDisputeDisplay} from "./MerchantUtil.js";
 
-export default function LenderDashboardPresenter({
+export default function MerchantDashboardPresenter({
                                                      itemDetailsModalActive,
                                                      isModalOpen,
                                                      closeAllModals,
@@ -20,13 +20,14 @@ export default function LenderDashboardPresenter({
                                                      pastRentals,
                                                      requests,
                                                      listings,
+                                                     sales,
 
                                                      openAcceptModal,
                                                      openItemDetailsModal,
                                                      declineRequest,
                                                      editItem,
                                                      handleViewDisputes,
-                                                     openBorrowerModal
+                                                     openClientModal
                                                  }) {
 
     const pendingRequests = requests.filter(req => req.status === REQUEST_STATUS.ACTIVE);
@@ -57,8 +58,8 @@ export default function LenderDashboardPresenter({
                       Rented
                     </span>
                     <button className="text-sm ml-2 text-white bg-amber-500 px-3 py-1 rounded-lg hover:bg-orange-700 transition"
-                            onClick={(event) => openBorrowerModal(event, correspondingRequest.borrower_id)}>
-                        Borrower Details
+                            onClick={(event) => openClientModal(event, correspondingRequest.borrower_id)}>
+                        Client Details
                     </button>
                 </div>
             </div>
@@ -76,7 +77,7 @@ export default function LenderDashboardPresenter({
                     <img src={itemImageSrc(item.image_url, item.title)} alt={item.title} className="w-12 h-12 rounded-lg object-cover"/>
                     <div className="flex flex-col justify-center items-center">
                         <p className="text-sm text-gray-700 mb-1">
-                            <a href="#" className="font-bold text-indigo-900 hover:underline" onClick={(event) => openBorrowerModal(event, req.borrower_id)}>Borrower</a> wants
+                            <a href="#" className="font-bold text-indigo-900 hover:underline" onClick={(event) => openClientModal(event, req.borrower_id)}>Client</a> wants
                             to rent <span className="text-indigo-600 font-bold">{item.title}</span>.
                         </p>
                         <p className="text-xs text-gray-600">
@@ -102,6 +103,8 @@ export default function LenderDashboardPresenter({
 
     // 3. Available Inventory Item Renderer
     const renderAvailableInventory = (item) => {
+        const isSellListing = item.listing_type === 'SELL';
+
         return (
             <div key={item.id}
                  className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-8 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
@@ -111,12 +114,17 @@ export default function LenderDashboardPresenter({
                          className="w-12 h-12 rounded-lg object-cover"/>
                     <div>
                         <p className="font-medium text-gray-900">{item.title}</p>
-                        <p className="text-sm text-left text-gray-500">Rent: ${item.daily_rate}/{TIME_UNIT.DAY}</p>
+                        <p className="text-sm text-left text-gray-500">
+                            {isSellListing
+                                ? `Price: $${item.price}`
+                                : `Rent: $${item.daily_rate}/${TIME_UNIT.DAY}`
+                            }
+                        </p>
                     </div>
                 </div>
                 <div className="sm:text-right">
-                    <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700`}>
-                      Available
+                    <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${isSellListing ? 'bg-emerald-100 text-emerald-700' : 'bg-green-100 text-green-700'}`}>
+                      {isSellListing ? 'For Sale' : 'Available'}
                     </span>
                     <button className="text-xs ml-2 text-white bg-indigo-600 px-3 py-1 rounded-lg hover:bg-indigo-700 transition"
                             onClick={() => editItem(item.id, RENTAL_STATUS.PENDING_BORROW)}>Manage
@@ -176,8 +184,38 @@ export default function LenderDashboardPresenter({
                         {display.label}
                     </span>
                     <button className="text-sm ml-2 text-white bg-amber-500 px-3 py-1 rounded-lg hover:bg-orange-700 transition"
-                            onClick={(event) => openBorrowerModal(event, correspondingRequest.borrower_id)}>
-                        Borrower Details
+                            onClick={(event) => openClientModal(event, correspondingRequest.borrower_id)}>
+                        Client Details
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
+    // 6. Completed Sales Item Renderer
+    const renderSale = (sale) => {
+        const snapshot = sale.listing_snapshot;
+        if (!snapshot) return null;
+
+        return (
+            <div key={sale.id}
+                 className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-emerald-50 border border-emerald-200 rounded-xl hover:bg-emerald-100 transition gap-8">
+                <div className="flex items-center space-x-3">
+                    <img src={itemImageSrc(snapshot.image_url, snapshot.title)} alt={snapshot.title}
+                         className="w-12 h-12 rounded-lg object-cover border border-emerald-300"/>
+                    <div>
+                        <p className="font-medium text-gray-900">{snapshot.title}</p>
+                        <p className="text-sm text-gray-500">Sold: {sale.date}</p>
+                    </div>
+                </div>
+                <div className="sm:text-right flex items-center gap-2">
+                    <span className="text-sm font-bold text-emerald-700">${snapshot.price}</span>
+                    <span className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-700">
+                        Sold ✅
+                    </span>
+                    <button className="text-sm ml-2 text-white bg-amber-500 px-3 py-1 rounded-lg hover:bg-orange-700 transition"
+                            onClick={(event) => openClientModal(event, sale.buyer_id)}>
+                        Client Details
                     </button>
                 </div>
             </div>
@@ -200,7 +238,7 @@ export default function LenderDashboardPresenter({
 
 
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-6">
-                <h3 className="text-3xl font-bold text-gray-800">Lender Hub: Manage Inventory & Requests</h3>
+                <h3 className="text-3xl font-bold text-gray-800">Merchant Hub: Manage Inventory & Requests</h3>
                 <Link to={`/item?role=${ROLE.LENDER}`}
                       className="bg-indigo-200 text-indigo-700 text-sm font-medium px-3 py-1 rounded-full hover:bg-indigo-100 transition">
                     <Package className="w-4 h-4 inline mr-1"/>
@@ -221,7 +259,7 @@ export default function LenderDashboardPresenter({
                     emptyMessage="No items are currently out on rent."
                 />
 
-                {/* II. Pending Borrower Requests (High-Priority Action) */}
+                {/* II. Pending Client Requests (High-Priority Action) */}
                 <DashboardListSection
                     title={`Pending Requests (${pendingRequests.length})`}
                     Icon={Clock}
@@ -231,7 +269,7 @@ export default function LenderDashboardPresenter({
                     emptyMessage="No pending requests right now."
                 />
 
-                {/* III. Pending Rental Listings (Inventory) */}
+                {/* III. Available Inventory */}
                 <DashboardListSection
                     title={`Available Inventory (${pendingRentalListings.length})`}
                     Icon={Wrench}
@@ -241,7 +279,17 @@ export default function LenderDashboardPresenter({
                     emptyMessage="No items are currently listed."
                 />
 
-                {/* IV. Disputed Rentals */}
+                {/* IV. Completed Sales */}
+                <DashboardListSection
+                    title={`Completed Sales (${sales.length})`}
+                    Icon={DollarSign}
+                    iconColor="text-emerald-500"
+                    list={sales}
+                    renderItem={renderSale}
+                    emptyMessage="No sales completed yet."
+                />
+
+                {/* V. Disputed Rentals */}
                 <DashboardListSection
                     title={`Disputed Rentals (${disputedRentals.length})`}
                     Icon={ShieldAlert}
@@ -261,7 +309,7 @@ export default function LenderDashboardPresenter({
                     }
                 />
 
-                {/* V. Past Rentals (Settled) */}
+                {/* VI. Past Rentals (Settled) */}
                 <DashboardListSection
                     title={`Past Rentals (Settled) (${pastRentals.length})`}
                     Icon={CheckCheck}

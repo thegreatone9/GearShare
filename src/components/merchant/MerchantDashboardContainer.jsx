@@ -13,11 +13,11 @@ import {
     ROLE,
     TOAST_TYPE
 } from "../util/Util.js";
-import LenderDashboardPresenter from "./LenderDashboardPresenter.jsx";
+import MerchantDashboardPresenter from "./MerchantDashboardPresenter.jsx";
 import {useAuth, useToast} from "../AppContext.jsx";
 import Loader from "../common/Loader.jsx";
 
-export default function LenderDashboardContainer() {
+export default function MerchantDashboardContainer() {
     const {authenticatedUser} = useAuth();
     const {addToast} = useToast();
     const navigate = useNavigate();
@@ -29,8 +29,9 @@ export default function LenderDashboardContainer() {
     const [modalPayload, setModalPayload] = useState(null);
     const [listings, setListings] = useState([]);
     const [requests, setRequests] = useState([]);
-    const [lenderRentals, setLenderRentals] = useState([]);
+    const [merchantRentals, setMerchantRentals] = useState([]);
     const [disputes, setDisputes] = useState([]);
+    const [sales, setSales] = useState([]);
 
     const category = modalPayload?.category;
 
@@ -48,7 +49,7 @@ export default function LenderDashboardContainer() {
         setIsModalOpen(true);
     };
 
-    const openBorrowerModal = (event, userId) => {
+    const openClientModal = (event, userId) => {
         event.preventDefault();
         event.stopPropagation();
 
@@ -89,7 +90,7 @@ export default function LenderDashboardContainer() {
 
     // --- INITIAL DATA FETCHING ---
     useEffect(() => {
-        const fetchLenderData = async () => {
+        const fetchMerchantData = async () => {
             setLoading(true);
 
             const fetchTable = async (table, filters = {}, setState) => {
@@ -136,10 +137,10 @@ export default function LenderDashboardContainer() {
                 addToast(TOAST_TYPE.ERROR, `Error fetching rentals: ${rentalError.message || rentalError}`);
             }
 
-            const lenderRentals = rentalData || [];
-            setLenderRentals(lenderRentals);
+            const merchantRentalsData = rentalData || [];
+            setMerchantRentals(merchantRentalsData);
 
-            const rentalIds = lenderRentals.map(rental => rental.id);
+            const rentalIds = merchantRentalsData.map(rental => rental.id);
 
             const {data: disputeData, error: disputeError} = await fetchDisputesByRentalIds(rentalIds);
 
@@ -148,24 +149,49 @@ export default function LenderDashboardContainer() {
             }
 
             setDisputes(disputeData || []);
+
+            // Fetch completed sales
+            const {data: txData, error: txError} = await fetchFromTable('transactions', {payee_id: userId, type: 'SALE'});
+            if (txError) console.error("Error fetching sales:", txError);
+            if (txData && txData.length > 0) {
+                const saleRequestIds = txData.map(tx => tx.request_id);
+                const {data: saleRequests} = await fetchFromTable('requests', {});
+                const matchingRequests = (saleRequests || []).filter(r => saleRequestIds.includes(r.id));
+
+                const salesWithSnapshots = txData.map(tx => {
+                    const req = matchingRequests.find(r => r.id === tx.request_id);
+                    let snapshot = req?.listing_snapshot;
+                    if (typeof snapshot === 'string') {
+                        try { snapshot = JSON.parse(snapshot); } catch (e) { snapshot = null; }
+                    }
+                    return {
+                        ...tx,
+                        listing_snapshot: snapshot,
+                        buyer_id: tx.payer_id,
+                        date: req?.date || new Date(tx.created_at).toLocaleDateString()
+                    };
+                });
+                setSales(salesWithSnapshots);
+            }
+
             setLoading(false);
         };
 
-        fetchLenderData();
+        fetchMerchantData();
 
     }, [userId]);
 
     // --- DATA FILTERING (Moved from component body) ---
-    const activeRentals = lenderRentals.filter(rental => rental.status === RENTAL_STATUS.ACTIVE);
-    const pendingRentalListings = listings.filter(item => item.available && item.status === LISTING_STATUS.ACTIVE);
-    const disputedRentals = lenderRentals.filter(rental => {
+    const activeRentals = merchantRentals.filter(rental => rental.status === RENTAL_STATUS.ACTIVE);
+    const pendingRentalListings = listings.filter(item => item.status === LISTING_STATUS.ACTIVE);
+    const disputedRentals = merchantRentals.filter(rental => {
         if (rental.status !== RENTAL_STATUS.RETURNED) return false;
 
         const dispute = disputes.find(d => d.rental_id === rental.id);
 
         return dispute && dispute.status !== DISPUTE_STATUS.COMPLETED;
     });
-    const pastRentals = lenderRentals.filter(rental => {
+    const pastRentals = merchantRentals.filter(rental => {
         if (rental.status !== RENTAL_STATUS.COMPLETED) return false;
 
         const dispute = disputes.find(d => d.rental_id === rental.id);
@@ -181,7 +207,7 @@ export default function LenderDashboardContainer() {
             props: {
                 request: modalPayload?.data?.request,
                 setRequests: setRequests,
-                setLenderRentals: setLenderRentals,
+                setMerchantRentals: setMerchantRentals,
                 closeAllModals: closeAllModals
             }
         },
@@ -194,7 +220,7 @@ export default function LenderDashboardContainer() {
             }
         },
         [MODAL_CATEGORY.BORROWER]: {
-            title: "Borrower Details",
+            title: "Client Details",
             maxWidth: "max-w-xl",
             props: {
                 userId: modalPayload?.data?.userId,
@@ -213,11 +239,11 @@ export default function LenderDashboardContainer() {
     const itemDetailsModalActive = currentModalConfig.title && isModalOpen;
 
     if (loading) {
-        return <Loader show={loading} message={'Loading Lender Dashboard'}/>
+        return <Loader show={loading} message={'Loading Merchant Dashboard'}/>
     }
 
     return (
-        <LenderDashboardPresenter
+        <MerchantDashboardPresenter
             // Modal Props
             itemDetailsModalActive={itemDetailsModalActive}
             isModalOpen={isModalOpen}
@@ -233,6 +259,7 @@ export default function LenderDashboardContainer() {
             pastRentals={pastRentals}
             requests={requests}
             listings={listings}
+            sales={sales}
 
             // Action Handlers
             openAcceptModal={openAcceptModal}
@@ -240,7 +267,7 @@ export default function LenderDashboardContainer() {
             declineRequest={declineRequest}
             editItem={editItem}
             handleViewDisputes={handleViewDisputes}
-            openBorrowerModal={openBorrowerModal}
+            openClientModal={openClientModal}
         />
     );
 }
