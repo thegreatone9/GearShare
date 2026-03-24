@@ -1,5 +1,5 @@
 import {useNavigate} from "react-router-dom";
-import {itemImageSrc, ROLE, TIME_UNIT, upperCaseFirstLetter} from "../util/Util.js";
+import {itemImageSrc, ROLE, TIME_UNIT} from "../util/Util.js";
 import {useAuth} from "../AppContext.jsx";
 
 export default function ItemCard({item}) {
@@ -9,46 +9,70 @@ export default function ItemCard({item}) {
     const handleItemClick = function () {
         if (authenticatedUser) {
             navigate(`/item/${item.id}?role=${ROLE.CLIENT}`);
-
         } else {
             navigate('/auth');
         }
     }
 
+    const isForSale = item.listing_type === 'SELL';
+    const rating = item.rating || item.condition || '—';
+
     return (
         <div
             onClick={handleItemClick}
-            className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden cursor-pointer">
-            <img
-                src={itemImageSrc(item.image_url, item.title)}
-                alt={item.title}
-                className="w-full h-48 object-cover object-center"
-                onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = "https://placehold.co/300x200/CCCCCC/000000?text=Image+Error";
-                }}
-            />
-            <div className="p-4">
-                <div className="flex justify-between items-start">
-                    <h2 className="text-lg font-semibold text-gray-800 truncate">{item.title}</h2>
-                    {item.listing_type === 'SELL' ? (
-                        <span className="text-sm font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">
-                            ${item.price}
-                        </span>
-                    ) : (
-                        <span className="text-sm font-bold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-full">
-                            ${item.daily_rate}/{TIME_UNIT.DAY}
-                        </span>
-                    )}
+            className="item-card group"
+        >
+            {/* Image area */}
+            <div className="item-card__image-wrapper">
+                <img
+                    src={itemImageSrc(item.image_url, item.title)}
+                    alt={item.title}
+                    className="item-card__image"
+                    onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "https://placehold.co/400x280/CCCCCC/000000?text=Image+Error";
+                    }}
+                />
+                {/* Listing type badge on image */}
+                <span className={`item-card__badge ${isForSale ? 'item-card__badge--sale' : 'item-card__badge--rent'}`}>
+                    {isForSale ? 'FOR SALE' : 'FOR RENT'}
+                </span>
+            </div>
+
+            {/* Content area */}
+            <div className="item-card__content">
+                {/* Title + Rating */}
+                <div className="item-card__header">
+                    <h3 className="item-card__title">{item.title}</h3>
+                    <span className="item-card__rating">
+                        <span className="item-card__star">★</span> {rating}
+                    </span>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">{item.location}</p>
-                <div className="mt-2 flex items-center text-sm text-yellow-500">
-                    <span className="mr-1">★</span> {item.condition}
-                    {item.listing_type === 'SELL' ? (
-                        <span className="ml-2 text-emerald-600 font-medium">· For Sale</span>
-                    ) : (
-                        <span className="ml-2 text-gray-500">· For Rent</span>
-                    )}
+
+                {/* Description */}
+                <p className="item-card__description">
+                    {item.description || 'No description available.'}
+                </p>
+
+                {/* Location */}
+                <p className="item-card__location">
+                    <span className="item-card__location-icon">📍</span> {item.location}
+                </p>
+
+                {/* Price + Action Button */}
+                <div className="item-card__footer">
+                    <div className="item-card__price">
+                        {isForSale ? (
+                            <>
+                                <span className="item-card__price-amount item-card__price-amount--sale">${item.price}</span>
+                            </>
+                        ) : (
+                            <>
+                                <span className="item-card__price-amount">${item.daily_rate}</span>
+                                <span className="item-card__price-unit">/{TIME_UNIT.DAY}</span>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
