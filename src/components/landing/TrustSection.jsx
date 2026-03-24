@@ -12,7 +12,7 @@ export default function TrustSection() {
                             Secure Deposits
                         </dt>
                         <dd className="mt-2 text-base leading-7 text-gray-600">
-                            A refundable security deposit is held for all high-value items, protecting the lender against minor damages.
+                            A refundable security deposit is held for all high-value items, protecting the merchant against minor damages.
                         </dd>
                     </div>
 

@@ -2,7 +2,7 @@ import {endpointWrapper} from "../util/transaction.js";
 import {ACTIVITY, ADMIN_ID, PAYMENT_INTENT_STATUS, TRANSACTION_STATUS} from "../../src/utils/constants.js";
 
 /**
- * Resolves a dispute by paying damages to the lender.
+ * Resolves a dispute by paying damages to the merchant.
  * Handles cases where damages exceed the held security deposit.
  */
 export default async function payDamages(req, res) {
@@ -24,7 +24,7 @@ export default async function payDamages(req, res) {
                  d.id, d.rental_id,
                  r.request_id,
                  pi.id as payment_intent_id, pi.amount as total_captured_amount,
-                 req.borrower_id, req.lender_id
+                 req.client_id, req.merchant_id
              FROM disputes d
                       JOIN rentals r ON d.rental_id = r.id
                       JOIN requests req ON r.request_id = req.id
@@ -41,8 +41,8 @@ export default async function payDamages(req, res) {
             rental_id: rentalId,
             payment_intent_id: intentId,
             total_captured_amount: totalCaptured,
-            borrower_id: borrowerId,
-            lender_id: lenderId
+            client_id: clientId,
+            merchant_id: merchantId
         } = contextData.rows[0];
 
         // 3. Calculate Available Escrow Funds
@@ -65,33 +65,33 @@ export default async function payDamages(req, res) {
                 await tx.query(
                     `INSERT INTO transactions (created_at, payment_intent_id, rental_id, payer_id, payee_id, amount, type, description)
                      VALUES (NOW(), $1, $2, ${ADMIN_ID.ESCROW}, $3, $4, '${TRANSACTION_STATUS.DAMAGE_FEE}', $5)`,
-                    [intentId, rentalId, lenderId, totalDamage, `Damage compensation (Covered by Deposit)`]
+                    [intentId, rentalId, merchantId, totalDamage, `Damage compensation (Covered by Deposit)`]
                 );
             }
 
-            // 2. Refund the rest to Borrower
+            // 2. Refund the rest to Client
             const refundAmount = remainingBalance - totalDamage;
             if (refundAmount > 0) {
                 await tx.query(
                     `INSERT INTO transactions (created_at, payment_intent_id, rental_id, payer_id, payee_id, amount, type, description)
                      VALUES (NOW(), $1, $2, ${ADMIN_ID.ESCROW}, $3, $4, '${TRANSACTION_STATUS.DEPOSIT_REFUND}', $5)`,
-                    [intentId, rentalId, borrowerId, refundAmount, `Security deposit refund (Partial)`]
+                    [intentId, rentalId, clientId, refundAmount, `Security deposit refund (Partial)`]
                 );
             }
         } else {
             // SCENARIO B: Damage exceeds Deposit (Overage)
             const overageAmount = totalDamage - remainingBalance;
 
-            // 1. Drain the Escrow (Pay full deposit to Lender)
+            // 1. Drain the Escrow (Pay full deposit to Merchant)
             if (remainingBalance > 0) {
                 await tx.query(
                     `INSERT INTO transactions (created_at, payment_intent_id, rental_id, payer_id, payee_id, amount, type, description)
                      VALUES (NOW(), $1, $2, ${ADMIN_ID.ESCROW}, $3, $4, '${TRANSACTION_STATUS.DAMAGE_FEE}', $5)`,
-                    [intentId, rentalId, lenderId, remainingBalance, `Damage compensation (Max Deposit)`]
+                    [intentId, rentalId, merchantId, remainingBalance, `Damage compensation (Max Deposit)`]
                 );
             }
 
-            // 2. Charge the Overage (Borrower pays Lender directly for the excess)
+            // 2. Charge the Overage (Client pays Merchant directly for the excess)
             // Note: In a real Stripe app, this would trigger a new charge on the saved card.
             // Here, we log the obligation.
             await tx.query(
@@ -100,8 +100,8 @@ export default async function payDamages(req, res) {
                 [
                     intentId,
                     rentalId,
-                    borrowerId, // Payer is explicitly the Borrower now, not Escrow
-                    lenderId,
+                    clientId, // Payer is explicitly the Client now, not Escrow
+                    merchantId,
                     overageAmount,
                     `Excess damage liability (Amount exceeding deposit)`
                 ]
@@ -127,7 +127,7 @@ export default async function payDamages(req, res) {
 
         await tx.query(
             `INSERT INTO activity_log (created_at, user_id, type, message) VALUES (NOW(), $1, '${ACTIVITY.PAY_DAMAGES}', $2)`,
-            [borrowerId, logMessage]
+            [clientId, logMessage]
         );
 
         return updatedDispute.rows[0];

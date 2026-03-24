@@ -218,7 +218,7 @@ LANGUAGE plpgsql;
 CREATE
 OR REPLACE FUNCTION can_request_borrow(
     r_listing_id int4,
-    r_borrower_id int4,
+    r_client_id int4,
     request_status text
 )
 RETURNS boolean AS $$
@@ -230,7 +230,7 @@ BEGIN
 EXISTS (
         SELECT 1
         FROM listings
-        WHERE id = r_listing_id AND owner_id = r_borrower_id
+        WHERE id = r_listing_id AND owner_id = r_client_id
     ) THEN
         RETURN false;
 END IF;
@@ -239,7 +239,7 @@ END IF;
 SELECT EXISTS(SELECT 1
               FROM requests
               WHERE listing_id = r_listing_id
-                AND borrower_id = r_borrower_id
+                AND client_id = r_client_id
                 AND status = request_status)
 INTO can_request_borrow;
 

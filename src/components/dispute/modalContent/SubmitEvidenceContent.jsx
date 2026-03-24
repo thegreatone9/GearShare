@@ -48,7 +48,7 @@ export default function SubmitEvidenceContent ({ disputeData, onClose, setAppDat
     return (
         <div className="p-6 space-y-4">
             <p className="text-gray-700">
-                The lender has filed a claim. Upload evidence below to dispute the damage claim for **{disputeData.item.title}**.
+                The merchant has filed a claim. Upload evidence below to dispute the damage claim for **{disputeData.item.title}**.
             </p>
             <label htmlFor="defense-description" className="block text-sm font-medium text-gray-700">
                 Your Defense Statement

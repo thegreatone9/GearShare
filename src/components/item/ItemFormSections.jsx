@@ -177,16 +177,16 @@ export const PricingSection = ({ editMode, itemState, handleChange }) => {
     );
 };
 
-// 4. Lender/Seller Info Card
-export const LenderInfoCard = ({ lender, isSellListing }) => (
+// 4. Merchant/Seller Info Card
+export const MerchantInfoCard = ({ merchant, isSellListing }) => (
     <div className="space-y-4 pb-6 mx-auto flex flex-col items-center">
         <h4 className="text-xl font-semibold text-indigo-700">
             {isSellListing ? '4. Seller Details' : '4. Merchant Details'}
         </h4>
-        <img src={userImageSrc(lender.name)} alt={lender.name} className="w-24 h-24 object-cover rounded-full" />
-        <InfoRow icon={User} label="Name" value={lender.name} />
-        <InfoRow icon={Mail} label="Email" value={lender.email} />
-        <InfoRow icon={Phone} label="Phone" value={lender.phone || 'N/A'} />
+        <img src={userImageSrc(merchant.name)} alt={merchant.name} className="w-24 h-24 object-cover rounded-full" />
+        <InfoRow icon={User} label="Name" value={merchant.name} />
+        <InfoRow icon={Mail} label="Email" value={merchant.email} />
+        <InfoRow icon={Phone} label="Phone" value={merchant.phone || 'N/A'} />
     </div>
 );
 const InfoRow = ({ icon: Icon, label, value }) => (
@@ -213,7 +213,7 @@ export const ActionButtons = ({ role, editMode, itemState, canRequestBorrow, isS
                 Back
             </button>
 
-            {/* 2. Lender/Seller Actions */}
+            {/* 2. Merchant/Seller Actions */}
             {!isNew && editMode ? (
                 <>
                     <button type="submit" className={`${commonClass} bg-indigo-600 hover:bg-indigo-700 text-white`}>
@@ -227,13 +227,13 @@ export const ActionButtons = ({ role, editMode, itemState, canRequestBorrow, isS
                     )}
                 </>
             ) : (
-                ROLE.LENDER && isNew &&
+                ROLE.MERCHANT && isNew &&
                 <button type="submit" className={`${commonClass} bg-indigo-600 hover:bg-indigo-700 text-white`}>
                     Publish Item
                 </button>
             )}
 
-            {/* 3. Buyer/Borrower Actions */}
+            {/* 3. Buyer/Client Actions */}
             {!isOwner && isSellListing && (
                 <button type="button" onClick={onBuyNow} className={`${commonClass} bg-emerald-600 hover:bg-emerald-700 text-white`}>
                     🛒 Buy Now — ${itemState.price}

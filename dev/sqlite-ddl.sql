@@ -38,8 +38,8 @@ CREATE TABLE IF NOT EXISTS requests
 (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     listing_id       INTEGER REFERENCES listings (id) NOT NULL,
-    borrower_id      INTEGER REFERENCES accounts (id) NOT NULL,
-    lender_id        INTEGER REFERENCES accounts (id) NOT NULL,
+    client_id      INTEGER REFERENCES accounts (id) NOT NULL,
+    merchant_id        INTEGER REFERENCES accounts (id) NOT NULL,
     date             TEXT,
     start_date       TEXT,
     end_date         TEXT,

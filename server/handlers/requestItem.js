@@ -8,10 +8,10 @@ export default async function requestItem(req, res) {
     }
 
     const requestItemQuery = async (req, tx) => {
-        const {listingId, borrowerId, lenderId, status, date, startDate, endDate} = req.body;
+        const {listingId, borrowerId: clientId, lenderId: merchantId, status, date, startDate, endDate} = req.body;
 
         // Validate required fields
-        if (!listingId || !borrowerId || !lenderId || !status || !date || !startDate || !endDate) {
+        if (!listingId || !clientId || !merchantId || !status || !date || !startDate || !endDate) {
             throw new Error('Missing required fields: listingId, borrowerId, lenderId, status, date, startDate, endDate');
         }
 
@@ -37,9 +37,9 @@ export default async function requestItem(req, res) {
 
         //Insert into requests table
         const requestsResult = await tx.query(
-            `INSERT INTO requests (listing_id, borrower_id, lender_id, status, date, start_date, end_date, listing_snapshot)
+            `INSERT INTO requests (listing_id, client_id, merchant_id, status, date, start_date, end_date, listing_snapshot)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-            [listingId, borrowerId, lenderId, status, date, startDate, endDate, listingJson]
+            [listingId, clientId, merchantId, status, date, startDate, endDate, listingJson]
         );
 
         const newRequestId = requestsResult.rows[0].id;
@@ -60,8 +60,8 @@ export default async function requestItem(req, res) {
              VALUES (NOW(), NOW(), $1, null, $2, $3, $4, '${PAYMENT_INTENT_STATUS.AUTHORIZED}', $5)`,
             [
                 newRequestId,
-                borrowerId,
-                lenderId,
+                clientId,
+                merchantId,
                 totalAuthAmount,//(Rent + Deposit)
                 `Requesting Listing #${listingId} for ${duration} days`
             ]
@@ -70,7 +70,7 @@ export default async function requestItem(req, res) {
         //log activity
         await tx.query(
             `INSERT INTO activity_log (created_at, user_id, type, message) VALUES (NOW(), $1, '${ACTIVITY.REQUEST_ITEM}', $2)`,
-            [borrowerId, `You (User ID: #${borrowerId}) have requested the item: #${listingId}`],
+            [clientId, `You (User ID: #${clientId}) have requested the item: #${listingId}`],
         );
 
         return newRequestId;

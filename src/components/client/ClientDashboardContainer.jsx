@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {apiRequest, DISPUTE_STATUS, MODAL_CATEGORY, RENTAL_STATUS, ROLE, TOAST_TYPE} from "../util/Util.js";
 import {
-    fetchRequestsByBorrower, fetchRentalsByRequestIds, fetchListingsByIds,
+    fetchRequestsByClient, fetchRentalsByRequestIds, fetchListingsByIds,
     fetchDisputesByRentalIds, fetchRentalById, deleteRequest, fetchFromTable
 } from "../../services/service.js";
 import ClientDashboardPresenter from "./ClientDashboardPresenter.jsx";
@@ -34,7 +34,7 @@ export default function ClientDashboardContainer() {
             setLoading(true);
 
             // 1. Fetch Requests (Primary data source for Client)
-            const {data: requestData, error: reqError} = await fetchRequestsByBorrower(userId);
+            const {data: requestData, error: reqError} = await fetchRequestsByClient(userId);
 
             if (reqError) console.error("Error fetching requests:", reqError);
             const fetchedRequests = requestData || [];
@@ -154,14 +154,14 @@ export default function ClientDashboardContainer() {
     };
 
     const openItemDetailsModal = (item) => {
-        setModalPayload({category: MODAL_CATEGORY.ITEM, data: {item, role: ROLE.BORROWER}});
+        setModalPayload({category: MODAL_CATEGORY.ITEM, data: {item, role: ROLE.CLIENT}});
         setIsModalOpen(true);
     }
 
     const openMerchantDetailsModal = (event, userId) => {
         event.stopPropagation();
 
-        setModalPayload({category: MODAL_CATEGORY.LENDER, data: {userId}});
+        setModalPayload({category: MODAL_CATEGORY.MERCHANT, data: {userId}});
         setIsModalOpen(true);
     }
 
@@ -180,7 +180,7 @@ export default function ClientDashboardContainer() {
                 role: modalPayload?.data?.role
             }
         },
-        [MODAL_CATEGORY.LENDER]: {
+        [MODAL_CATEGORY.MERCHANT]: {
             title: "Merchant Details",
             maxWidth: "max-w-xl",
             props: {

@@ -80,7 +80,7 @@ export default function ClientDashboardPresenter({
                     <img src={itemImageSrc(item.image_url, item.title)} alt={item.title} className="w-12 h-12 rounded-lg object-cover"/>
                     <div className="flex flex-col justify-center items-center">
                         <p className="text-sm text-gray-700 mb-1">
-                            Requested <span className="text-indigo-600 font-bold">{item.title}</span> from <a href="#" className="font-bold text-indigo-900 hover:underline" onClick={(event) => openMerchantDetailsModal(event, req.lender_id)}>Merchant</a>
+                            Requested <span className="text-indigo-600 font-bold">{item.title}</span> from <a href="#" className="font-bold text-indigo-900 hover:underline" onClick={(event) => openMerchantDetailsModal(event, req.merchant_id)}>Merchant</a>
                         </p>
                         <p className="text-xs text-gray-600">
                             Request Date: {req.date || 'N/A'} | Deposit: ${item.replacement_value || 'N/A'}

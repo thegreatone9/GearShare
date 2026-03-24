@@ -8,7 +8,7 @@ export default function ItemCard({item}) {
 
     const handleItemClick = function () {
         if (authenticatedUser) {
-            navigate(`/item/${item.id}?role=${ROLE.BORROWER}`);
+            navigate(`/item/${item.id}?role=${ROLE.CLIENT}`);
 
         } else {
             navigate('/auth');

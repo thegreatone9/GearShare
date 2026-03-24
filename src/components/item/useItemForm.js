@@ -23,7 +23,7 @@ export function useItemForm() {
     const [editMode, setEditMode] = useState(false);
     const [canRequestBorrow, setCanRequestBorrow] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
-    const [lender, setLender] = useState(null);
+    const [merchant, setMerchant] = useState(null);
     const [statusMessage, setStatusMessage] = useState({ type: '', field: '', text: '' });
 
     // Flattened Item State
@@ -83,12 +83,12 @@ export function useItemForm() {
                     })));
                 }
 
-                // Logic Branch: Lender vs Borrower
+                // Logic Branch: Merchant vs Client
                 if (item.owner_id === authenticatedUser.id) {
                     setEditMode(true);
 
                 } else {
-                    await fetchBorrowerViewData(item, availability?.unavailable_ranges || []);
+                    await fetchClientViewData(item, availability?.unavailable_ranges || []);
                 }
 
             } catch (error) {
@@ -107,7 +107,7 @@ export function useItemForm() {
         setStatusMessage({ type: '', field: '', text: '' });
 
         // Exit early if logic doesn't apply (e.g. data not loaded, wrong role, or actually borrowable)
-        if (!currentItem || role === ROLE.LENDER || canRequestBorrow) {
+        if (!currentItem || role === ROLE.MERCHANT || canRequestBorrow) {
             return;
         }
 
@@ -126,12 +126,12 @@ export function useItemForm() {
     }, [canRequestBorrow, currentItem, authenticatedUser.id, role]);
 
 
-    // Helper to fetch extra data if viewing as Borrower
-    const fetchBorrowerViewData = async (item, existingUnavailable) => {
-        // Get Lender Details
-        const { data: lenderData } = await fetchUserById(item.owner_id, 'id, name, email, image_url, phone');
+    // Helper to fetch extra data if viewing as Client
+    const fetchClientViewData = async (item, existingUnavailable) => {
+        // Get Merchant Details
+        const { data: merchantData } = await fetchUserById(item.owner_id, 'id, name, email, image_url, phone');
 
-        setLender(lenderData);
+        setMerchant(merchantData);
 
         if (item.owner_id !== authenticatedUser.id) {
             // Get Existing Requests to block dates
@@ -265,7 +265,7 @@ export function useItemForm() {
                 throw new Error(dbError);
             }
 
-            navigate(`/lender?toast=Successfully Updated Listing: ${itemState.title}`);
+            navigate(`/merchant?toast=Successfully Updated Listing: ${itemState.title}`);
 
         } catch (err) {
             addToast(TOAST_TYPE.ERROR, `Error: ${err.message}`);
@@ -286,7 +286,7 @@ export function useItemForm() {
                 body: {
                     listingId: itemIdNum,
                     borrowerId: authenticatedUser.id,
-                    lenderId: lender.id,
+                    lenderId: merchant.id,
                     status: REQUEST_STATUS.ACTIVE,
                     date: new Date().toISOString(),
                     startDate: start_date,
@@ -316,7 +316,7 @@ export function useItemForm() {
             });
 
             if (error) throw new Error(error);
-            navigate(`/borrower?toast=Purchase complete! You bought: ${itemState.title}`);
+            navigate(`/client?toast=Purchase complete! You bought: ${itemState.title}`);
 
         } catch (error) {
             addToast(TOAST_TYPE.ERROR, `Error: ${error.message}`);
@@ -332,7 +332,7 @@ export function useItemForm() {
             });
 
             if (deleteError) throw new Error(deleteError.message);
-            navigate('/lender');
+            navigate('/merchant');
 
         } catch (error) {
             addToast(TOAST_TYPE.ERROR, `Deletion Error: ${error.message}`);
@@ -340,7 +340,7 @@ export function useItemForm() {
     };
 
     const validateItemOverallAvailableDates = function () {
-        if (role !== ROLE.LENDER) return true;
+        if (role !== ROLE.MERCHANT) return true;
 
         // 2. Check if dates exist
         if (!overallAvailableDates.from || !overallAvailableDates.to) {
@@ -380,7 +380,7 @@ export function useItemForm() {
     };
 
     return {
-        authenticatedUser, loading, role, editMode, itemState, lender, statusMessage, canRequestBorrow,
+        authenticatedUser, loading, role, editMode, itemState, merchant, statusMessage, canRequestBorrow,
         isSellListing,
         overallAvailableDates, requestDates,
         selectedRangeForLender, selectedRangeForBorrower,

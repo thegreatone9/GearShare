@@ -7,7 +7,7 @@ import {
     fetchRequestsByUser, fetchRentalsByRequestIds, fetchDisputesByRentalIds,
     fetchListingsByIds, fetchUsersByIds
 } from "../../services/service.js";
-import {BORROWER_DISPUTE_ACTIONS, LENDER_DISPUTE_ACTIONS, ROLE} from "../util/Util.js";
+import {CLIENT_DISPUTE_ACTIONS, MERCHANT_DISPUTE_ACTIONS, ROLE} from "../util/Util.js";
 import {useAuth, useToast} from "../AppContext.jsx";
 import Loader from "../common/Loader.jsx";
 
@@ -32,12 +32,12 @@ export default function DisputeDashboard() {
         event.preventDefault();
         event.stopPropagation();
 
-        const actionType = ROLE.LENDER === disputeData.userRole ? LENDER_DISPUTE_ACTIONS.VIEW_BORROWER : BORROWER_DISPUTE_ACTIONS.VIEW_LENDER;
+        const actionType = ROLE.MERCHANT === disputeData.userRole ? MERCHANT_DISPUTE_ACTIONS.VIEW_CLIENT : CLIENT_DISPUTE_ACTIONS.VIEW_MERCHANT;
 
         setModalState({isOpen: true, action: actionType, disputeData: disputeData});
     };
     const openItemDetails = (disputeData) => {
-        const actionType = ROLE.LENDER === disputeData.userRole ? LENDER_DISPUTE_ACTIONS.VIEW_ITEM : BORROWER_DISPUTE_ACTIONS.VIEW_ITEM;
+        const actionType = ROLE.MERCHANT === disputeData.userRole ? MERCHANT_DISPUTE_ACTIONS.VIEW_ITEM : CLIENT_DISPUTE_ACTIONS.VIEW_ITEM;
 
         setModalState({isOpen: true, action: actionType, disputeData: disputeData});
     };
@@ -56,7 +56,7 @@ export default function DisputeDashboard() {
         const fetchDisputeData = async () => {
             setLoading(true);
 
-            // 1. Fetch ALL Requests involving the user (Lender OR Borrower)
+            // 1. Fetch ALL Requests involving the user (Merchant OR Client)
             const {data: allRequests, error: reqError} = await fetchRequestsByUser(authenticatedUser.id);
 
             if (reqError) {
@@ -68,8 +68,8 @@ export default function DisputeDashboard() {
             const requestIds = allRequests.map(req => req.id);
             const listingIds = [...new Set(allRequests.map(req => req.listing_id))];
             const uniqueAccountIds = [...new Set([
-                ...allRequests.map(req => req.borrower_id),
-                ...allRequests.map(req => req.lender_id)
+                ...allRequests.map(req => req.client_id),
+                ...allRequests.map(req => req.merchant_id)
             ])];
 
             // 2. Fetch Rentals associated with those requests
@@ -128,7 +128,7 @@ export default function DisputeDashboard() {
 
             <div className="bg-white p-6 md:p-8 rounded-2xl shadow-2xl space-y-8">
 
-                {/* 1. Disputed Lent Items (Lender Role) */}
+                {/* 1. Disputed Lent Items (Merchant Role) */}
                 <section>
                     <h4 className="text-2xl font-semibold text-gray-800 mb-4 border-b pb-3 flex items-center">
                         <Landmark className="w-6 h-6 mr-2 text-indigo-500"/>
@@ -175,7 +175,7 @@ export default function DisputeDashboard() {
 
                 <hr className="border-t border-b mt-10 border-gray-200"/>
 
-                {/* 2. Disputed Borrowed Items (Borrower Role) */}
+                {/* 2. Disputed Borrowed Items (Client Role) */}
                 <section>
                     <h4 className="text-2xl font-semibold text-gray-800 mb-4 border-b pb-3 flex items-center">
                         <Handshake className="w-6 h-6 mr-2 text-red-500"/>

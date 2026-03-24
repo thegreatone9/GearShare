@@ -4,7 +4,7 @@ import {AlertTriangle, CheckCircle} from 'lucide-react';
 import {getStatusClasses, ROLE} from "../util/Util.js";
 import ItemCalendar from "./ItemCalendar.jsx";
 import {useItemForm} from "./useItemForm.js";
-import {ActionButtons, BasicInfoSection, LenderInfoCard, PricingSection} from "./ItemFormSections.jsx";
+import {ActionButtons, BasicInfoSection, MerchantInfoCard, PricingSection} from "./ItemFormSections.jsx";
 import {PhotoSection} from "./PhotoSection.jsx";
 
 export default function ItemForm2() {
@@ -14,7 +14,7 @@ export default function ItemForm2() {
         role,
         editMode,
         itemState,
-        lender,
+        merchant,
         statusMessage,
         canRequestBorrow,
         isSellListing,
@@ -82,17 +82,17 @@ export default function ItemForm2() {
                 />
 
 
-                {/* 4. Borrower: Seller/Lender Details */}
-                {role === ROLE.BORROWER && lender && (
-                    <LenderInfoCard lender={lender} isSellListing={isSellListing} />
+                {/* 4. Client: Seller/Merchant Details */}
+                {role === ROLE.CLIENT && merchant && (
+                    <MerchantInfoCard merchant={merchant} isSellListing={isSellListing} />
                 )}
 
-                {/* 4. Lender: Availability Calendar (RENT only) */}
-                {!isSellListing && ((role === ROLE.LENDER && !itemState.id) || (itemState.owner_id === authenticatedUser.id)) && (
+                {/* 4. Merchant: Availability Calendar (RENT only) */}
+                {!isSellListing && ((role === ROLE.MERCHANT && !itemState.id) || (itemState.owner_id === authenticatedUser.id)) && (
                     <div className="space-y-4 pb-6 mx-auto flex flex-col">
                         <h4 className="text-xl font-semibold text-indigo-700 text-center">4. Available Dates</h4>
                         <ItemCalendar
-                            role={ROLE.LENDER}
+                            role={ROLE.MERCHANT}
                             selectedRange={selectedRangeForLender}
                             onSelect={handleDayClickForLender}
                             disabledDays={disabledDaysForLender}
@@ -103,13 +103,13 @@ export default function ItemForm2() {
                     </div>
                 )}
 
-                {/* 5. Borrower: Request Rent Dates (RENT only) */}
-                {!isSellListing && role === ROLE.BORROWER && itemState.owner_id !== authenticatedUser.id && (
+                {/* 5. Client: Request Rent Dates (RENT only) */}
+                {!isSellListing && role === ROLE.CLIENT && itemState.owner_id !== authenticatedUser.id && (
                     <div className="space-y-4 pb-6 mx-auto flex flex-col">
                         <h4 className="text-xl font-semibold text-indigo-700 text-center">5. Request Rent Dates</h4>
                         {canRequestBorrow ? (
                             <ItemCalendar
-                                role={ROLE.BORROWER}
+                                role={ROLE.CLIENT}
                                 selectedRange={selectedRangeForBorrower}
                                 onSelect={handleDayClickForBorrower}
                                 disabledDays={disabledDaysForBorrower}

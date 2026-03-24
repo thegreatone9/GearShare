@@ -8,8 +8,8 @@ import UserDetails from "./UserDetails.jsx";
 const ModalComponentMap = {
     [MODAL_CATEGORY.ACCEPT_RENTAL_REQUEST]: AcceptRentalRequest,
     [MODAL_CATEGORY.ITEM]: ModalItemDetails,
-    [MODAL_CATEGORY.BORROWER]: UserDetails,
-    [MODAL_CATEGORY.LENDER]: UserDetails
+    [MODAL_CATEGORY.CLIENT]: UserDetails,
+    [MODAL_CATEGORY.MERCHANT]: UserDetails
 
     // Can add other generic item modals here as needed (e.g., disputeReview, returnFlow)
 };

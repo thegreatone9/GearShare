@@ -65,7 +65,7 @@ export default function AuthPage() {
             updateUserCookie(newUser);
             handleAuth(newUser);
             addToast(TOAST_TYPE.SUCCESS, `Welcome ${newUser.name}!`);
-            navigate('/borrower');
+            navigate('/client');
 
         } else {
             const user = await authenticateUser(email, password); // If authenticateUser is also async
@@ -76,7 +76,7 @@ export default function AuthPage() {
                 updateUserCookie(user);
                 handleAuth(user);
                 addToast(TOAST_TYPE.SUCCESS, `Welcome ${user.name}!`);
-                navigate('/borrower');
+                navigate('/client');
 
             } else {
                 setError('Invalid email or password.');

@@ -48,8 +48,8 @@ export const fetchAvailability        = lazy('fetchAvailability');
 export const fetchAvailabilityColumns = lazy('fetchAvailabilityColumns');
 
 // --- Requests ---
-export const fetchRequestsByBorrower   = lazy('fetchRequestsByBorrower');
-export const fetchRequestsByLender     = lazy('fetchRequestsByLender');
+export const fetchRequestsByClient     = lazy('fetchRequestsByClient');
+export const fetchRequestsByMerchant   = lazy('fetchRequestsByMerchant');
 export const fetchRequestsByUser       = lazy('fetchRequestsByUser');
 export const fetchActiveRequestDates   = lazy('fetchActiveRequestDates');
 export const fetchRequestById          = lazy('fetchRequestById');

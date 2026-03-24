@@ -38,7 +38,7 @@ export default function FileClaimContent({ disputeData, onClose, setAppData }) {
             return { ...prevData, disputes: updatedDisputes };
         });
 
-        console.log(`CONFIRMED ACTION: Lender filed claim for Case #${disputeId}`);
+        console.log(`CONFIRMED ACTION: Merchant filed claim for Case #${disputeId}`);
         onClose();
     }
 

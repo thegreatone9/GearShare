@@ -37,7 +37,7 @@ export default function MerchantDashboardContainer() {
 
     // --- ACTION HANDLERS ---
     const editItem = function (itemId, itemStatus) {
-        navigate(`/item/${itemId}?status=${itemStatus}&role=${ROLE.LENDER}`);
+        navigate(`/item/${itemId}?status=${itemStatus}&role=${ROLE.MERCHANT}`);
     }
 
     const handleViewDisputes = function () {
@@ -53,12 +53,12 @@ export default function MerchantDashboardContainer() {
         event.preventDefault();
         event.stopPropagation();
 
-        setModalPayload({category: MODAL_CATEGORY.BORROWER, data: {userId}});
+        setModalPayload({category: MODAL_CATEGORY.CLIENT, data: {userId}});
         setIsModalOpen(true);
     };
 
     const openItemDetailsModal = (item) => {
-        setModalPayload({category: MODAL_CATEGORY.ITEM, data: {item, role: ROLE.LENDER}});
+        setModalPayload({category: MODAL_CATEGORY.ITEM, data: {item, role: ROLE.MERCHANT}});
         setIsModalOpen(true);
     }
 
@@ -126,7 +126,7 @@ export default function MerchantDashboardContainer() {
 
             const [fetchedListings, fetchedRequests] = await Promise.all([
                 fetchListingsFromApi(),
-                fetchTable('requests', {'lender_id': userId}, setRequests)
+                fetchTable('requests', {'merchant_id': userId}, setRequests)
             ]);
 
             const requestIds = fetchedRequests ? fetchedRequests.map(req => req.id) : [];
@@ -219,7 +219,7 @@ export default function MerchantDashboardContainer() {
                 role: modalPayload?.data?.role
             }
         },
-        [MODAL_CATEGORY.BORROWER]: {
+        [MODAL_CATEGORY.CLIENT]: {
             title: "Client Details",
             maxWidth: "max-w-xl",
             props: {

@@ -2,7 +2,7 @@ import {endpointWrapper} from "../util/transaction.js";
 import {isPartiallyAvailable} from "../util/util.js";
 
 /**
- * Checks if an item is available for a borrower to request
+ * Checks if an item is available for a client to request
  */
 export default async function checkAvailability(req, res) {
     if (req.method !== 'GET') {
@@ -17,7 +17,7 @@ export default async function checkAvailability(req, res) {
             throw new Error('Missing required fields: listingId, borrowerId');
         }
 
-        // 1. Check if borrower is trying to request their own listing
+        // 1. Check if client is trying to request their own listing
         const ownerCheck = await tx.query(
             `SELECT 1
              FROM listings
@@ -27,7 +27,7 @@ export default async function checkAvailability(req, res) {
         );
 
         if (ownerCheck.rows.length > 0) {
-            // Borrower owns this listing - not available
+            // Client owns this listing - not available
             return {available: false, reason: 'Cannot request your own listing'};
         }
 

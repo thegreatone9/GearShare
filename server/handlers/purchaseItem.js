@@ -44,7 +44,7 @@ export default async function purchaseItem(req, res) {
 
         // 1. Create a request record (reusing requests table)
         const requestResult = await tx.query(
-            `INSERT INTO requests (listing_id, borrower_id, lender_id, status, date, start_date, end_date, listing_snapshot)
+            `INSERT INTO requests (listing_id, client_id, merchant_id, status, date, start_date, end_date, listing_snapshot)
              VALUES ($1, $2, $3, 'completed', $4, $4, $4, $5) RETURNING *`,
             [listingId, buyerId, sellerId, today, listingJson]
         );

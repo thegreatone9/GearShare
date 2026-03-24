@@ -4,7 +4,7 @@ import classNames from "react-day-picker/style.module.css";
 import {formatDateStr, ROLE} from "../util/Util.js";
 
 export default function ItemCalendar({
-                                         role, // 'lender' or 'borrower'
+                                         role, // 'merchant' or 'client'
                                          selectedRange,
                                          onSelect,
                                          disabledDays,
@@ -14,11 +14,11 @@ export default function ItemCalendar({
                                      }) {
     // Helper to determine start/end display strings based on object shape
     const getStartDate = () => {
-        if (role === ROLE.LENDER) return dateRangeStr.from;
+        if (role === ROLE.MERCHANT) return dateRangeStr.from;
         return dateRangeStr.start_date;
     };
     const getEndDate = () => {
-        if (role === ROLE.LENDER) return dateRangeStr.to;
+        if (role === ROLE.MERCHANT) return dateRangeStr.to;
         return dateRangeStr.end_date;
     };
 

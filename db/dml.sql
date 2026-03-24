@@ -19,7 +19,7 @@ VALUES (1, 2, 'Cordless Drill Set', '', 15, 'day', 'Downtown LA', 4.8, 150,
        (7, 2, 'Skateboard', '', 50, 'day', 'Jericho', 5.0, 30,
         'https://placehold.co/300x200/EC4899/FFFFFF?text=Skateboard', 'Available');
 
-INSERT INTO requests (id, listing_id, borrower_id, lender_id, request_date, rent_start_date, rent_end_date, status,
+INSERT INTO requests (id, listing_id, client_id, merchant_id, request_date, rent_start_date, rent_end_date, status,
                       deposit)
 VALUES (1, 1, 1, 2, '2025-09-09', '2025-10-09', '2025-12-15', 'completed', 500),
        (2, 2, 2, 1, '2025-09-09', '2025-10-09', '2025-12-15', 'completed', NULL),

@@ -129,8 +129,8 @@ export default async function resolveDispute(req, res) {
         const {
             payment_intent_id: intentId,
             total_captured_amount: totalCaptured,
-            borrower_id: borrowerId,
-            lender_id: lenderId
+            client_id: clientId,
+            merchant_id: merchantId
         } = contextData.rows[0];
 
         // Step 4 & 5 Preparation: Calculate Refund Amount
@@ -155,7 +155,7 @@ export default async function resolveDispute(req, res) {
                 [
                     intentId,
                     rentalId,
-                    borrowerId, // Money goes back to Borrower
+                    clientId, // Money goes back to Client
                     refundAmount,
                     `Full security deposit refund after dispute resolution`
                 ]
@@ -174,13 +174,13 @@ export default async function resolveDispute(req, res) {
         await tx.query(
             `INSERT INTO activity_log (created_at, user_id, type, message)
              VALUES (NOW(), $1, '${ACTIVITY.SETTLE_DISPUTE}', $2)`,
-            [borrowerId, `Dispute resolved in your favor. Security deposit of $${refundAmount} refunded.`]
+            [clientId, `Dispute resolved in your favor. Security deposit of $${refundAmount} refunded.`]
         );
 
         await tx.query(
             `INSERT INTO activity_log (created_at, user_id, type, message)
              VALUES (NOW(), $1, '${ACTIVITY.SETTLE_DISPUTE}', $2)`,
-            [lenderId, `Dispute resolved. Security deposit of $${refundAmount} refunded.`]
+            [merchantId, `Dispute resolved. Security deposit of $${refundAmount} refunded.`]
         );
 
         // Return the updated dispute

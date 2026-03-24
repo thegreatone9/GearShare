@@ -24,7 +24,7 @@ export default function AcceptRentalRequest({request, onClose, setRequests, setM
     const [itemWithAvailability, setItemWithAvailability] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const {id, listing_id: listingId, borrower_id: borrowerId, lender_id: lenderId, listing_snapshot: listingSnapshot} = request;
+    const {id, listing_id: listingId, client_id: borrowerId, merchant_id: lenderId, listing_snapshot: listingSnapshot} = request;
     const pricePerUnit = listingSnapshot.daily_rate;
 
     useEffect(() => {

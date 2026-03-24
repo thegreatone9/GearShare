@@ -38,7 +38,7 @@ export default function PayDamagesContent ({ disputeData, onClose, setAppData })
     return (
         <div className="p-6 space-y-4">
             <p className="text-gray-700">
-                The platform has ruled in favor of the lender. Pay the required damages for **{disputeData.item.title}** to close the case.
+                The platform has ruled in favor of the merchant. Pay the required damages for **{disputeData.item.title}** to close the case.
             </p>
             <div className="text-lg font-bold text-red-600">Damage Amount Due: {disputeData.damage_amount}</div>
 

@@ -49,7 +49,7 @@ export default function SettleContent({disputeData, onClose, setAppData}) {
             return {...prevData, disputes: updatedDisputes};
         });
 
-        console.log(`CONFIRMED ACTION: Lender settled deposit for Case #${disputeId}`);
+        console.log(`CONFIRMED ACTION: Merchant settled deposit for Case #${disputeId}`);
         onClose();
     };
 
@@ -57,7 +57,7 @@ export default function SettleContent({disputeData, onClose, setAppData}) {
         <div className="p-6 space-y-4">
             <p className="text-gray-700">
                 You are about to <span className="font-bold text-red-500">release the full security deposit</span> for
-                the rental of <span className="font-bold">{item.title}</span> back to the borrower.
+                the rental of <span className="font-bold">{item.title}</span> back to the client.
                 This action confirms there is <span className="font-bold text-red-500">no damage</span> and will close
                 the case.
             </p>

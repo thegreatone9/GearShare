@@ -58,7 +58,7 @@ export default function MerchantDashboardPresenter({
                       Rented
                     </span>
                     <button className="text-sm ml-2 text-white bg-amber-500 px-3 py-1 rounded-lg hover:bg-orange-700 transition"
-                            onClick={(event) => openClientModal(event, correspondingRequest.borrower_id)}>
+                            onClick={(event) => openClientModal(event, correspondingRequest.client_id)}>
                         Client Details
                     </button>
                 </div>
@@ -77,7 +77,7 @@ export default function MerchantDashboardPresenter({
                     <img src={itemImageSrc(item.image_url, item.title)} alt={item.title} className="w-12 h-12 rounded-lg object-cover"/>
                     <div className="flex flex-col justify-center items-center">
                         <p className="text-sm text-gray-700 mb-1">
-                            <a href="#" className="font-bold text-indigo-900 hover:underline" onClick={(event) => openClientModal(event, req.borrower_id)}>Client</a> wants
+                            <a href="#" className="font-bold text-indigo-900 hover:underline" onClick={(event) => openClientModal(event, req.client_id)}>Client</a> wants
                             to rent <span className="text-indigo-600 font-bold">{item.title}</span>.
                         </p>
                         <p className="text-xs text-gray-600">
@@ -184,7 +184,7 @@ export default function MerchantDashboardPresenter({
                         {display.label}
                     </span>
                     <button className="text-sm ml-2 text-white bg-amber-500 px-3 py-1 rounded-lg hover:bg-orange-700 transition"
-                            onClick={(event) => openClientModal(event, correspondingRequest.borrower_id)}>
+                            onClick={(event) => openClientModal(event, correspondingRequest.client_id)}>
                         Client Details
                     </button>
                 </div>
@@ -239,7 +239,7 @@ export default function MerchantDashboardPresenter({
 
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-6">
                 <h3 className="text-3xl font-bold text-gray-800">Merchant Hub: Manage Inventory & Requests</h3>
-                <Link to={`/item?role=${ROLE.LENDER}`}
+                <Link to={`/item?role=${ROLE.MERCHANT}`}
                       className="bg-indigo-200 text-indigo-700 text-sm font-medium px-3 py-1 rounded-full hover:bg-indigo-100 transition">
                     <Package className="w-4 h-4 inline mr-1"/>
                     New Item

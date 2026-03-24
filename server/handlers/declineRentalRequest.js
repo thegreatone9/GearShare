@@ -19,7 +19,7 @@ export default async function declineRentalRequest(req, res) {
             `UPDATE requests
              SET status = $2
              WHERE id = $1
-             RETURNING borrower_id, listing_id`,
+             RETURNING client_id, listing_id`,
             [requestId, newStatus]
         );
 
@@ -27,7 +27,7 @@ export default async function declineRentalRequest(req, res) {
             throw new Error(`Request with ID ${requestId} not found.`);
         }
 
-        const { borrower_id: borrowerId, listing_id: listingId } = requestUpdateResult.rows[0];
+        const { client_id: clientId, listing_id: listingId } = requestUpdateResult.rows[0];
 
         // 3. Cancel the Payment Intent (Release the Hold)
         // We only cancel intents that are currently AUTHORIZED.
@@ -45,12 +45,12 @@ export default async function declineRentalRequest(req, res) {
             console.warn(`Warning: No 'AUTHORIZED' payment intent found to cancel for Request #${requestId}`);
         }
 
-        // 4. Log Activity for the Borrower
+        // 4. Log Activity for the Client
         await tx.query(
             `INSERT INTO activity_log (created_at, user_id, type, message)
              VALUES (NOW(), $1, '${ACTIVITY.DECLINE_REQUEST}', $2)`,
             [
-                borrowerId,
+                clientId,
                 `Your rental request for Listing #${listingId} was declined. The temporary hold on your card has been released.`
             ]
         );

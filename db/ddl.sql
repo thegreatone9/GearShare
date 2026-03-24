@@ -30,8 +30,8 @@ CREATE TABLE requests
 (
     id               SERIAL PRIMARY KEY,
     listing_id       INT REFERENCES listings (id) NOT NULL,
-    borrower_id      INT REFERENCES accounts (id) NOT NULL,
-    lender_id        INT REFERENCES accounts (id) NOT NULL,
+    client_id      INT REFERENCES accounts (id) NOT NULL,
+    merchant_id        INT REFERENCES accounts (id) NOT NULL,
     date             DATE,
     start_date       DATE,
     end_date         DATE,

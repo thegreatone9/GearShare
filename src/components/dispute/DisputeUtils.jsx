@@ -1,5 +1,5 @@
 import {DollarSign, Eye, FileText, MessageSquareWarning, XCircle} from 'lucide-react';
-import {BORROWER_DISPUTE_ACTIONS, DISPUTE_STATUS, LENDER_DISPUTE_ACTIONS, ROLE} from "../util/Util.js";
+import {CLIENT_DISPUTE_ACTIONS, DISPUTE_STATUS, MERCHANT_DISPUTE_ACTIONS, ROLE} from "../util/Util.js";
 
 export const processUserDisputes = (appData, userId) => {
     const { disputes, rentals, requests, listings } = appData;
@@ -14,15 +14,15 @@ export const processUserDisputes = (appData, userId) => {
             if (!request) return null;
 
             // 3. Determine User Role
-            const isLender = request.lender_id === userId;
-            const isBorrower = request.borrower_id === userId;
+            const isMerchant = request.merchant_id === userId;
+            const isClient = request.client_id === userId;
 
             // Filter out disputes the user isn't involved in
-            if (!isLender && !isBorrower) return null;
+            if (!isMerchant && !isClient) return null;
 
             // 4. Get Listing Details
             const listing = listings.find(l => l.id === request.listing_id);
-            const userRole = isLender ? ROLE.LENDER : ROLE.BORROWER;
+            const userRole = isMerchant ? ROLE.MERCHANT : ROLE.CLIENT;
 
             // 5. Get Status Details using the external helper function
             const statusDetails = getStatusDetails(dispute, userRole);
@@ -33,14 +33,14 @@ export const processUserDisputes = (appData, userId) => {
                 request: request,
                 rental: rental,
                 userRole: userRole,
-                isLent: isLender, // Used for final categorization
-                opponentId: isLender ? request.borrower_id : request.lender_id,
+                isLent: isMerchant, // Used for final categorization
+                opponentId: isMerchant ? request.client_id : request.merchant_id,
                 ...statusDetails,
             };
         })
         .filter(d => d !== null); // Remove disputes not involving the user
 
-    // Categorize into Lent (Lender Role) and Borrowed (Borrower Role)
+    // Categorize into Lent (Merchant Role) and Borrowed (Client Role)
     const disputedLentItems = allRelevantDisputes.filter(d => d.isLent);
     const disputedBorrowedItems = allRelevantDisputes.filter(d => !d.isLent);
 
@@ -62,27 +62,27 @@ export const processUserDisputes = (appData, userId) => {
 };
 
 export const ACTION_ICONS = {
-    [LENDER_DISPUTE_ACTIONS.SETTLE]: DollarSign,
-    [LENDER_DISPUTE_ACTIONS.FILE_CLAIM]: XCircle,
-    [LENDER_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS]: Eye,
-    [LENDER_DISPUTE_ACTIONS.VIEW_REPORT]: FileText,
-    [BORROWER_DISPUTE_ACTIONS.SUBMIT_EVIDENCE]: MessageSquareWarning, // Used MessageSquareWarning for evidence submission
-    [BORROWER_DISPUTE_ACTIONS.VIEW_REPORT]: FileText,
-    [BORROWER_DISPUTE_ACTIONS.PAY_DAMAGES]: DollarSign
+    [MERCHANT_DISPUTE_ACTIONS.SETTLE]: DollarSign,
+    [MERCHANT_DISPUTE_ACTIONS.FILE_CLAIM]: XCircle,
+    [MERCHANT_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS]: Eye,
+    [MERCHANT_DISPUTE_ACTIONS.VIEW_REPORT]: FileText,
+    [CLIENT_DISPUTE_ACTIONS.SUBMIT_EVIDENCE]: MessageSquareWarning,
+    [CLIENT_DISPUTE_ACTIONS.VIEW_REPORT]: FileText,
+    [CLIENT_DISPUTE_ACTIONS.PAY_DAMAGES]: DollarSign
 };
 
 const getStatusDetails = (dispute, userRole) => {
     const status = dispute.status;
 
     if (status === DISPUTE_STATUS.PENDING_DEPOSIT_RETURN) {
-        if (userRole === ROLE.LENDER) {
+        if (userRole === ROLE.MERCHANT) {
             return {
                 label: 'Awaiting Your Review',
                 color: 'bg-red-100 text-red-700',
-                actions: [LENDER_DISPUTE_ACTIONS.SETTLE, LENDER_DISPUTE_ACTIONS.FILE_CLAIM]
+                actions: [MERCHANT_DISPUTE_ACTIONS.SETTLE, MERCHANT_DISPUTE_ACTIONS.FILE_CLAIM]
             };
         }
-        // Borrower's view (passive)
+        // Client's view (passive)
         return {
             label: 'Awaiting Merchant Review',
             color: 'bg-yellow-100 text-yellow-700',
@@ -91,54 +91,53 @@ const getStatusDetails = (dispute, userRole) => {
     }
 
     if (status === DISPUTE_STATUS.CLAIM_FILED) {
-        if (userRole === ROLE.BORROWER) {
+        if (userRole === ROLE.CLIENT) {
             return {
                 label: 'Merchant Claim Filed: Action Required',
                 color: 'bg-red-100 text-red-700',
-                actions: [BORROWER_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS, BORROWER_DISPUTE_ACTIONS.SUBMIT_EVIDENCE], // Consistent use of actions array
+                actions: [CLIENT_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS, CLIENT_DISPUTE_ACTIONS.SUBMIT_EVIDENCE],
             };
         }
-        // Lender's view (passive—waiting for borrower's evidence)
+        // Merchant's view (passive—waiting for client's evidence)
         return {
             label: 'Awaiting Client Evidence',
             color: 'bg-blue-100 text-blue-700',
-            actions: [LENDER_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS]
+            actions: [MERCHANT_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS]
         };
     }
 
     if (status === DISPUTE_STATUS.JUDGED) {
-        if (userRole === ROLE.BORROWER) {
+        if (userRole === ROLE.CLIENT) {
             return {
                 label: 'Judgement Pronounced: Action Required',
                 color: 'bg-red-100 text-red-700',
-                actions: [BORROWER_DISPUTE_ACTIONS.PAY_DAMAGES, BORROWER_DISPUTE_ACTIONS.VIEW_REPORT], // Consistent use of actions array
+                actions: [CLIENT_DISPUTE_ACTIONS.PAY_DAMAGES, CLIENT_DISPUTE_ACTIONS.VIEW_REPORT],
             };
         }
-        // Lender's view (passive—waiting for borrower's evidence)
+        // Merchant's view (passive—waiting for client to pay damages)
         return {
             label: 'Judgement Pronounced: Awaiting Client Damages',
             color: 'bg-indigo-100 text-indigo-700',
-            actions: [LENDER_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS, LENDER_DISPUTE_ACTIONS.VIEW_REPORT]
+            actions: [MERCHANT_DISPUTE_ACTIONS.VIEW_CLAIM_DETAILS, MERCHANT_DISPUTE_ACTIONS.VIEW_REPORT]
         };
     }
 
     if (status === DISPUTE_STATUS.COMPLETED) {
-        // Assuming a final resolution requires both parties to view the report
         const actions = [];
 
         if (dispute.judgement_details) {
-            if (userRole === ROLE.BORROWER) {
-                actions.push(BORROWER_DISPUTE_ACTIONS.VIEW_REPORT);
+            if (userRole === ROLE.CLIENT) {
+                actions.push(CLIENT_DISPUTE_ACTIONS.VIEW_REPORT);
 
-            } else if (userRole === ROLE.LENDER) {
-                actions.push(LENDER_DISPUTE_ACTIONS.VIEW_REPORT);
+            } else if (userRole === ROLE.MERCHANT) {
+                actions.push(MERCHANT_DISPUTE_ACTIONS.VIEW_REPORT);
             }
         }
 
         return {
             label: 'Case Settled',
             color: 'bg-green-100 text-green-700',
-            // Borrower should also be able to view the final report
+            // Client should also be able to view the final report
             actions: actions
         };
     }

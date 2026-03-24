@@ -28,8 +28,8 @@ export const ACTIVITY = {
 }
 
 export const ROLE = {
-    LENDER: 'lender',
-    BORROWER: 'borrower',
+    MERCHANT: 'merchant',
+    CLIENT: 'client',
     ADMIN: 'admin'
 }
 
@@ -90,21 +90,21 @@ export const BORROWER_ITEM_ACTIONS = {
     BUY_NOW: 'buyNow'
 }
 
-export const LENDER_DISPUTE_ACTIONS = {
+export const MERCHANT_DISPUTE_ACTIONS = {
     FILE_CLAIM: 'fileClaim',
     SETTLE: 'settle',
     VIEW_CLAIM_DETAILS: 'viewClaimDetails',
     VIEW_REPORT: 'viewReport',
-    VIEW_BORROWER: 'viewBorrower',
+    VIEW_CLIENT: 'viewClient',
     VIEW_ITEM: 'viewItem'
 }
 
-export const BORROWER_DISPUTE_ACTIONS = {
+export const CLIENT_DISPUTE_ACTIONS = {
     VIEW_CLAIM_DETAILS: 'viewClaimDetails',
     SUBMIT_EVIDENCE: 'submitEvidence',
     VIEW_REPORT: 'viewReport',
     PAY_DAMAGES: 'payDamages',
-    VIEW_LENDER: 'viewLender',
+    VIEW_MERCHANT: 'viewMerchant',
     VIEW_ITEM: 'viewItem'
 }
 
@@ -144,6 +144,6 @@ export const TOAST_TYPE = {
 export const MODAL_CATEGORY = {
     ITEM: 'item',
     ACCEPT_RENTAL_REQUEST: 'acceptRentalRequest',
-    BORROWER: 'borrower',
-    LENDER: 'lender'
+    CLIENT: 'client',
+    MERCHANT: 'merchant'
 }

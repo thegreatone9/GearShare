@@ -167,7 +167,7 @@ export default async function confirmRental(req, res) {
              VALUES ($1, $2, $3, $4, '${TRANSACTION_STATUS.SECURITY_DEPOSIT}', $5)`,
             [
                 intentId,
-                borrowerId,        // The Borrower is paying
+                borrowerId,        // The Client is paying
                 ADMIN_ID.ESCROW,   // Money is currently held by the platform
                 totalAmount,
                 `Security deposit and rental fee captured for Rental #${insertedRental.id}`

@@ -43,7 +43,7 @@ VALUES (1, '[]', '{"from": "2025-09-01", "to": "2026-12-31"}'),
        (7, '[]', '{"from": "2025-09-01", "to": "2026-12-31"}');
 
 -- Requests (fixed column names: request_date→date, rent_start_date→start_date, rent_end_date→end_date, removed deposit)
-INSERT INTO requests (id, listing_id, borrower_id, lender_id, date, start_date, end_date, status, listing_snapshot)
+INSERT INTO requests (id, listing_id, client_id, merchant_id, date, start_date, end_date, status, listing_snapshot)
 VALUES (1, 1, 1, 2, '2025-09-09', '2025-10-09', '2025-12-15', 'completed',
         '{"title":"Cordless Drill Set","daily_rate":15,"replacement_value":150}'),
        (2, 2, 2, 1, '2025-09-09', '2025-10-09', '2025-12-15', 'completed',

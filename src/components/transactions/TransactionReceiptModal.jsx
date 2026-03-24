@@ -44,8 +44,8 @@ const TransactionReceiptModal = ({isOpen, onClose, transaction}) => {
                 const payee = users.find(p => p.id === transaction.payee_id);
 
                 setDetails({
-                    borrower: payer,
-                    lender: payee,
+                    client: payer,
+                    merchant: payee,
                     startDate: requestData.start_date,
                     endDate: requestData.end_date
                 });
@@ -133,35 +133,35 @@ const TransactionReceiptModal = ({isOpen, onClose, transaction}) => {
 
                                 {/* Parties */}
                                 <div className="flex justify-center items-center gap-8 mb-4">
-                                    {/* Lender */}
+                                    {/* Merchant */}
                                     <div>
                                         <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 flex items-center">
                                             <User className="w-3 h-3 mr-1"/> Payee (Merchant)
                                         </h4>
                                         <div className="flex items-center">
                                             <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">
-                                                <img src={userImageSrc(details.lender?.name)}
-                                                     className="w-full h-full object-cover" alt={details.lender?.name}/>
+                                                <img src={userImageSrc(details.merchant?.name)}
+                                                     className="w-full h-full object-cover" alt={details.merchant?.name}/>
                                             </div>
                                             <div>
-                                                <p className="font-bold text-gray-800 text-sm">{details.lender?.name || 'Unknown'}</p>
-                                                <p className="text-xs text-gray-500">{details.lender?.email}</p>
+                                                <p className="font-bold text-gray-800 text-sm">{details.merchant?.name || 'Unknown'}</p>
+                                                <p className="text-xs text-gray-500">{details.merchant?.email}</p>
                                             </div>
                                         </div>
                                     </div>
-                                    {/* Borrower */}
+                                    {/* Client */}
                                     <div>
                                         <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 flex items-center">
                                             <User className="w-3 h-3 mr-1"/> Payer (Client)
                                         </h4>
                                         <div className="flex items-center">
                                             <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">
-                                                <img src={userImageSrc(details.borrower?.name)}
-                                                     className="w-full h-full object-cover" alt={details.borrower?.name}/>
+                                                <img src={userImageSrc(details.client?.name)}
+                                                     className="w-full h-full object-cover" alt={details.client?.name}/>
                                             </div>
                                             <div>
-                                                <p className="font-bold text-gray-800 text-sm">{details.borrower?.name || 'Unknown'}</p>
-                                                <p className="text-xs text-gray-500">{details.borrower?.email}</p>
+                                                <p className="font-bold text-gray-800 text-sm">{details.client?.name || 'Unknown'}</p>
+                                                <p className="text-xs text-gray-500">{details.client?.email}</p>
                                             </div>
                                         </div>
                                     </div>

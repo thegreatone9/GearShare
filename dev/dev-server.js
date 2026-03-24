@@ -105,7 +105,7 @@ function buildQuery(table, queryParams) {
 }
 
 /**
- * Parse OR filter clause like: "borrower_id.eq.5,lender_id.eq.5"
+ * Parse OR filter clause like: "client_id.eq.5,merchant_id.eq.5"
  * or "title.ilike.%drill%,description.ilike.%drill%"
  */
 function parseOrClause(orString) {

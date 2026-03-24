@@ -152,25 +152,25 @@ export async function fetchAvailabilityColumns(listingId, columns) {
 // Requests
 // =============================================================================
 
-export async function fetchRequestsByBorrower(borrowerId) {
-    return await get('requests', {'eq.borrower_id': borrowerId});
+export async function fetchRequestsByClient(clientId) {
+    return await get('requests', {'eq.client_id': clientId});
 }
 
-export async function fetchRequestsByLender(lenderId) {
-    return await get('requests', {'eq.lender_id': lenderId});
+export async function fetchRequestsByMerchant(merchantId) {
+    return await get('requests', {'eq.merchant_id': merchantId});
 }
 
 export async function fetchRequestsByUser(userId) {
     return await get('requests', {
-        'or': `borrower_id.eq.${userId},lender_id.eq.${userId}`
+        'or': `client_id.eq.${userId},merchant_id.eq.${userId}`
     });
 }
 
-export async function fetchActiveRequestDates(listingId, borrowerId, status) {
+export async function fetchActiveRequestDates(listingId, clientId, status) {
     return await get('requests', {
         select: 'start_date,end_date',
         'eq.listing_id': listingId,
-        'eq.borrower_id': borrowerId,
+        'eq.client_id': clientId,
         'eq.status': status
     });
 }

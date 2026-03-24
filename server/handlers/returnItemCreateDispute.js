@@ -22,7 +22,7 @@ export default async function returnItemCreateDispute(req, res) {
         const rentalData = await tx.query(
             `SELECT
                  r.id, r.request_id,
-                 req.borrower_id, req.lender_id, req.start_date, req.end_date,
+                 req.client_id, req.merchant_id, req.start_date, req.end_date,
                  req.listing_snapshot,
                  pi.id as payment_intent_id, pi.amount as total_held_amount
              FROM rentals r
@@ -60,8 +60,8 @@ export default async function returnItemCreateDispute(req, res) {
         const pricePerUnit = listingSnapshot.daily_rate;
         const rentalFee = calculateRentalFee(TIME_UNIT.DAY, pricePerUnit, rental.start_date, rental.end_date);
 
-        // 5. Create Transaction: Pay Rent to Lender
-        // We move the Rent portion from Escrow -> Lender
+        // 5. Create Transaction: Pay Rent to Merchant
+        // We move the Rent portion from Escrow -> Merchant
         await tx.query(
             `INSERT INTO transactions (
                 payment_intent_id, payer_id, payee_id, amount, type, description, created_at
@@ -70,7 +70,7 @@ export default async function returnItemCreateDispute(req, res) {
             [
                 rental.payment_intent_id,
                 ADMIN_ID.ESCROW,
-                rental.lender_id,
+                rental.merchant_id,
                 rentalFee,
                 `Rental fee payout for Rental #${rentalId}`
             ]
@@ -88,7 +88,7 @@ export default async function returnItemCreateDispute(req, res) {
         await tx.query(
             `INSERT INTO activity_log (created_at, user_id, type, message)
              VALUES (NOW(), $1, '${ACTIVITY.RETURN_ITEM_CREATE_DISPUTE}', $2)`,
-            [rental.borrower_id, `Dispute opened for Rental #${rentalId}. Rental fee paid, deposit held.`]
+            [rental.client_id, `Dispute opened for Rental #${rentalId}. Rental fee paid, deposit held.`]
         );
 
         // Return the created dispute
