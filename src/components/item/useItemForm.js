@@ -66,7 +66,12 @@ export function useItemForm() {
                 setCurrentItem(item);
                 setItemState({
                     ...item,
-                    image_url: item.image_url || { url_1: '', url_2: '', url_3: '' }
+                    image_url: (() => {
+                        const raw = item.image_url;
+                        if (!raw) return { url_1: '', url_2: '', url_3: '' };
+                        if (typeof raw === 'object') return raw;
+                        try { return JSON.parse(raw); } catch (_) { return { url_1: raw, url_2: '', url_3: '' }; }
+                    })()
                 });
 
                 // Fetch Availability

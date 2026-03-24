@@ -26,64 +26,85 @@ VALUES
     -- RENT listings
     (1,  2, 'Cordless Drill Set',        'A high-quality cordless drill with multiple bits and a carrying case. Perfect for home improvement projects.',
          15, 15, 'day', 'day', 'Downtown LA',   4.8, 150,
-         'https://placehold.co/300x200/4F46E5/FFFFFF?text=Drill',      'RENT', 'ACTIVE', 'Household', '4'),
+         '{"url_1":"https://placehold.co/300x200/4F46E5/FFFFFF?text=Drill"}',      'RENT', 'ACTIVE', 'Household', '4'),
 
     (2,  1, 'DJI Mavic Mini Drone',      'Compact drone with 4K camera, perfect for aerial photography. Includes 3 batteries and carrying case.',
          35, 35, 'day', 'day', 'Santa Monica',   4.5, 800,
-         'https://placehold.co/300x200/10B981/FFFFFF?text=Drone',      'RENT', 'ACTIVE', 'Electronics', '4'),
+         '{"url_1":"https://placehold.co/300x200/10B981/FFFFFF?text=Drone"}',      'RENT', 'ACTIVE', 'Electronics', '4'),
 
     (3,  2, 'Professional Steam Iron',   'Industrial-grade steam iron, heats up in 30 seconds. Great for bulk ironing or tailoring work.',
          5,  5,  'day', 'day', 'Venice Beach',    4.9, 60,
-         'https://placehold.co/300x200/F97316/FFFFFF?text=Iron',       'RENT', 'ACTIVE', 'Household', '5'),
+         '{"url_1":"https://placehold.co/300x200/F97316/FFFFFF?text=Iron"}',       'RENT', 'ACTIVE', 'Household', '5'),
 
     (4,  1, 'Fender Acoustic Guitar',    'Full-size acoustic guitar with carrying bag and spare strings. Beautiful warm tone.',
          100, 100, 'day', 'day', 'Culver City',   5.0, 450,
-         'https://placehold.co/300x200/EC4899/FFFFFF?text=Guitar',     'RENT', 'ACTIVE', 'Music', '4'),
+         '{"url_1":"https://placehold.co/300x200/EC4899/FFFFFF?text=Guitar"}',     'RENT', 'ACTIVE', 'Music', '4'),
 
     (5,  2, 'Mechanical Keyboard',       'Cherry MX Blue mechanical keyboard with RGB backlighting. Great for gaming or coding.',
          20, 20, 'day', 'day', 'Montana City',    5.0, 120,
-         'https://placehold.co/300x200/7C3AED/FFFFFF?text=Keyboard',   'RENT', 'ACTIVE', 'Electronics', '4'),
+         '{"url_1":"https://placehold.co/300x200/7C3AED/FFFFFF?text=Keyboard"}',   'RENT', 'ACTIVE', 'Electronics', '4'),
 
     (6,  1, 'Canon EOS R5 Camera',       'Full-frame mirrorless camera with 45MP sensor and 8K video. Includes 50mm f/1.8 lens.',
          75, 75, 'day', 'day', 'Beverly Hills',   4.7, 3800,
-         'https://placehold.co/300x200/0EA5E9/FFFFFF?text=Camera',     'RENT', 'ACTIVE', 'Electronics', '5'),
+         '{"url_1":"https://placehold.co/300x200/0EA5E9/FFFFFF?text=Camera"}',     'RENT', 'ACTIVE', 'Electronics', '5'),
 
     (7,  2, 'Pro Skateboard',            'Professional skateboard with custom deck, Bones Swiss bearings and Thunder trucks.',
          15, 15, 'day', 'day', 'Venice Beach',     4.6, 200,
-         'https://placehold.co/300x200/F59E0B/FFFFFF?text=Skateboard', 'RENT', 'ACTIVE', 'Sports', '3'),
+         '{"url_1":"https://placehold.co/300x200/F59E0B/FFFFFF?text=Skateboard"}', 'RENT', 'ACTIVE', 'Sports', '3'),
 
     (10, 3, 'Camping Tent (4-Person)',   'Waterproof 4-person tent with vestibule. Easy 10-minute setup. Includes stakes and rainfly.',
          25, 25, 'day', 'day', 'Malibu',           4.8, 350,
-         'https://placehold.co/300x200/059669/FFFFFF?text=Tent',       'RENT', 'ACTIVE', 'Travel', '4'),
+         '{"url_1":"https://placehold.co/300x200/059669/FFFFFF?text=Tent"}',       'RENT', 'ACTIVE', 'Travel', '4'),
 
     (11, 4, 'Electronic Stethoscope',    'Littmann 3200 electronic stethoscope with Bluetooth. Perfect for medical students.',
          30, 30, 'day', 'day', 'Pasadena',         4.9, 400,
-         'https://placehold.co/300x200/6366F1/FFFFFF?text=Stethoscope','RENT', 'ACTIVE', 'Medical', '5'),
+         '{"url_1":"https://placehold.co/300x200/6366F1/FFFFFF?text=Stethoscope"}','RENT', 'ACTIVE', 'Medical', '5'),
 
     (12, 1, 'Textbook: Intro to Algorithms', 'CLRS 4th Edition. Clean, no highlights. Perfect for CS courses.',
          8,  8,  'day', 'day', 'Westwood',         5.0, 90,
-         'https://placehold.co/300x200/8B5CF6/FFFFFF?text=Textbook',   'RENT', 'ACTIVE', 'Education', '4'),
+         '{"url_1":"https://placehold.co/300x200/8B5CF6/FFFFFF?text=Textbook"}',   'RENT', 'ACTIVE', 'Education', '4'),
 
     -- SELL listings
     (8,  1, 'Weber BBQ Grill',           'Premium gas grill, barely used. Comes with cover, utensils, and propane tank.',
          250, NULL, NULL, NULL, 'Pasadena',        4.7, NULL,
-         'https://placehold.co/300x200/DC2626/FFFFFF?text=BBQ+Grill',  'SELL', 'ACTIVE', 'Household', '4'),
+         '{"url_1":"https://placehold.co/300x200/DC2626/FFFFFF?text=BBQ+Grill"}',  'SELL', 'ACTIVE', 'Household', '4'),
 
     (9,  2, 'Nintendo Switch Bundle',    'Switch console + 3 games (Zelda, Mario Kart, Smash Bros) + Pro Controller. Original box included.',
          320, NULL, NULL, NULL, 'Hollywood',       4.6, NULL,
-         'https://placehold.co/300x200/7C3AED/FFFFFF?text=Switch',     'SELL', 'ACTIVE', 'Electronics', '4'),
+         '{"url_1":"https://placehold.co/300x200/7C3AED/FFFFFF?text=Switch"}',     'SELL', 'ACTIVE', 'Electronics', '4'),
 
     (13, 2, 'KitchenAid Stand Mixer',    'Artisan 5-quart stand mixer in Empire Red. Barely used, all attachments included.',
          180, NULL, NULL, NULL, 'Santa Monica',    4.9, NULL,
-         'https://placehold.co/300x200/EF4444/FFFFFF?text=Mixer',      'SELL', 'ACTIVE', 'Household', '5'),
+         '{"url_1":"https://placehold.co/300x200/EF4444/FFFFFF?text=Mixer"}',      'SELL', 'ACTIVE', 'Household', '5'),
 
     (14, 3, 'Trek Mountain Bike',        '2023 Trek Marlin 7, Size M. Well-maintained with new tires and brakes.',
          650, NULL, NULL, NULL, 'Burbank',         4.5, NULL,
-         'https://placehold.co/300x200/16A34A/FFFFFF?text=Bike',       'SELL', 'ACTIVE', 'Sports', '3'),
+         '{"url_1":"https://placehold.co/300x200/16A34A/FFFFFF?text=Bike"}',       'SELL', 'ACTIVE', 'Sports', '3'),
 
     (15, 4, 'Instant Pot Duo 8-Quart',   'Multi-use pressure cooker, slow cooker, rice cooker. Includes accessories.',
          55,  NULL, NULL, NULL, 'Glendale',        4.8, NULL,
-         'https://placehold.co/300x200/EA580C/FFFFFF?text=InstantPot', 'SELL', 'ACTIVE', 'Food', '4');
+         '{"url_1":"https://placehold.co/300x200/EA580C/FFFFFF?text=InstantPot"}', 'SELL', 'ACTIVE', 'Food', '4'),
+
+    -- SERVICE listings
+    (18, 3, 'Electronics Repair & Diagnostics',
+         'Professional repair service for smartphones, laptops, tablets, and gaming consoles. Same-day screen replacements, battery swaps, and water damage recovery. Free diagnostics for all devices.',
+         NULL, NULL, NULL, NULL, 'Downtown LA',    NULL, NULL,
+         '{"url_1":"https://placehold.co/300x200/0EA5E9/FFFFFF?text=ElecRepair"}',  'SERVICE', 'ACTIVE', 'Electronics', NULL),
+
+    (19, 4, 'Custom Tailoring & Alterations',
+         'Expert tailoring services including hemming, resizing, zipper replacements, and custom fittings. Specializing in formal wear, denim, and leather alterations. Walk-ins welcome, 3-5 day turnaround.',
+         NULL, NULL, NULL, NULL, 'Beverly Hills',  NULL, NULL,
+         '{"url_1":"https://placehold.co/300x200/EC4899/FFFFFF?text=Tailoring"}',   'SERVICE', 'ACTIVE', 'Household', NULL),
+
+    (20, 1, 'Document Printing & Binding',
+         'High-quality printing services: color/B&W, large format posters, thesis binding, business cards, and flyer printing. Bulk discounts available. USB and email submissions accepted.',
+         NULL, NULL, NULL, NULL, 'Westwood',       NULL, NULL,
+         '{"url_1":"https://placehold.co/300x200/8B5CF6/FFFFFF?text=Printing"}',    'SERVICE', 'ACTIVE', 'Education', NULL),
+
+    (21, 2, 'Bike Tune-Up & Repair',
+         'Full bicycle servicing: brake adjustments, gear tuning, chain replacement, wheel truing, and flat tire repair. Quick 1-2 day turnaround. All bike types welcome — road, mountain, BMX.',
+         NULL, NULL, NULL, NULL, 'Venice Beach',   NULL, NULL,
+         '{"url_1":"https://placehold.co/300x200/16A34A/FFFFFF?text=BikeRepair"}',  'SERVICE', 'ACTIVE', 'Sports', NULL);
 
 
 -- -------------------- AVAILABILITY (rental listings only) --------------------

@@ -6,16 +6,31 @@ export default function ItemCard({item}) {
     const navigate = useNavigate();
     const {authenticatedUser} = useAuth();
 
+    const isForSale = item.listing_type === 'SELL';
+    const isService = item.listing_type === 'SERVICE';
+
     const handleItemClick = function () {
-        if (authenticatedUser) {
-            navigate(`/item/${item.id}?role=${ROLE.CLIENT}`);
-        } else {
+        if (!authenticatedUser) {
             navigate('/auth');
+            return;
+        }
+
+        if (isService) {
+            navigate(`/service/${item.id}`);
+        } else {
+            navigate(`/item/${item.id}?role=${ROLE.CLIENT}`);
         }
     }
 
-    const isForSale = item.listing_type === 'SELL';
     const rating = item.rating || item.condition || '—';
+
+    // Determine badge style
+    const getBadge = () => {
+        if (isService) return {label: 'SERVICE', cls: 'item-card__badge--service'};
+        if (isForSale) return {label: 'FOR SALE', cls: 'item-card__badge--sale'};
+        return {label: 'FOR RENT', cls: 'item-card__badge--rent'};
+    };
+    const badge = getBadge();
 
     return (
         <div
@@ -33,9 +48,8 @@ export default function ItemCard({item}) {
                         e.target.src = "https://placehold.co/400x280/CCCCCC/000000?text=Image+Error";
                     }}
                 />
-                {/* Listing type badge on image */}
-                <span className={`item-card__badge ${isForSale ? 'item-card__badge--sale' : 'item-card__badge--rent'}`}>
-                    {isForSale ? 'FOR SALE' : 'FOR RENT'}
+                <span className={`item-card__badge ${badge.cls}`}>
+                    {badge.label}
                 </span>
             </div>
 
@@ -44,9 +58,11 @@ export default function ItemCard({item}) {
                 {/* Title + Rating */}
                 <div className="item-card__header">
                     <h3 className="item-card__title">{item.title}</h3>
-                    <span className="item-card__rating">
-                        <span className="item-card__star">★</span> {rating}
-                    </span>
+                    {!isService && (
+                        <span className="item-card__rating">
+                            <span className="item-card__star">★</span> {rating}
+                        </span>
+                    )}
                 </div>
 
                 {/* Description */}
@@ -59,21 +75,28 @@ export default function ItemCard({item}) {
                     <span className="item-card__location-icon">📍</span> {item.location}
                 </p>
 
-                {/* Price + Action Button */}
-                <div className="item-card__footer">
-                    <div className="item-card__price">
-                        {isForSale ? (
-                            <>
+                {/* Price (hidden for services) */}
+                {!isService && (
+                    <div className="item-card__footer">
+                        <div className="item-card__price">
+                            {isForSale ? (
                                 <span className="item-card__price-amount item-card__price-amount--sale">${item.price}</span>
-                            </>
-                        ) : (
-                            <>
-                                <span className="item-card__price-amount">${item.daily_rate}</span>
-                                <span className="item-card__price-unit">/{TIME_UNIT.DAY}</span>
-                            </>
-                        )}
+                            ) : (
+                                <>
+                                    <span className="item-card__price-amount">${item.daily_rate}</span>
+                                    <span className="item-card__price-unit">/{TIME_UNIT.DAY}</span>
+                                </>
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
+
+                {/* Service indicator in footer area */}
+                {isService && (
+                    <div className="item-card__footer">
+                        <span className="text-sm font-medium text-orange-600">View Details →</span>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -18,6 +18,8 @@ import {useAuth} from "./components/AppContext.jsx";
 import ToastContainer from "./components/common/ToastContainer.jsx";
 import Transactions from "./components/transactions/Transactions.jsx";
 import ActivityLog from "./components/activity/ActivityLog.jsx";
+import ServiceDetailPage from "./components/service/ServiceDetailPage.jsx";
+import ServiceForm from "./components/service/ServiceForm.jsx";
 
 export default function App() {
     const location = useLocation();
@@ -88,6 +90,18 @@ export default function App() {
                             path="/item/:id?"
                             element={<ProtectedRoute>
                                 <ItemForm/>
+                            </ProtectedRoute>}
+                        />
+                        <Route
+                            path="/service"
+                            element={<ProtectedRoute>
+                                <ServiceForm/>
+                            </ProtectedRoute>}
+                        />
+                        <Route
+                            path="/service/:id"
+                            element={<ProtectedRoute>
+                                <ServiceDetailPage/>
                             </ProtectedRoute>}
                         />
                         <Route

@@ -1,4 +1,4 @@
-import {CheckCheck, Clock, DollarSign, Landmark, Package, ShieldAlert, Wrench, Zap} from 'lucide-react';
+import {CheckCheck, Clock, DollarSign, Landmark, Package, ShieldAlert, Wrench, Zap, Briefcase} from 'lucide-react';
 import {Link} from 'react-router-dom';
 import {itemImageSrc, RENTAL_STATUS, REQUEST_STATUS, ROLE, TIME_UNIT, upperCaseFirstLetter} from "../util/Util.js";
 import ActionModal from "../common/ActionModal.jsx";
@@ -222,6 +222,34 @@ export default function MerchantDashboardPresenter({
         );
     };
 
+    // 7. Service Listings Item Renderer
+    const renderServiceListing = (item) => {
+        return (
+            <div key={item.id}
+                 className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-8 p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition">
+                <div className="flex items-center space-x-3 cursor-pointer"
+                     onClick={() => openItemDetailsModal(item)}>
+                    <img src={itemImageSrc(item.image_url, item.title)} alt={item.title}
+                         className="w-12 h-12 rounded-lg object-cover"/>
+                    <div>
+                        <p className="font-medium text-gray-900">{item.title}</p>
+                        <p className="text-sm text-left text-gray-500">
+                            {item.category} · {item.location}
+                        </p>
+                    </div>
+                </div>
+                <div className="sm:text-right">
+                    <span className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700">
+                      Service
+                    </span>
+                    <button className="text-xs ml-2 text-white bg-indigo-600 px-3 py-1 rounded-lg hover:bg-indigo-700 transition"
+                            onClick={() => editItem(item.id, 'active')}>Manage
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
 
     return (
         <div className="py-8 max-w-5xl mx-auto">
@@ -239,11 +267,18 @@ export default function MerchantDashboardPresenter({
 
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-6">
                 <h3 className="text-3xl font-bold text-gray-800">Merchant Hub: Manage Inventory & Requests</h3>
-                <Link to={`/item?role=${ROLE.MERCHANT}`}
-                      className="bg-indigo-200 text-indigo-700 text-sm font-medium px-3 py-1 rounded-full hover:bg-indigo-100 transition">
-                    <Package className="w-4 h-4 inline mr-1"/>
-                    New Item
-                </Link>
+                <div className="flex gap-2">
+                    <Link to={`/item?role=${ROLE.MERCHANT}`}
+                          className="bg-indigo-200 text-indigo-700 text-sm font-medium px-3 py-1 rounded-full hover:bg-indigo-100 transition">
+                        <Package className="w-4 h-4 inline mr-1"/>
+                        New Item
+                    </Link>
+                    <Link to="/service"
+                          className="bg-orange-200 text-orange-700 text-sm font-medium px-3 py-1 rounded-full hover:bg-orange-100 transition">
+                        <Briefcase className="w-4 h-4 inline mr-1"/>
+                        New Service
+                    </Link>
+                </div>
             </div>
 
             {/* MAIN CONTAINER: Use a single column grid to stack all sections vertically */}
@@ -269,14 +304,24 @@ export default function MerchantDashboardPresenter({
                     emptyMessage="No pending requests right now."
                 />
 
-                {/* III. Available Inventory */}
+                {/* III. Available Inventory (items only, not services) */}
                 <DashboardListSection
-                    title={`Available Inventory (${pendingRentalListings.length})`}
+                    title={`Available Inventory (${pendingRentalListings.filter(i => i.listing_type !== 'SERVICE').length})`}
                     Icon={Wrench}
                     iconColor="text-indigo-500"
-                    list={pendingRentalListings}
+                    list={pendingRentalListings.filter(i => i.listing_type !== 'SERVICE')}
                     renderItem={renderAvailableInventory}
                     emptyMessage="No items are currently listed."
+                />
+
+                {/* III-b. My Services */}
+                <DashboardListSection
+                    title={`My Services (${pendingRentalListings.filter(i => i.listing_type === 'SERVICE').length})`}
+                    Icon={Briefcase}
+                    iconColor="text-orange-500"
+                    list={pendingRentalListings.filter(i => i.listing_type === 'SERVICE')}
+                    renderItem={renderServiceListing}
+                    emptyMessage="No services listed yet."
                 />
 
                 {/* IV. Completed Sales */}

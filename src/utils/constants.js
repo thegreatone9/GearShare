@@ -12,7 +12,8 @@ export const ADMIN_ID = {
 export const LISTING_TYPE = {
     ANY: 'Listing: Any',
     RENT: 'For Rent',
-    SELL: 'For Sale'
+    SELL: 'For Sale',
+    SERVICE: 'Service'
 }
 
 export const ACTIVITY = {

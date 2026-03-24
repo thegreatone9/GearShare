@@ -18,7 +18,12 @@ export const RANDOM_COLOR = function () {
 }
 
 export const itemImageSrc = function (image_url, title) {
-    return image_url?.url_1 || image_url?.url_2 || image_url?.url_3 || `https://placehold.co/600x400/${RANDOM_COLOR()}/FFFFFF?text=${title}`;
+    let img = image_url;
+    // Parse JSON string from DB into object
+    if (typeof img === 'string') {
+        try { img = JSON.parse(img); } catch (_) { /* plain URL string — use as-is */ return img; }
+    }
+    return img?.url_1 || img?.url_2 || img?.url_3 || `https://placehold.co/600x400/${RANDOM_COLOR()}/FFFFFF?text=${title}`;
 }
 
 export const userImageSrc = function (title) {

@@ -30,6 +30,11 @@ export default async function listingsWithAvailability(req, res) {
         const result = await tx.query(queryText, queryParams);
 
         const processedResult = result.rows.map(row => {
+            // SERVICE and SELL listings don't have availability ranges — always available
+            if (row.listing_type === 'SERVICE' || row.listing_type === 'SELL') {
+                return { ...row, available: true };
+            }
+
             const isAvailable = isPartiallyAvailable(
                 row.overall_available_range,
                 row.unavailable_ranges

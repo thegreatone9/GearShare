@@ -68,7 +68,7 @@ export default async function upsertListing(req, res) {
                     listingData.replacement_value,
                     listingData.time_unit,
                     listingData.status,
-                    listingData.image_url
+                    typeof listingData.image_url === 'object' ? JSON.stringify(listingData.image_url) : listingData.image_url
                 ]
             );
 
@@ -145,7 +145,7 @@ export default async function upsertListing(req, res) {
                     updates.replacement_value,
                     updates.time_unit,
                     updates.status,
-                    updates.image_url
+                    typeof updates.image_url === 'object' ? JSON.stringify(updates.image_url) : updates.image_url
                 ]
             );
 
