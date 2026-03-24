@@ -1,49 +1,71 @@
 # GearShare
 
-A peer-to-peer gear rental marketplace where users can list equipment they own, browse available items in their community, and manage the full rental lifecycle — from requesting an item, to confirming a rental, returning it, and resolving any damage disputes.
+A peer-to-peer marketplace where users can rent equipment, buy items for sale, and discover local services — all in one community platform. Manage the full lifecycle from listing to transaction, including escrow-protected payments and dispute resolution.
 
 ---
 
 ## Business Overview
 
-GearShare solves the problem of expensive equipment sitting idle. Instead of buying a **$500 drill** you'll use once, you borrow one from a neighbor for **$15/day**.
+GearShare solves the problem of expensive equipment sitting idle and disconnected local services. Instead of buying a **$500 drill** you'll use once, you rent one from a neighbor for **$15/day**. Need a tailor or bike repair? Find trusted providers in your area.
+
+### Listing Types
+
+| Type | Description |
+|------|-------------|
+| **Rent** | Equipment available for daily rental with security deposit and date-based availability |
+| **Sell** | Items listed for one-time purchase at a fixed price |
+| **Service** | Local services (tailoring, repairs, printing, etc.) displayed as a read-only directory with provider contact info |
 
 ### User Roles
 
 | Role | What they do |
 |------|-------------|
-| **Borrower** | Browse marketplace, request items, pay rental fees + security deposit |
-| **Lender** | List items with pricing/availability, accept or decline requests, manage inventory |
-| **Admin** | Resolve damage disputes between borrowers and lenders |
+| **Client** | Browse marketplace, request rentals, purchase items, view service listings |
+| **Merchant** | List items for rent/sale, offer services, accept or decline requests, manage inventory |
+| **Admin** | Resolve damage disputes between clients and merchants |
 
 ### Rental Lifecycle
 
 ```
-Borrower requests item → Lender reviews → Accept or Decline
+Client requests item → Merchant reviews → Accept or Decline
                                               ↓
                                      Rental period begins
                                               ↓
-                                     Borrower returns item
+                                     Client returns item
                                               ↓
-                               Lender inspects returned item
+                               Merchant inspects returned item
                               ↙                            ↘
                        No damage                      Damage found
                           ↓                                ↓
                     Settle & release               File claim (keep deposit)
-                    deposit to borrower                    ↓
-                          ↓                        Borrower submits evidence
+                    deposit to client                      ↓
+                          ↓                        Client submits evidence
                       COMPLETED                            ↓
                                                   Admin reviews & judges
                                                            ↓
                                                        COMPLETED
 ```
 
+### Purchase Flow
+
+```
+Client clicks "Buy Now" → Payment captured → Item marked as SOLD → COMPLETED
+```
+
+### Service Directory
+
+Services appear on the marketplace alongside items. Clicking a service card navigates to a **read-only detail page** showing:
+- Title, description, category, and location
+- Provider contact details (name, email, phone)
+- Designed for future escrow-protected service bookings
+
 ### Payment Flow
 
-- **Security Deposit** — Held in escrow when the borrower requests an item
-- **Rental Fee** — Paid to the lender when the item is returned
-- **Deposit Return** — Full or partial refund to borrower after lender inspection
-- **Damage Overage** — Extra charge to borrower if damages exceed the deposit
+- **Security Deposit** — Held in escrow when the client requests a rental
+- **Rental Fee** — Paid to the merchant when the item is returned
+- **Deposit Return** — Full or partial refund to client after merchant inspection
+- **Damage Overage** — Extra charge to client if damages exceed the deposit
+- **Purchase Payment** — Direct payment to merchant for sale items
 
 ---
 
@@ -64,14 +86,14 @@ Borrower requests item → Lender reviews → Accept or Decline
 GearShare/
 ├── api/index.js                  ← Vercel serverless entry point
 ├── server/
-│   ├── handlers/                 ← Business logic (confirmRental, requestItem, etc.)
+│   ├── handlers/                 ← Business logic (confirmRental, requestItem, purchaseItem, etc.)
 │   └── util/                     ← Transaction wrapper, SQL helpers
 ├── db/                           ← Production SQL (PostgreSQL DDL, seed, stored procs)
 ├── dev/                          ← Local dev server + SQLite
 │   ├── dev-server.js             ← Express server with CRUD routes + SQL console
 │   ├── db.js                     ← pg-compatible SQLite adapter
 │   ├── sqlite-ddl.sql            ← SQLite schema
-│   ├── seed.sql                  ← Sample data
+│   ├── seed.sql                  ← Sample data (rentals, sales, services)
 │   └── gearshare.db              ← Persistent SQLite database (gitignored)
 ├── src/
 │   ├── services/                 ← Data access layer (strategy pattern)
@@ -80,6 +102,12 @@ GearShare/
 │   │   └── localService.js       ← Development: fetch() to local Express server
 │   ├── utils/                    ← Shared utilities (constants, auth, date, etc.)
 │   ├── components/               ← React UI components (by feature)
+│   │   ├── item/                 ← Item forms, cards, calendar
+│   │   ├── service/              ← ServiceDetailPage, ServiceForm
+│   │   ├── merchant/             ← Merchant dashboard (inventory + services)
+│   │   ├── client/               ← Client dashboard (rentals + purchases)
+│   │   ├── dispute/              ← Dispute resolution UI
+│   │   └── transactions/         ← Transaction history & receipts
 │   ├── App.jsx
 │   └── main.jsx
 ├── .env                          ← Public defaults (committed)
@@ -139,7 +167,7 @@ This starts:
 - **Express API server** on `http://localhost:5000` with an in-memory SQLite database
 - **Vite dev server** on `http://localhost:5174` with hot reload
 
-On the first run, the SQLite database file (`dev/gearshare.db`) is automatically created and seeded with sample data. On subsequent runs, the existing database is loaded  — **your changes persist across restarts**.
+On the first run, the SQLite database file (`dev/gearshare.db`) is automatically created and seeded with sample data (15 items + 4 services). On subsequent runs, the existing database is loaded  — **your changes persist across restarts**.
 
 #### Resetting the Database
 
@@ -203,10 +231,14 @@ The SQLite database is stored in `dev/gearshare.db` (gitignored). This means:
 
 ### Sample Login Credentials (Local Mode)
 
-| Email | Password | Role |
-|-------|----------|------|
-| `tom@gearshare.com` | `password` | Lender (owns listings) |
-| `jane@gearshare.com` | `password` | Borrower |
+| Email | Password | Notes |
+|-------|----------|-------|
+| `tom@gearshare.com` | `password` | Merchant — owns rent/sell/service listings |
+| `jane@gearshare.com` | `password` | Merchant — owns rent/sell/service listings |
+| `mike@gearshare.com` | `password` | Merchant — owns rent/service listings |
+| `sarah@gearshare.com` | `password` | Merchant — owns rent/sell/service listings |
+
+All users can act as both **Client** (browse, rent, buy) and **Merchant** (list, manage) depending on context.
 
 ---
 
@@ -224,10 +256,10 @@ The SQLite database is stored in `dev/gearshare.db` (gitignored). This means:
 
 ## Dispute Resolution Flow
 
-After an item is returned, the lender inspects it and decides on the security deposit:
+After an item is returned, the merchant inspects it and decides on the security deposit:
 
-1. **Pending Deposit Return** — Lender reviews the returned item
-2. **Settle** — No damage found. Deposit is refunded to the borrower. Status → `COMPLETED`
-3. **File Claim** — Damage found. Lender retains the deposit and submits evidence
-4. **Submit Evidence** — Borrower uploads counter-evidence defending their deposit
+1. **Pending Deposit Return** — Merchant reviews the returned item
+2. **Settle** — No damage found. Deposit is refunded to the client. Status → `COMPLETED`
+3. **File Claim** — Damage found. Merchant retains the deposit and submits evidence
+4. **Submit Evidence** — Client uploads counter-evidence defending their deposit
 5. **Admin Judgment** — Admin reviews both sides and enforces a final decision (refund, deduction, or additional charge). Status → `COMPLETED`
